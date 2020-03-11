@@ -75,6 +75,28 @@ class UpdateDockerTags:
         os.chdir(self.repo_name)
         self.checkout_branch()
         self.edit_config(images_to_update)
+        self.add_commit_push(images_to_update)
+
+    def add_commit_push(self, images_to_update):
+        """Perform git add, commit, push actions to an edited file
+
+        Arguments:
+            images_to_update {list of strings} -- list of image tags to be updated
+        """
+        add_cmd = ["git", "add", self.fname]
+        subprocess.check_call(add_cmd)
+
+        commit_msg = f"Bump images {[image for image in images_to_update]} to tags {self.new_image_tags[image] for image in images_to_update}, respectively"
+        commit_cmd = ["git", "commit", "-m", commit_msg]
+        subprocess.check_call(commit_cmd)
+
+        push_cmd = [
+            "git",
+            "push",
+            f"https://sgibson91:{API_TOKEN}@github.com/sgibson91/{self.repo_name}",
+            self.branch,
+        ]
+        subprocess.check_call(push_cmd)
 
     def check_fork_exists(self):
         """Check if sgibson91 has a fork of the repo or not"""
@@ -129,11 +151,10 @@ class UpdateDockerTags:
         Arguments:
             images_to_update {list of strings} -- list of image tags to be updated
         """
-        fname = os.path.join("config", "config-template.yaml")
+        self.fname = os.path.join("config", "config-template.yaml")
 
-        with open(fname, "r") as f:
+        with open(self.fname, "r") as f:
             config_yaml = yaml.safe_load(f)
-        print(json.dumps(config_yaml, indent=2))
 
         if "minimal-notebook" in images_to_update:
             config_yaml["singleuser"]["image"]["tag"] = self.new_image_tags[
@@ -160,7 +181,7 @@ class UpdateDockerTags:
                 if d["display_name"] == "Custom repo2docker image"
             ]
 
-        with open(fname, "w") as f:
+        with open(self.fname, "w") as f:
             yaml.safe_dump(config_yaml, f)
 
     def find_most_recent_tag_dockerhub(self, name, url):
