@@ -175,7 +175,7 @@ class UpdateDockerTags:
 
         if "datascience-notebook" in images_to_update:
             [
-                d.__setitem__(
+                d["kubespawner_override"].__setitem__(
                     "image",
                     f"jupyter/datascience-notebook:{self.new_image_tags['datascience-notebook']}",
                 )
@@ -185,7 +185,7 @@ class UpdateDockerTags:
 
         if "custom-env" in images_to_update:
             [
-                d.__setitem__(
+                d["kubespawner_override"].__setitem__(
                     "image",
                     f"{self.docker_repo}/{self.docker_image}:{self.new_image_tags['custom-env']}",
                 )
