@@ -11,6 +11,7 @@ from itertools import compress
 API_TOKEN = os.getenv("API_TOKEN", None)
 if API_TOKEN is None:
     raise EnvironmentError("API_TOKEN must be set")
+headers = {"Authorization": f"token {API_TOKEN}"}
 
 
 class UpdateDockerTags:
@@ -107,6 +108,20 @@ class UpdateDockerTags:
         ]
         subprocess.check_call(clone_cmd)
 
+    def delete_old_branch(self):
+        """Delete a branch of a git repo"""
+        res = requests.get(
+            f"https://api.github.com/repos/sgibson91/{self.repo_name}/branches",
+            headers=headers,
+        )
+
+        if self.branch in [x["name"] for x in res.json()]:
+            del_remote_cmd = ["git", "push", "--delete", "origin", self.branch]
+            subprocess.check_call(del_remote_cmd)
+
+            del_local_cmd = ["git", "branch", "-d", self.branch]
+            subprocess.check_call(del_local_cmd)
+
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
 
@@ -133,7 +148,6 @@ class UpdateDockerTags:
         Arguments:
             url {str} -- GitHub raw content URL to read config from
         """
-        headers = {"Authorization": f"token {API_TOKEN}"}
         res = yaml.safe_load(requests.get(url, headers=headers).text)
 
         self.old_image_tags["minimal-notebook"] = res["singleuser"]["image"][
@@ -156,7 +170,6 @@ class UpdateDockerTags:
 
     def make_fork(self):
         """Fork a GitHub repo"""
-        headers = {"Authorization": f"token {API_TOKEN}"}
         requests.post(self.repo_api + "forks", headers=headers)
         self.fork_exists = True
 
