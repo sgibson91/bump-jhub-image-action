@@ -30,13 +30,13 @@ class UpdateDockerTags:
             "custom-env": f"https://hub.docker.com/v2/repositories/{self.docker_repo}/{self.docker_image}/tags",
         }
 
-        for api_url in self.api_urls.keys():
-            if api_url == "jupyterhub":
-                self.find_most_recent_tag_github(self.api_urls[api_url])
-            else:
-                self.find_most_recent_tag_dockerhub(
-                    api_url, self.api_urls[api_url]
-                )
+        self.find_most_recent_tag_github(self.api_urls["jupyterhub"])
+
+        self.api_urls.pop("jupyterhub", None)
+        for api_url in self.api_urls:
+            self.find_most_recent_tag_dockerhub(
+                api_url, self.api_urls[api_url]
+            )
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
