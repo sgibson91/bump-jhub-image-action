@@ -256,15 +256,6 @@ class UpdateDockerTags:
                 self.clean_up()
                 self.remove_fork()
 
-            del_local_cmd = ["git", "branch", "--delete", self.branch]
-
-            try:
-                subprocess.check_call(del_local_cmd)
-                logging.info("Successfully deleted local branch")
-            except Exception:
-                self.clean_up()
-                self.remove_fork()
-
     def edit_config(self, images_to_update):
         """Update the JupyterHub config file with the new image tags
 
