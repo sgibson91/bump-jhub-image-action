@@ -38,13 +38,11 @@ class UpdateDockerTags:
     """Class to check that the tags of Docker images in a JupyterHub config
     are up to date"""
 
-    def __init__(self):
+    def __init__(self, argsDict):
         """Constructor function for UpdateDockerTags class"""
-        self.repo_owner = "alan-turing-institute"
-        self.repo_name = "bridge-data-platform"
+        for k, v in argsDict.items():
+            setattr(self, k, v)
 
-        self.branch = "bump-image-tags"
-        self.identity = False
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
@@ -377,8 +375,3 @@ class UpdateDockerTags:
             time.sleep(5)
 
             logging.info("Fork successfully deleted")
-
-
-if __name__ == "__main__":
-    obj = UpdateDockerTags()
-    obj.check_image_tags()
