@@ -42,8 +42,6 @@ class UpdateDockerTags:
         """Constructor function for UpdateDockerTags class"""
         self.repo_owner = "alan-turing-institute"
         self.repo_name = "bridge-data-platform"
-        self.docker_repo = "turinginst"
-        self.docker_image = "bridge-data-env"
 
         self.branch = "bump-image-tags"
         self.identity = False
@@ -65,7 +63,7 @@ class UpdateDockerTags:
             "jupyterhub": f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/master/config/config-template.yaml",
             "minimal-notebook": "https://hub.docker.com/v2/repositories/jupyter/minimal-notebook/tags",
             "datascience-notebook": "https://hub.docker.com/v2/repositories/jupyter/datascience-notebook/tags",
-            "custom-env": f"https://hub.docker.com/v2/repositories/{self.docker_repo}/{self.docker_image}/tags",
+            "custom-env": f"https://hub.docker.com/v2/repositories/turinginst/bridge-data-env/tags",
         }
         images = list(api_urls.keys())
         images.remove("jupyterhub")
@@ -299,7 +297,7 @@ class UpdateDockerTags:
             [
                 d["kubespawner_override"].__setitem__(
                     "image",
-                    f"{self.docker_repo}/{self.docker_image}:{self.new_image_tags['custom-env']}",
+                    f"turinginst/bridge-data-env:{self.new_image_tags['custom-env']}",
                 )
                 for d in config_yaml["singleuser"]["profileList"]
                 if d["display_name"] == "Custom repo2docker image"
