@@ -5,6 +5,8 @@ import requests
 
 import numpy as np
 
+from itertools import compress
+
 API_TOKEN = os.getenv("API_TOKEN", None)
 if API_TOKEN is None:
     raise EnvironmentError("API_TOKEN must be set")
@@ -20,6 +22,8 @@ class UpdateDockerTags:
         self.repo_name = "bridge-data-platform"
         self.docker_repo = "turinginst"
         self.docker_image = "bridge-data-env"
+
+        self.fork_exists = self.check_fork_exists()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
@@ -48,9 +52,28 @@ class UpdateDockerTags:
 
         if np.any(cond):
             print("Some images need updating")
-            # self.update_images(list(compress(images, condition)))
+            self.update_images(list(compress(images, cond)))
         else:
             print("All images are up to date")
+
+    def update_images(self, images_to_update):
+        """[summary]
+
+        Arguments:
+            images_to_update {[type]} -- [description]
+        """
+        if not self.fork_exists:
+            self.make_fork()
+        self.clone_fork()
+
+    def check_fork_exists(self):
+        """[summary]
+        """
+        res = requests.get("https://api.github.com/users/HelmUpgradeBot/repos")
+
+        self.fork_exists = bool(
+            [x for x in res.json() if x["name"] == self.repo_name]
+        )
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
