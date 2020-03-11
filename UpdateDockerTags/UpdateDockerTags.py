@@ -76,6 +76,7 @@ class UpdateDockerTags:
         self.checkout_branch()
         self.edit_config(images_to_update)
         self.add_commit_push(images_to_update)
+        self.create_pull_request()
 
     def add_commit_push(self, images_to_update):
         """Perform git add, commit, push actions to an edited file
@@ -86,7 +87,7 @@ class UpdateDockerTags:
         add_cmd = ["git", "add", self.fname]
         subprocess.check_call(add_cmd)
 
-        commit_msg = f"Bump images {[image for image in images_to_update]} to tags {self.new_image_tags[image] for image in images_to_update}, respectively"
+        commit_msg = f"Bump images {[image for image in images_to_update]} to tags {[self.new_image_tags[image] for image in images_to_update]}, respectively"
         commit_cmd = ["git", "commit", "-m", commit_msg]
         subprocess.check_call(commit_cmd)
 
@@ -131,6 +132,17 @@ class UpdateDockerTags:
         ]
         subprocess.check_call(clone_cmd)
 
+    def create_pull_request(self):
+        """Open a Pull Request to the original repo on GitHub"""
+        pr = {
+            "title": "Bumping Docker image tags",
+            "body": "This PR is bumping the Docker image tags for the computing environments to the most recently published",
+            "base": "master",
+            "head": f"sgibson91:{self.branch}",
+        }
+
+        requests.post(self.repo_api + "pulls", headers=headers, json=pr)
+
     def delete_old_branch(self):
         """Delete a branch of a git repo"""
         res = requests.get(
@@ -142,7 +154,7 @@ class UpdateDockerTags:
             del_remote_cmd = ["git", "push", "--delete", "origin", self.branch]
             subprocess.check_call(del_remote_cmd)
 
-            del_local_cmd = ["git", "branch", "-d", self.branch]
+            del_local_cmd = ["git", "branch", "--delete", self.branch]
             subprocess.check_call(del_local_cmd)
 
     def edit_config(self, images_to_update):
