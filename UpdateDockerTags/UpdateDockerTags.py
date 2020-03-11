@@ -46,7 +46,7 @@ class UpdateDockerTags:
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
-        configure_logging(identity=self.identity)
+        configure_logging()
         self.remove_fork()
 
     def check_image_tags(self):
