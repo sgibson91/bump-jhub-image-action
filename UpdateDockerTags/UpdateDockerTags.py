@@ -46,14 +46,15 @@ class UpdateDockerTags:
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
-
-        configure_logging()
-
+        configure_logging(identity=self.identity)
         self.remove_fork()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
         """
+        if self.dry_run:
+            logging.info("THIS IS A DRY-RUN. CHANGES WILL NOT BE MADE.")
+
         self.new_image_tags = {}
         self.old_image_tags = {}
 
@@ -83,7 +84,8 @@ class UpdateDockerTags:
                 "The following images can be updated: %s"
                 % list(compress(images, cond))
             )
-            self.update_images(list(compress(images, cond)))
+            if not self.dry_run:
+                self.update_images(list(compress(images, cond)))
         else:
             logging.info("All images are up to date")
 
