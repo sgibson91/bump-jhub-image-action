@@ -3,6 +3,8 @@ import json
 import yaml
 import requests
 
+import numpy as np
+
 API_TOKEN = os.getenv("API_TOKEN", None)
 if API_TOKEN is None:
     raise EnvironmentError("API_TOKEN must be set")
@@ -25,7 +27,7 @@ class UpdateDockerTags:
         self.new_image_tags = {}
         self.api_urls = {
             "jupyterhub": f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/master/config/config-template.yaml",
-            "minimal_notebook": "https://hub.docker.com/v2/repositories/jupyter/minimal-notebook/tags",
+            "minimal-notebook": "https://hub.docker.com/v2/repositories/jupyter/minimal-notebook/tags",
             "datascience-notebook": "https://hub.docker.com/v2/repositories/jupyter/datascience-notebook/tags",
             "custom-env": f"https://hub.docker.com/v2/repositories/{self.docker_repo}/{self.docker_image}/tags",
         }
@@ -37,6 +39,19 @@ class UpdateDockerTags:
             self.find_most_recent_tag_dockerhub(
                 api_url, self.api_urls[api_url]
             )
+
+        cond = [
+            (
+                self.old_image_tags[image_name]
+                != self.new_image_tags[image_name]
+            )
+            for image_name in self.api_urls.keys()
+        ]
+
+        if np.any(cond):
+            print("Some images need updating")
+        else:
+            print("All images are up to date")
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
