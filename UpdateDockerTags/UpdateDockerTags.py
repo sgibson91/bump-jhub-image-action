@@ -1,7 +1,9 @@
 import os
+import sys
 import json
 import yaml
 import shutil
+import logging
 import requests
 import subprocess
 
@@ -13,6 +15,23 @@ API_TOKEN = os.getenv("API_TOKEN", None)
 if API_TOKEN is None:
     raise EnvironmentError("API_TOKEN must be set")
 headers = {"Authorization": f"token {API_TOKEN}"}
+
+
+def configure_logging(identity=False):
+    if identity:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            filename="UpdateDockerTags.log",
+            filemode="a",
+            format="[%(asctime)s %(levelname)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    else:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="[%(asctime)s %(levelname)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
 
 
 class UpdateDockerTags:
@@ -28,9 +47,12 @@ class UpdateDockerTags:
 
         self.branch = "bump-image-tags"
         self.fork_exists = self.check_fork_exists()
+        self.identity = False
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
+
+        configure_logging()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
@@ -47,8 +69,10 @@ class UpdateDockerTags:
         images = list(api_urls.keys())
         images.remove("jupyterhub")
 
+        logging.info("Pulling currently deployed image tags...")
         self.find_most_recent_tag_github(api_urls["jupyterhub"])
 
+        logging.info("Pulling most recent image tags...")
         for image in images:
             self.find_most_recent_tag_dockerhub(image, api_urls[image])
 
@@ -58,16 +82,19 @@ class UpdateDockerTags:
         ]
 
         if np.any(cond):
-            print("Some images need updating")
+            logging.info(
+                "The following images can be updated: %s"
+                % list(compress(images, cond))
+            )
             self.update_images(list(compress(images, cond)))
         else:
-            print("All images are up to date")
+            logging.info("All images are up to date")
 
     def update_images(self, images_to_update):
-        """[summary]
+        """Function to update the Docker image tags in a JupyterHub config file
 
         Arguments:
-            images_to_update {[type]} -- [description]
+            images_to_update {list of strings} -- list of images to be updated
         """
         if not self.fork_exists:
             self.make_fork()
@@ -87,20 +114,38 @@ class UpdateDockerTags:
         Arguments:
             images_to_update {list of strings} -- list of image tags to be updated
         """
+        logging.info("Adding file: %s" % self.fname)
         add_cmd = ["git", "add", self.fname]
-        subprocess.check_call(add_cmd)
 
+        try:
+            subprocess.check_call(add_cmd)
+            logging.info("Successfully added file")
+        except Exception:
+            self.clean_up()
+
+        logging.info("Committing file: %s" % self.fname)
         commit_msg = f"Bump images {[image for image in images_to_update]} to tags {[self.new_image_tags[image] for image in images_to_update]}, respectively"
         commit_cmd = ["git", "commit", "-m", commit_msg]
-        subprocess.check_call(commit_cmd)
 
+        try:
+            subprocess.check_call(commit_cmd)
+            logging.info("Successfully committed file")
+        except Exception:
+            self.clean_up()
+
+        logging.info("Pushing commits to branch: %s" % self.branch)
         push_cmd = [
             "git",
             "push",
             f"https://sgibson91:{API_TOKEN}@github.com/sgibson91/{self.repo_name}",
             self.branch,
         ]
-        subprocess.check_call(push_cmd)
+
+        try:
+            subprocess.check_call(push_cmd)
+            logging.info("Successfully pushed changes")
+        except Exception:
+            self.clean_up()
 
     def check_fork_exists(self):
         """Check if sgibson91 has a fork of the repo or not"""
@@ -115,16 +160,31 @@ class UpdateDockerTags:
         if self.fork_exists:
             self.delete_old_branch()
 
+            logging.info(
+                "Pulling master branch of: %s/%s"
+                % (self.repo_owner, self.repo_name)
+            )
             pull_cmd = [
                 "git",
                 "pull",
                 f"https://github.com/{self.repo_owner}/{self.repo_name}.git",
                 "master",
             ]
-            subprocess.check_call(pull_cmd)
 
+            try:
+                subprocess.check_call(pull_cmd)
+                logging.info("Successfully pulled master branch")
+            except Exception:
+                self.clean_up()
+
+        logging.info("Checkout out branch: %s" % self.branch)
         chkt_cmd = ["git", "checkout", "-b", self.branch]
-        subprocess.check_call(chkt_cmd)
+
+        try:
+            subprocess.check_call(chkt_cmd)
+            logging.info("Successfully checked out branch")
+        except Exception:
+            self.clean_up()
 
     def clean_up(self):
         """Clean up locally cloned git repo"""
@@ -134,19 +194,30 @@ class UpdateDockerTags:
             os.chdir(os.pardir)
 
         if os.path.exists(self.repo_name):
+            logging.info("Deleting local repo: %s" % self.repo_name)
             shutil.rmtree(self.repo_name)
+            logging.info("Deleted local repository")
+
+        sys.exit()
 
     def clone_fork(self):
         """Locally clone a fork of a GitHub repo"""
+        logging.info("Cloning fork: %s" % self.repo_name)
         clone_cmd = [
             "git",
             "clone",
             f"https://github.com/sgibson91/{self.repo_name}.git",
         ]
-        subprocess.check_call(clone_cmd)
+
+        try:
+            subprocess.check_call(clone_cmd)
+            logging.info("Successfully cloned repo")
+        except Exception:
+            self.clean_up()
 
     def create_pull_request(self):
         """Open a Pull Request to the original repo on GitHub"""
+        logging.info("Creating Pull Request")
         pr = {
             "title": "Bumping Docker image tags",
             "body": "This PR is bumping the Docker image tags for the computing environments to the most recently published",
@@ -154,7 +225,12 @@ class UpdateDockerTags:
             "head": f"sgibson91:{self.branch}",
         }
 
-        requests.post(self.repo_api + "pulls", headers=headers, json=pr)
+        res = requests.post(self.repo_api + "pulls", headers=headers, json=pr)
+
+        if res:
+            logging.info("Successfully opened Pull Request")
+        else:
+            self.clean_up()
 
     def delete_old_branch(self):
         """Delete a branch of a git repo"""
@@ -164,11 +240,22 @@ class UpdateDockerTags:
         )
 
         if self.branch in [x["name"] for x in res.json()]:
+            logging.info("Deleting old branch: %s" % self.branch)
             del_remote_cmd = ["git", "push", "--delete", "origin", self.branch]
-            subprocess.check_call(del_remote_cmd)
+
+            try:
+                subprocess.check_call(del_remote_cmd)
+                logging.info("Successfully deleted remote branch")
+            except Exception:
+                self.clean_up()
 
             del_local_cmd = ["git", "branch", "--delete", self.branch]
-            subprocess.check_call(del_local_cmd)
+
+            try:
+                subprocess.check_call(del_local_cmd)
+                logging.info("Successfully deleted local branch")
+            except Exception:
+                self.clean_up()
 
     def edit_config(self, images_to_update):
         """Update the JupyterHub config file with the new image tags
@@ -176,6 +263,8 @@ class UpdateDockerTags:
         Arguments:
             images_to_update {list of strings} -- list of image tags to be updated
         """
+        logging.info("Updating JupyterHub config file")
+
         self.fname = os.path.join("config", "config-template.yaml")
 
         with open(self.fname, "r") as f:
@@ -208,6 +297,8 @@ class UpdateDockerTags:
 
         with open(self.fname, "w") as f:
             yaml.safe_dump(config_yaml, f)
+
+        logging.info("Updated JupyterHub config")
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
@@ -257,6 +348,7 @@ class UpdateDockerTags:
 
     def make_fork(self):
         """Fork a GitHub repo"""
+        logging.info("Forking repo: %s" % self.repo_name)
         requests.post(self.repo_api + "forks", headers=headers)
         self.fork_exists = True
 
