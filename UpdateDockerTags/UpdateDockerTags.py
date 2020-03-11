@@ -74,6 +74,7 @@ class UpdateDockerTags:
 
         os.chdir(self.repo_name)
         self.checkout_branch()
+        self.edit_config(images_to_update)
 
     def check_fork_exists(self):
         """Check if sgibson91 has a fork of the repo or not"""
@@ -121,6 +122,46 @@ class UpdateDockerTags:
 
             del_local_cmd = ["git", "branch", "-d", self.branch]
             subprocess.check_call(del_local_cmd)
+
+    def edit_config(self, images_to_update):
+        """Update the JupyterHub config file with the new image tags
+
+        Arguments:
+            images_to_update {list of strings} -- list of image tags to be updated
+        """
+        fname = os.path.join("config", "config-template.yaml")
+
+        with open(fname, "r") as f:
+            config_yaml = yaml.safe_load(f)
+        print(json.dumps(config_yaml, indent=2))
+
+        if "minimal-notebook" in images_to_update:
+            config_yaml["singleuser"]["image"]["tag"] = self.new_image_tags[
+                "minimal-notebook"
+            ]
+
+        if "datascience-notebook" in images_to_update:
+            [
+                d.__setitem__(
+                    "image",
+                    f"jupyter/datascience-notebook:{self.new_image_tags['datascience-notebook']}",
+                )
+                for d in config_yaml["singleuser"]["profileList"]
+                if d["display_name"] == "Data Science Environment"
+            ]
+
+        if "custom-env" in images_to_update:
+            [
+                d.__setitem__(
+                    "image",
+                    f"{self.docker_repo}/{self.docker_image}:{self.new_image_tags['custom-env']}",
+                )
+                for d in config_yaml["singleuser"]["profileList"]
+                if d["display_name"] == "Custom repo2docker image"
+            ]
+
+        with open(fname, "w") as f:
+            yaml.safe_dump(config_yaml, f)
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
