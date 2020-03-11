@@ -1,5 +1,11 @@
+import os
 import json
+import yaml
 import requests
+
+API_TOKEN = os.getenv("API_TOKEN", None)
+if API_TOKEN is None:
+    raise EnvironmentError("API_TOKEN must be set")
 
 
 class UpdateDockerTags:
@@ -26,7 +32,7 @@ class UpdateDockerTags:
 
         for api_url in self.api_urls.keys():
             if api_url == "jupyterhub":
-                pass
+                self.find_most_recent_tag_github(self.api_urls[api_url])
             else:
                 self.find_most_recent_tag_dockerhub(
                     api_url, self.api_urls[api_url]
@@ -51,6 +57,35 @@ class UpdateDockerTags:
             new_tag = updates_sorted[-1]["name"]
 
         self.new_image_tags[name] = new_tag
+
+    def find_most_recent_tag_github(self, url):
+        """Function to find old image tags from GitHub
+
+        Arguments:
+            url {str} -- GitHub raw content URL to read config from
+        """
+        self.old_image_tags = {}
+
+        headers = {"Authorization": f"token {API_TOKEN}"}
+        results = yaml.safe_load(requests.get(url, headers=headers).text)
+
+        self.old_image_tags["minimal-notebook"] = results["singleuser"][
+            "image"
+        ]["tag"]
+
+        for image_name in ["datascience-notebook", "custom-env"]:
+            for i in results["singleuser"]["profileList"]:
+                datascience_cond = (image_name == "datascience-notebook") and (
+                    i["display_name"] == "Data Science Environment"
+                )
+                custom_cond = (image_name == "custom-env") and (
+                    i["display_name"] == "Custom repo2docker image"
+                )
+
+                if datascience_cond or custom_cond:
+                    old_image = i["kubespawner_override"]["image"]
+                    old_tag = old_image.split(":")[-1]
+                    self.old_image_tags[image_name] = old_tag
 
 
 if __name__ == "__main__":
