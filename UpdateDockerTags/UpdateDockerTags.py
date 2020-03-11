@@ -2,6 +2,7 @@ import os
 import json
 import yaml
 import requests
+import subprocess
 
 import numpy as np
 
@@ -24,6 +25,9 @@ class UpdateDockerTags:
         self.docker_image = "bridge-data-env"
 
         self.fork_exists = self.check_fork_exists()
+        self.repo_api = (
+            f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
+        )
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
@@ -67,13 +71,21 @@ class UpdateDockerTags:
         self.clone_fork()
 
     def check_fork_exists(self):
-        """[summary]
-        """
-        res = requests.get("https://api.github.com/users/HelmUpgradeBot/repos")
+        """Check if sgibson91 has a fork of the repo or not"""
+        res = requests.get("https://api.github.com/users/sgibson91/repos")
 
         self.fork_exists = bool(
             [x for x in res.json() if x["name"] == self.repo_name]
         )
+
+    def clone_fork(self):
+        """Locally clone a fork of a GitHub repo"""
+        clone_cmd = [
+            "git",
+            "clone",
+            f"https://github.com/sgibson91/{self.repo_name}.git",
+        ]
+        subprocess.check_call(clone_cmd)
 
     def find_most_recent_tag_dockerhub(self, name, url):
         """Function to find most recent tag of an image from Docker Hub
@@ -121,6 +133,12 @@ class UpdateDockerTags:
                     old_image = profile["kubespawner_override"]["image"]
                     old_tag = old_image.split(":")[-1]
                     self.old_image_tags[image_name] = old_tag
+
+    def make_fork(self):
+        """Fork a GitHub repo"""
+        headers = {"Authorization": f"token {API_TOKEN}"}
+        requests.post(self.repo_api + "forks", headers=headers)
+        self.fork_exists = True
 
 
 if __name__ == "__main__":
