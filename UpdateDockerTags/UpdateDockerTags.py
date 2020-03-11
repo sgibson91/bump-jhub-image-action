@@ -1,6 +1,7 @@
 import os
 import json
 import yaml
+import shutil
 import requests
 import subprocess
 
@@ -78,6 +79,8 @@ class UpdateDockerTags:
         self.add_commit_push(images_to_update)
         self.create_pull_request()
 
+        self.clean_up()
+
     def add_commit_push(self, images_to_update):
         """Perform git add, commit, push actions to an edited file
 
@@ -122,6 +125,16 @@ class UpdateDockerTags:
 
         chkt_cmd = ["git", "checkout", "-b", self.branch]
         subprocess.check_call(chkt_cmd)
+
+    def clean_up(self):
+        """Clean up locally cloned git repo"""
+        cwd = os.getcwd()
+        this_dir = cwd.split("/")[-1]
+        if this_dir == self.repo_name:
+            os.chdir(os.pardir)
+
+        if os.path.exists(self.repo_name):
+            shutil.rmtree(self.repo_name)
 
     def clone_fork(self):
         """Locally clone a fork of a GitHub repo"""
