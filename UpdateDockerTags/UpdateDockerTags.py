@@ -11,11 +11,6 @@ import numpy as np
 
 from itertools import compress
 
-API_TOKEN = os.getenv("API_TOKEN", None)
-if API_TOKEN is None:
-    raise EnvironmentError("API_TOKEN must be set")
-headers = {"Authorization": f"token {API_TOKEN}"}
-
 
 def configure_logging(identity=False):
     if identity:
@@ -48,6 +43,16 @@ class UpdateDockerTags:
         )
         configure_logging()
         self.remove_fork()
+
+        if self.token_name is None:
+            self.token = os.getenv("API_TOKEN", None)
+            if self.token is None:
+                raise EnvironmentError(
+                    "Either --token-name or API_TOKEN must be set"
+                )
+            self.headers = {"Authorization": f"token {self.token}"}
+        else:
+            self.get_token()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
@@ -230,7 +235,9 @@ class UpdateDockerTags:
             "head": f"sgibson91:{self.branch}",
         }
 
-        res = requests.post(self.repo_api + "pulls", headers=headers, json=pr)
+        res = requests.post(
+            self.repo_api + "pulls", headers=self.headers, json=pr
+        )
 
         if res:
             logging.info("Successfully opened Pull Request")
@@ -242,7 +249,7 @@ class UpdateDockerTags:
         """Delete a branch of a git repo"""
         res = requests.get(
             f"https://api.github.com/repos/sgibson91/{self.repo_name}/branches",
-            headers=headers,
+            headers=self.headers,
         )
 
         if self.branch in [x["name"] for x in res.json()]:
@@ -325,7 +332,7 @@ class UpdateDockerTags:
         Arguments:
             url {str} -- GitHub raw content URL to read config from
         """
-        res = yaml.safe_load(requests.get(url, headers=headers).text)
+        res = yaml.safe_load(requests.get(url, headers=self.headers).text)
 
         self.old_image_tags["minimal-notebook"] = res["singleuser"]["image"][
             "tag"
@@ -348,7 +355,7 @@ class UpdateDockerTags:
     def make_fork(self):
         """Fork a GitHub repo"""
         logging.info("Forking repo: %s" % self.repo_name)
-        requests.post(self.repo_api + "forks", headers=headers)
+        requests.post(self.repo_api + "forks", headers=self.headers)
         self.fork_exists = True
 
     def remove_fork(self):
@@ -361,7 +368,7 @@ class UpdateDockerTags:
             logging.info("Deleting fork...")
             requests.delete(
                 f"https://api.github.com/repos/sgibson91/{self.repo_name}",
-                headers=headers,
+                headers=self.headers,
             )
 
             self.fork_exists = False
