@@ -21,11 +21,29 @@ parser.add_argument(
     action="store_true",
     help="Perform a dry-run. Pull Request will not be opened.",
 )
+parser.add_argument(
+    "-t", "--token-name", default=None, help="Name of GitHub API token"
+)
+parser.add_argument(
+    "-k",
+    "--keyvault",
+    default=None,
+    help="Name of Azure Keyvault where GitHub API is stored",
+)
 
 
 def main():
     """Main function"""
     args = parser.parse_args(sys.argv[1:])
+
+    cond1 = (args.token_name is None) and (args.keyvault is not None)
+    cond2 = (args.token_name is not None) and (args.keyvault is None)
+
+    if cond1 or cond2:
+        raise Exception(
+            "--token-name and --keyvault options must both be provided."
+        )
+
     obj = UpdateDockerTags(vars(args))
     obj.check_image_tags()
 
