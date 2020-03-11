@@ -24,6 +24,7 @@ class UpdateDockerTags:
         self.docker_repo = "turinginst"
         self.docker_image = "bridge-data-env"
 
+        self.branch = "bump-image-tags"
         self.fork_exists = self.check_fork_exists()
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
@@ -70,6 +71,9 @@ class UpdateDockerTags:
             self.make_fork()
         self.clone_fork()
 
+        os.chdir(self.repo_name)
+        self.checkout_branch()
+
     def check_fork_exists(self):
         """Check if sgibson91 has a fork of the repo or not"""
         res = requests.get("https://api.github.com/users/sgibson91/repos")
@@ -77,6 +81,22 @@ class UpdateDockerTags:
         self.fork_exists = bool(
             [x for x in res.json() if x["name"] == self.repo_name]
         )
+
+    def checkout_branch(self):
+        """Checkout a branch of a git repo"""
+        if self.fork_exists:
+            self.delete_old_branch()
+
+            pull_cmd = [
+                "git",
+                "pull",
+                f"https://github.com/{self.repo_owner}/{self.repo_name}.git",
+                "master",
+            ]
+            subprocess.check_call(pull_cmd)
+
+        chkt_cmd = ["git", "checkout", "-b", self.branch]
+        subprocess.check_call(chkt_cmd)
 
     def clone_fork(self):
         """Locally clone a fork of a GitHub repo"""
