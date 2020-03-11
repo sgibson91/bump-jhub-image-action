@@ -46,13 +46,14 @@ class UpdateDockerTags:
         self.docker_image = "bridge-data-env"
 
         self.branch = "bump-image-tags"
-        self.fork_exists = self.check_fork_exists()
         self.identity = False
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
 
         configure_logging()
+
+        self.remove_fork()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
@@ -122,6 +123,7 @@ class UpdateDockerTags:
             logging.info("Successfully added file")
         except Exception:
             self.clean_up()
+            self.remove_fork()
 
         logging.info("Committing file: %s" % self.fname)
         commit_msg = f"Bump images {[image for image in images_to_update]} to tags {[self.new_image_tags[image] for image in images_to_update]}, respectively"
@@ -132,6 +134,7 @@ class UpdateDockerTags:
             logging.info("Successfully committed file")
         except Exception:
             self.clean_up()
+            self.remove_fork()
 
         logging.info("Pushing commits to branch: %s" % self.branch)
         push_cmd = [
@@ -146,6 +149,7 @@ class UpdateDockerTags:
             logging.info("Successfully pushed changes")
         except Exception:
             self.clean_up()
+            self.remove_fork()
 
     def check_fork_exists(self):
         """Check if sgibson91 has a fork of the repo or not"""
@@ -176,6 +180,7 @@ class UpdateDockerTags:
                 logging.info("Successfully pulled master branch")
             except Exception:
                 self.clean_up()
+                self.remove_fork()
 
         logging.info("Checkout out branch: %s" % self.branch)
         chkt_cmd = ["git", "checkout", "-b", self.branch]
@@ -185,6 +190,7 @@ class UpdateDockerTags:
             logging.info("Successfully checked out branch")
         except Exception:
             self.clean_up()
+            self.remove_fork()
 
     def clean_up(self):
         """Clean up locally cloned git repo"""
@@ -214,6 +220,7 @@ class UpdateDockerTags:
             logging.info("Successfully cloned repo")
         except Exception:
             self.clean_up()
+            self.remove_fork()
 
     def create_pull_request(self):
         """Open a Pull Request to the original repo on GitHub"""
@@ -231,6 +238,7 @@ class UpdateDockerTags:
             logging.info("Successfully opened Pull Request")
         else:
             self.clean_up()
+            self.remove_fork()
 
     def delete_old_branch(self):
         """Delete a branch of a git repo"""
@@ -248,6 +256,7 @@ class UpdateDockerTags:
                 logging.info("Successfully deleted remote branch")
             except Exception:
                 self.clean_up()
+                self.remove_fork()
 
             del_local_cmd = ["git", "branch", "--delete", self.branch]
 
@@ -256,6 +265,7 @@ class UpdateDockerTags:
                 logging.info("Successfully deleted local branch")
             except Exception:
                 self.clean_up()
+                self.remove_fork()
 
     def edit_config(self, images_to_update):
         """Update the JupyterHub config file with the new image tags
@@ -351,6 +361,24 @@ class UpdateDockerTags:
         logging.info("Forking repo: %s" % self.repo_name)
         requests.post(self.repo_api + "forks", headers=headers)
         self.fork_exists = True
+
+    def remove_fork(self):
+        """Delete a fork of a GitHub repo"""
+        self.check_fork_exists()
+
+        if self.fork_exists:
+            logging("A fork exists of repo: %s" % self.repo_name)
+
+            logging.info("Deleting fork...")
+            requests.delete(
+                f"https://api.github.com/repos/sgibson91/{self.repo_name}",
+                headers=headers,
+            )
+
+            self.fork_exists = False
+            time.sleep(5)
+
+            logging.info("Fork successfully deleted")
 
 
 if __name__ == "__main__":
