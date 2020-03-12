@@ -352,6 +352,35 @@ class UpdateDockerTags:
                     old_tag = old_image.split(":")[-1]
                     self.old_image_tags[image_name] = old_tag
 
+    def get_token(self):
+        """Get GitHub Personal Access Token from Azure Keyvault"""
+        self.login()
+
+        logging.info("Retrieving token: %s" % self.token_name)
+        vault_cmd = [
+            "az",
+            "keyvault",
+            "secret",
+            "show",
+            "--vault-name",
+            self.keyvault,
+            "--name",
+            self.token_name,
+            "--query",
+            "value",
+            "--output",
+            "tsv",
+        ]
+
+        try:
+            self.token = (
+                subprocess.check_output(vault_cmd).decode("utf-8").strip("\n")
+            )
+            logging.info("Successfully retrieved token")
+        except Exception:
+            self.clean_up()
+            self.remove_fork()
+
     def make_fork(self):
         """Fork a GitHub repo"""
         logging.info("Forking repo: %s" % self.repo_name)
