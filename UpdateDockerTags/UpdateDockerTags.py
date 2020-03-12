@@ -143,7 +143,7 @@ class UpdateDockerTags:
         push_cmd = [
             "git",
             "push",
-            f"https://sgibson91:{API_TOKEN}@github.com/sgibson91/{self.repo_name}",
+            f"https://sgibson91:{self.token}@github.com/sgibson91/{self.repo_name}",
             self.branch,
         ]
 
