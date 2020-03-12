@@ -22,6 +22,12 @@ parser.add_argument(
     help="Perform a dry-run. Pull Request will not be opened.",
 )
 parser.add_argument(
+    "--identity",
+    action="store_true",
+    help="Login to Azure with a Managed System Identity",
+)
+
+parser.add_argument(
     "-t", "--token-name", default=None, help="Name of GitHub API token"
 )
 parser.add_argument(
