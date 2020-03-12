@@ -381,6 +381,24 @@ class UpdateDockerTags:
             self.clean_up()
             self.remove_fork()
 
+    def login(self):
+        """Login to Azure"""
+        login_cmd = ["az", "login"]
+
+        if self.identity:
+            login_cmd.append("--identity")
+            logging.info("Logging into Azure with Managed System Identity")
+        else:
+            login_cmd.extend(["--output", "none"])
+            logging.info("Logging into Azure interactively")
+
+        try:
+            subprocess.check_call(login_cmd)
+            logging.info("Successfully logged into Azure")
+        except Exception:
+            self.clean_up()
+            self.remove_fork()
+
     def make_fork(self):
         """Fork a GitHub repo"""
         logging.info("Forking repo: %s" % self.repo_name)
