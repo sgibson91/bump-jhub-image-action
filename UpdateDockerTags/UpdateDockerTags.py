@@ -11,11 +11,6 @@ import numpy as np
 
 from itertools import compress
 
-API_TOKEN = os.getenv("API_TOKEN", None)
-if API_TOKEN is None:
-    raise EnvironmentError("API_TOKEN must be set")
-headers = {"Authorization": f"token {API_TOKEN}"}
-
 
 def configure_logging(identity=False):
     if identity:
@@ -38,26 +33,33 @@ class UpdateDockerTags:
     """Class to check that the tags of Docker images in a JupyterHub config
     are up to date"""
 
-    def __init__(self):
+    def __init__(self, argsDict):
         """Constructor function for UpdateDockerTags class"""
-        self.repo_owner = "alan-turing-institute"
-        self.repo_name = "bridge-data-platform"
-        self.docker_repo = "turinginst"
-        self.docker_image = "bridge-data-env"
+        for k, v in argsDict.items():
+            setattr(self, k, v)
 
-        self.branch = "bump-image-tags"
-        self.identity = False
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
-
         configure_logging()
-
         self.remove_fork()
+
+        if self.token_name is None:
+            self.token = os.getenv("API_TOKEN", None)
+            if self.token is None:
+                raise EnvironmentError(
+                    "Either --token-name or API_TOKEN must be set"
+                )
+            self.headers = {"Authorization": f"token {self.token}"}
+        else:
+            self.get_token()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
         """
+        if self.dry_run:
+            logging.info("THIS IS A DRY-RUN. CHANGES WILL NOT BE MADE.")
+
         self.new_image_tags = {}
         self.old_image_tags = {}
 
@@ -65,7 +67,7 @@ class UpdateDockerTags:
             "jupyterhub": f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/master/config/config-template.yaml",
             "minimal-notebook": "https://hub.docker.com/v2/repositories/jupyter/minimal-notebook/tags",
             "datascience-notebook": "https://hub.docker.com/v2/repositories/jupyter/datascience-notebook/tags",
-            "custom-env": f"https://hub.docker.com/v2/repositories/{self.docker_repo}/{self.docker_image}/tags",
+            "custom-env": f"https://hub.docker.com/v2/repositories/turinginst/bridge-data-env/tags",
         }
         images = list(api_urls.keys())
         images.remove("jupyterhub")
@@ -87,7 +89,8 @@ class UpdateDockerTags:
                 "The following images can be updated: %s"
                 % list(compress(images, cond))
             )
-            self.update_images(list(compress(images, cond)))
+            if not self.dry_run:
+                self.update_images(list(compress(images, cond)))
         else:
             logging.info("All images are up to date")
 
@@ -232,7 +235,9 @@ class UpdateDockerTags:
             "head": f"sgibson91:{self.branch}",
         }
 
-        res = requests.post(self.repo_api + "pulls", headers=headers, json=pr)
+        res = requests.post(
+            self.repo_api + "pulls", headers=self.headers, json=pr
+        )
 
         if res:
             logging.info("Successfully opened Pull Request")
@@ -244,7 +249,7 @@ class UpdateDockerTags:
         """Delete a branch of a git repo"""
         res = requests.get(
             f"https://api.github.com/repos/sgibson91/{self.repo_name}/branches",
-            headers=headers,
+            headers=self.headers,
         )
 
         if self.branch in [x["name"] for x in res.json()]:
@@ -254,15 +259,6 @@ class UpdateDockerTags:
             try:
                 subprocess.check_call(del_remote_cmd)
                 logging.info("Successfully deleted remote branch")
-            except Exception:
-                self.clean_up()
-                self.remove_fork()
-
-            del_local_cmd = ["git", "branch", "--delete", self.branch]
-
-            try:
-                subprocess.check_call(del_local_cmd)
-                logging.info("Successfully deleted local branch")
             except Exception:
                 self.clean_up()
                 self.remove_fork()
@@ -299,7 +295,7 @@ class UpdateDockerTags:
             [
                 d["kubespawner_override"].__setitem__(
                     "image",
-                    f"{self.docker_repo}/{self.docker_image}:{self.new_image_tags['custom-env']}",
+                    f"turinginst/bridge-data-env:{self.new_image_tags['custom-env']}",
                 )
                 for d in config_yaml["singleuser"]["profileList"]
                 if d["display_name"] == "Custom repo2docker image"
@@ -336,7 +332,7 @@ class UpdateDockerTags:
         Arguments:
             url {str} -- GitHub raw content URL to read config from
         """
-        res = yaml.safe_load(requests.get(url, headers=headers).text)
+        res = yaml.safe_load(requests.get(url, headers=self.headers).text)
 
         self.old_image_tags["minimal-notebook"] = res["singleuser"]["image"][
             "tag"
@@ -359,7 +355,7 @@ class UpdateDockerTags:
     def make_fork(self):
         """Fork a GitHub repo"""
         logging.info("Forking repo: %s" % self.repo_name)
-        requests.post(self.repo_api + "forks", headers=headers)
+        requests.post(self.repo_api + "forks", headers=self.headers)
         self.fork_exists = True
 
     def remove_fork(self):
@@ -372,15 +368,10 @@ class UpdateDockerTags:
             logging.info("Deleting fork...")
             requests.delete(
                 f"https://api.github.com/repos/sgibson91/{self.repo_name}",
-                headers=headers,
+                headers=self.headers,
             )
 
             self.fork_exists = False
             time.sleep(5)
 
             logging.info("Fork successfully deleted")
-
-
-if __name__ == "__main__":
-    obj = UpdateDockerTags()
-    obj.check_image_tags()
