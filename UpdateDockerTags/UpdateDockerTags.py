@@ -41,7 +41,7 @@ class UpdateDockerTags:
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
-        configure_logging()
+        configure_logging(identity=self.identity)
         self.remove_fork()
 
         if self.token_name is None:
@@ -50,7 +50,9 @@ class UpdateDockerTags:
                 raise EnvironmentError(
                     "Either --token-name or API_TOKEN must be set"
                 )
+
             self.headers = {"Authorization": f"token {self.token}"}
+
         else:
             self.get_token()
 
@@ -143,7 +145,7 @@ class UpdateDockerTags:
         push_cmd = [
             "git",
             "push",
-            f"https://sgibson91:{API_TOKEN}@github.com/sgibson91/{self.repo_name}",
+            f"https://sgibson91:{self.token}@github.com/sgibson91/{self.repo_name}",
             self.branch,
         ]
 
@@ -351,6 +353,54 @@ class UpdateDockerTags:
                     old_image = profile["kubespawner_override"]["image"]
                     old_tag = old_image.split(":")[-1]
                     self.old_image_tags[image_name] = old_tag
+
+    def get_token(self):
+        """Get GitHub Personal Access Token from Azure Keyvault"""
+        self.login()
+
+        logging.info("Retrieving token: %s" % self.token_name)
+        vault_cmd = [
+            "az",
+            "keyvault",
+            "secret",
+            "show",
+            "--vault-name",
+            self.keyvault,
+            "--name",
+            self.token_name,
+            "--query",
+            "value",
+            "--output",
+            "tsv",
+        ]
+
+        try:
+            self.token = (
+                subprocess.check_output(vault_cmd).decode("utf-8").strip("\n")
+            )
+            self.headers = {"Authorization": f"token {self.token}"}
+            logging.info("Successfully retrieved token")
+        except Exception:
+            self.clean_up()
+            self.remove_fork()
+
+    def login(self):
+        """Login to Azure"""
+        login_cmd = ["az", "login"]
+
+        if self.identity:
+            login_cmd.append("--identity")
+            logging.info("Logging into Azure with Managed System Identity")
+        else:
+            login_cmd.extend(["--output", "none"])
+            logging.info("Logging into Azure interactively")
+
+        try:
+            subprocess.check_call(login_cmd)
+            logging.info("Successfully logged into Azure")
+        except Exception:
+            self.clean_up()
+            self.remove_fork()
 
     def make_fork(self):
         """Fork a GitHub repo"""
