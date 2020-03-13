@@ -41,7 +41,7 @@ class UpdateDockerTags:
         self.repo_api = (
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
-        configure_logging()
+        configure_logging(identity=self.identity)
         self.remove_fork()
 
         if self.token_name is None:
@@ -50,7 +50,9 @@ class UpdateDockerTags:
                 raise EnvironmentError(
                     "Either --token-name or API_TOKEN must be set"
                 )
+
             self.headers = {"Authorization": f"token {self.token}"}
+
         else:
             self.get_token()
 
@@ -376,6 +378,7 @@ class UpdateDockerTags:
             self.token = (
                 subprocess.check_output(vault_cmd).decode("utf-8").strip("\n")
             )
+            self.headers = {"Authorization": f"token {self.token}"}
             logging.info("Successfully retrieved token")
         except Exception:
             self.clean_up()
