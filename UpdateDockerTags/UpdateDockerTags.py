@@ -414,7 +414,7 @@ class UpdateDockerTags:
         self.check_fork_exists()
 
         if self.fork_exists:
-            logging("A fork exists of repo: %s" % self.repo_name)
+            logging.info("A fork exists of repo: %s" % self.repo_name)
 
             logging.info("Deleting fork...")
             requests.delete(
