@@ -42,6 +42,7 @@ class UpdateDockerTags:
             f"https://api.github.com/repos/{self.repo_owner}/{self.repo_name}/"
         )
         configure_logging(identity=self.identity)
+        self.set_github_config()
         self.remove_fork()
 
         if self.token_name is None:
@@ -145,7 +146,7 @@ class UpdateDockerTags:
         push_cmd = [
             "git",
             "push",
-            f"https://sgibson91:{self.token}@github.com/sgibson91/{self.repo_name}",
+            f"https://HelmUpgradeBot:{self.token}@github.com/HelmUpgradeBot/{self.repo_name}",
             self.branch,
         ]
 
@@ -157,8 +158,8 @@ class UpdateDockerTags:
             self.remove_fork()
 
     def check_fork_exists(self):
-        """Check if sgibson91 has a fork of the repo or not"""
-        res = requests.get("https://api.github.com/users/sgibson91/repos")
+        """Check if HelmUpgradeBot has a fork of the repo or not"""
+        res = requests.get("https://api.github.com/users/HelmUpgradeBot/repos")
 
         self.fork_exists = bool(
             [x for x in res.json() if x["name"] == self.repo_name]
@@ -217,7 +218,7 @@ class UpdateDockerTags:
         clone_cmd = [
             "git",
             "clone",
-            f"https://github.com/sgibson91/{self.repo_name}.git",
+            f"https://github.com/HelmUpgradeBot/{self.repo_name}.git",
         ]
 
         try:
@@ -234,7 +235,7 @@ class UpdateDockerTags:
             "title": "Bumping Docker image tags",
             "body": "This PR is bumping the Docker image tags for the computing environments to the most recently published",
             "base": "master",
-            "head": f"sgibson91:{self.branch}",
+            "head": f"HelmUpgradeBot:{self.branch}",
         }
 
         res = requests.post(
@@ -250,7 +251,7 @@ class UpdateDockerTags:
     def delete_old_branch(self):
         """Delete a branch of a git repo"""
         res = requests.get(
-            f"https://api.github.com/repos/sgibson91/{self.repo_name}/branches",
+            f"https://api.github.com/repos/HelmUpgradeBot/{self.repo_name}/branches",
             headers=self.headers,
         )
 
@@ -417,7 +418,7 @@ class UpdateDockerTags:
 
             logging.info("Deleting fork...")
             requests.delete(
-                f"https://api.github.com/repos/sgibson91/{self.repo_name}",
+                f"https://api.github.com/repos/HelmUpgradeBot/{self.repo_name}",
                 headers=self.headers,
             )
 
@@ -425,3 +426,21 @@ class UpdateDockerTags:
             time.sleep(5)
 
             logging.info("Fork successfully deleted")
+
+    def set_github_config(self):
+        """Set up GitHub configuration for API calls"""
+
+        logging.info("Setting up git configuration for HelmUpgradeBot")
+
+        subprocess.check_call(
+            ["git", "config", "--global", "user.name", "HelmUpgradeBot"]
+        )
+        subprocess.check_call(
+            [
+                "git",
+                "config",
+                "--global",
+                "user.email",
+                "helmupgradebot.github@gmail.com",
+            ]
+        )
