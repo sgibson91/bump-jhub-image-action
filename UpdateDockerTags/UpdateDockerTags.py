@@ -43,7 +43,6 @@ class UpdateDockerTags:
         )
         configure_logging(identity=self.identity)
         self.set_github_config()
-        self.remove_fork()
 
         if self.token_name is None:
             self.token = os.getenv("API_TOKEN", None)
@@ -56,6 +55,8 @@ class UpdateDockerTags:
 
         else:
             self.get_token()
+        
+        self.remove_fork()
 
     def check_image_tags(self):
         """Function to check the image tags against the currently deployed tags
