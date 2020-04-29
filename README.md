@@ -76,10 +76,10 @@ If this script is to be run automatically from a virtual machine, that machine w
 
 ### :clock2: CRON expression
 
-To run this script at 10am daily, use the following cron expression:
+To run this script at midnight nightly, use the following cron expression:
 
 ```bash
-0 10 * * * cd /path/to/UpdateDockerTags && /path/to/python setup.py install && /path/to/UpdateDockerTags [--flags]
+0 0 * * * cd /path/to/UpdateDockerTags && /path/to/python setup.py install && /path/to/UpdateDockerTags [--flags]
 ```
 
 ## :leftwards_arrow_with_hook: Pre-commit Hook
