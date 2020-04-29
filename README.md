@@ -2,7 +2,8 @@
 
 [![GitHub](https://img.shields.io/github/license/HelmUpgradeBot/UpdateDockerTags)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md) [![good first issue](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/good%20first%20issue)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/good%20first%20issue) [![help wanted](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/help%20wanted)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/help%20wanted)
 
-An automatable bot that will update Docker image tags in a JupyterHub configuration file.
+This is an automatable bot that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
+If more recent image tags are available, the bot will open a Pull Request to the [`alan-turing-institute/bridge-data-platform` repository](https://github.com/alan-turing-institute/bridge-data-platform) inserting the new image tags into the JupyterHub configuration file.
 
 **Table of Contents:**
 
