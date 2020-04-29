@@ -63,13 +63,37 @@ See the [documentation](https://docs.microsoft.com/en-gb/cli/azure/install-azure
 
 ## :children_crossing: Usage
 
-To run the bot, execute the following:
+When running the bot you can **either** provide the GitHub PAT on the command line as an environment variable, like so:
 
 ```bash
+API_TOKEN="GITHUB_PAT" UpdateDockerTags REPO_OWNER REPO_NAME \
+    --branch BRANCH_NAME \
+    --dry-run \
+    --identity
+```
 
+where `GITHUB_PAT` is the raw token string.
+
+**Or** provide the name of an Azure Key Vault and the secret the GitHub PAT is stored as, like so:
+
+```bash
+UpdateDockerTags REPO_OWNER REPO_NAME \
+    --branch BRANCH_NAME \
+    --keyvault KEYVAULT_NAME \
+    --token-name [-t] TOKEN_NAME \
+    --dry-run \
+    --identity
 ```
 
 where:
+
+- `REPO_OWNER` is the owner of the deployment repository;
+- `REPO_NAME` is the name of the deployment repository;
+- `BRANCH_NAME` os the git branch to commit changes to;
+- `KEYVAULT_NAME` is the name of the Azure Key Vault;
+- `TOKEN_NAME` is the name of the secret storing the GitHub PAT;
+- `-dry-run` performs a dry-run of the check and does not open a Pull Request; and
+- `--identity` enables logging into Azure with a Managed System Identity.
 
 ### :lock: Permissions
 
