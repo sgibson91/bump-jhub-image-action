@@ -22,9 +22,9 @@ An automatable bot that will update Docker image tags in a JupyterHub configurat
 
 This is an overview of the steps the bot executes.
 
-- If a GitHub Personal Access Token (PAT) has not been parsed on the command line, it will login to Azure and pull a PAT from an Azure Key Vault
-- The bot will read a JupyterHub config file from the [`bridge-data-platform` repository]() and look for the tags of the Docker images describing the computational environments (`minimal-notebook`, `datascience-notebook` and `turinginst/bridge-data-env`)
-- The bot will then check the most recent image tags pushed to Docker Hub for these images
+- If a GitHub [Personal Access Token](https://github.blog/2013-05-16-personal-api-tokens/) (PAT) has not been parsed on the command line, it will login to Azure and pull a PAT from an [Azure Key Vault](https://docs.microsoft.com/en-gb/azure/key-vault/)
+- The bot will read a JupyterHub config file from the [`bridge-data-platform` repository](https://github.com/alan-turing-instute/bridge-data-platform) and look for the tags of the Docker images describing the computational environments (`minimal-notebook`, `datascience-notebook` and `turinginst/bridge-data-env`)
+- The bot will then check the most recent image tags pushed to [Docker Hub](https://hub.docker.com) for these images
 - If there are more recent image tags available, the bot will open a Pull Request to the `bridge-data-platform` repository with the updated image tags
 
 A moderator should review the Pull Request before merging it.
