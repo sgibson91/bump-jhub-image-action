@@ -10,6 +10,7 @@ Use your best judgement and feel free to propose changes to this document in a P
 
 - [:purple_heart: Code of Conduct](#purple_heart-code-of-conduct)
 - [:question: What should I know before I get started?](#question-what-should-i-know-before-i-get-started)
+  - [:robot: What is the project?](#robot-what-is-the-project)
 - [:gift: How can I contribute?](#gift-how-can-i-contribute)
   - [:bug: Reporting Bugs](#bug-reporting-bugs)
   - [:sparkles: Requesting Features](#sparkles-requesting-features)
@@ -30,7 +31,13 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 ## :question: What should I know before I get started?
 
-> TBA: This section should be updated with information relevant to the project.
+### :robot: What is the project?
+
+[HelmUpgradeBot](https://github.com/HelmUpgradeBot) is a series of repositories that tackle and automate specific tasks designed to make the experience of maintaining a [JupyterHub](https://jupyterhub.readthedocs.io) or [BinderHub](https://binderhub.readthedocs.io) deployment easier.
+
+This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide JupyterHub-compatible computational environments for the [`bridge-data-management` deployment](https://github.com/alan-turing-institute/bridge-data-platform) are up-to-date with the most recent tags on Docker Hub.
+
+This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling and a dash of the [Azure command line interface](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest) thrown in.
 
 ## :gift: How can I contribute?
 
