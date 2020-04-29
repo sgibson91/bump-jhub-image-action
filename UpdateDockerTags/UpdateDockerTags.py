@@ -55,7 +55,7 @@ class UpdateDockerTags:
 
         else:
             self.get_token()
-        
+
         self.remove_fork()
 
     def check_image_tags(self):
