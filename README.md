@@ -44,7 +44,7 @@ cd UpdateDockerTags
 python setup.py install
 ```
 
-You will also need to install the [Microsoft Azure command line interface](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest).
+You will also need to install the [Microsoft Azure command line interface](https://docs.microsoft.com/en-gb/cli/azure/?view=azure-cli-latest).
 
 ### :cloud: Install the Azure CLI
 
@@ -53,6 +53,8 @@ To install the Azure command line interface, run the following:
 ```bash
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
+
+See the [documentation](https://docs.microsoft.com/en-gb/cli/azure/install-azure-cli?view=azure-cli-latest) for more installation options.
 
 ## :children_crossing: Usage
 
@@ -66,7 +68,11 @@ where:
 
 ### :lock: Permissions
 
-The user (or machine) running this script will need _at least_ permission to get secrets from the Azure Key Vault (`Get` and `List`).
+:rotating_light: This section is only relevant if you choose not the provide the GitHub PAT on the command line :rotationg_light:
+
+The user running this script will need permission to [pull secrets from the Azure Key Vault](https://docs.microsoft.com/en-gb/azure/key-vault/general/group-permissions-for-apps) (`Get` and `List` at minimum).
+
+If this script is to be run automatically from a virtual machine, that machine will need a [Managed System Identity](https://docs.microsoft.com/en-gb/azure/active-directory/managed-identities-azure-resources/overview) with the above Key Vault permissions.
 
 ### :clock2: CRON expression
 
