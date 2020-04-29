@@ -33,6 +33,11 @@ A moderator should review the Pull Request before merging it.
 
 Here is a list detailing the assumptions that the bot makes.
 
+1. The bot has access to a GitHub PAT to authenticate to the API.
+   This is **either** provided on the command line **or** available in an Azure Key Vault.
+2. The JupyterHub configuration file is available in a **public** GitHub repository under `config/config-template.yaml`
+3. The Docker images are publicly available on Docker Hub
+
 ## :pushpin: Installation and Requirements
 
 To install the bot, you will need to clone this repository and install the package.
