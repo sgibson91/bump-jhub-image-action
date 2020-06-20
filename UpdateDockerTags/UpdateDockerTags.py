@@ -71,7 +71,7 @@ class UpdateDockerTags:
             "jupyterhub": f"https://raw.githubusercontent.com/{self.repo_owner}/{self.repo_name}/master/config/config-template.yaml",
             "minimal-notebook": "https://hub.docker.com/v2/repositories/jupyter/minimal-notebook/tags",
             "datascience-notebook": "https://hub.docker.com/v2/repositories/jupyter/datascience-notebook/tags",
-            "custom-env": f"https://hub.docker.com/v2/repositories/turinginst/bridge-data-env/tags",
+            "custom-env": "https://hub.docker.com/v2/repositories/turinginst/bridge-data-env/tags",
         }
         images = list(api_urls.keys())
         images.remove("jupyterhub")
