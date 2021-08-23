@@ -37,7 +37,7 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide JupyterHub-compatible computational environments for the [`bridge-data-management` deployment](https://github.com/alan-turing-institute/bridge-data-platform) are up-to-date with the most recent tags on Docker Hub.
 
-This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling and a dash of the [Azure command line interface](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest) thrown in.
+This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling.
 
 ## :gift: How can I contribute?
 
