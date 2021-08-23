@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import yaml
+import time
 import shutil
 import logging
 import requests
@@ -37,17 +38,14 @@ class UpdateDockerTags:
 
         self.token = os.getenv("API_TOKEN", None)
         if self.token is None:
-            raise EnvironmentError(
-                "API_TOKEN must be set"
-            )
+            raise EnvironmentError("API_TOKEN must be set")
 
         self.headers = {"Authorization": f"token {self.token}"}
 
         self.remove_fork()
 
     def check_image_tags(self):
-        """Function to check the image tags against the currently deployed tags
-        """
+        """Function to check the image tags against the currently deployed tags"""
         if self.dry_run:
             logging.info("THIS IS A DRY-RUN. CHANGES WILL NOT BE MADE.")
 
