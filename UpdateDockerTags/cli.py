@@ -6,9 +6,7 @@ DESCRIPTION = "Update the Docker image tags governing the computational environm
 parser = argparse.ArgumentParser(description=DESCRIPTION)
 
 parser.add_argument("repo_owner", type=str, help="The GitHub repository owner")
-parser.add_argument(
-    "repo_name", type=str, help="The JupyterHub deployment repo name"
-)
+parser.add_argument("repo_name", type=str, help="The JupyterHub deployment repo name")
 
 parser.add_argument(
     "--branch",
