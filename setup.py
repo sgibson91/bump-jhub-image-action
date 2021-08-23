@@ -27,7 +27,5 @@ setup(
     license="MIT",
     packages=find_packages(),
     use_package_data=True,
-    entry_points={
-        "console_scripts": ["docker-tags = UpdateDockerTags.cli:main"]
-    },
+    entry_points={"console_scripts": ["docker-tags = UpdateDockerTags.cli:main"]},
 )

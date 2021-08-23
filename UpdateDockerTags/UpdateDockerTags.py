@@ -75,8 +75,7 @@ class UpdateDockerTags:
 
         if np.any(cond):
             logging.info(
-                "The following images can be updated: %s"
-                % list(compress(images, cond))
+                "The following images can be updated: %s" % list(compress(images, cond))
             )
             if not self.dry_run:
                 self.update_images(list(compress(images, cond)))
@@ -147,9 +146,7 @@ class UpdateDockerTags:
         """Check if HelmUpgradeBot has a fork of the repo or not"""
         res = requests.get("https://api.github.com/users/HelmUpgradeBot/repos")
 
-        self.fork_exists = bool(
-            [x for x in res.json() if x["name"] == self.repo_name]
-        )
+        self.fork_exists = bool([x for x in res.json() if x["name"] == self.repo_name])
 
     def checkout_branch(self):
         """Checkout a branch of a git repo"""
@@ -157,8 +154,7 @@ class UpdateDockerTags:
             self.delete_old_branch()
 
             logging.info(
-                "Pulling master branch of: %s/%s"
-                % (self.repo_owner, self.repo_name)
+                "Pulling master branch of: %s/%s" % (self.repo_owner, self.repo_name)
             )
             pull_cmd = [
                 "git",
@@ -224,9 +220,7 @@ class UpdateDockerTags:
             "head": f"HelmUpgradeBot:{self.branch}",
         }
 
-        res = requests.post(
-            self.repo_api + "pulls", headers=self.headers, json=pr
-        )
+        res = requests.post(self.repo_api + "pulls", headers=self.headers, json=pr)
 
         if res:
             logging.info("Successfully opened Pull Request")
@@ -304,9 +298,7 @@ class UpdateDockerTags:
         """
         res = json.loads(requests.get(url).text)
 
-        updates_sorted = sorted(
-            res["results"], key=lambda k: k["last_updated"]
-        )
+        updates_sorted = sorted(res["results"], key=lambda k: k["last_updated"])
 
         if updates_sorted[-1]["name"] == "latest":
             new_tag = updates_sorted[-2]["name"]
@@ -323,9 +315,7 @@ class UpdateDockerTags:
         """
         res = yaml.safe_load(requests.get(url, headers=self.headers).text)
 
-        self.old_image_tags["minimal-notebook"] = res["singleuser"]["image"][
-            "tag"
-        ]
+        self.old_image_tags["minimal-notebook"] = res["singleuser"]["image"]["tag"]
 
         for image_name in ["datascience-notebook", "custom-env"]:
             for profile in res["singleuser"]["profileList"]:
