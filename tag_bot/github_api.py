@@ -3,27 +3,27 @@ import jmespath
 from .utils import get_request, post_request
 
 
-def check_fork_exists(repo_name: str, header: str) -> bool:
+def check_fork_exists(repo_name: str, header: dict = {}) -> bool:
+    """Check if a fork of a GitHub repo already exists
+
+    Args:
+        repo_name (str): The name of the repo to check
+        header (dict, optional): A dictionary of headers to send with the
+            request. Defaults to {}
+
+    Returns:
+        bool: True if a fork exists. False if not.
+    """
     url = "/".join(["https://api.github.com", "users", "HelmUpgradeBot", "repos"])
     resp = get_request(url, headers=header, output="json")
     return bool([x for x in resp if x["name"] == repo_name])
 
 
-def create_branch(repo_api: str, target_branch: str, sha: str, header: dict):
-    url = "/".join([repo_api, "git", "refs"])
-    body = {
-        "ref": f"heads/{target_branch}",
-        "sha": sha,
-    }
-
-    return post_request(url, headers=header, json=body, return_json=True)
-
-
-def find_existing_pr(repo_api: str, header: dict) -> [bool, str]:
+def find_existing_pr(api_url: str, header: dict) -> [bool, str]:
     """Check if the bot already has an open Pull Request
 
     Args:
-        repo_api (str): The API URL of the GitHub repository to send requests to
+        api_url (str): The API URL of the GitHub repository to send requests to
         header (dict): A dictionary of headers to send with the GET request
 
     Returns:
@@ -32,7 +32,7 @@ def find_existing_pr(repo_api: str, header: dict) -> [bool, str]:
     """
     print("Finding Pull Requests opened by HelmUpgradeBot")
 
-    url = "/".join([repo_api, "pulls"])
+    url = "/".join([api_url, "pulls"])
     params = {"state": "open", "sort": "created", "direction": "desc"}
     resp = get_request(url, headers=header, params=params, output="json")
 
@@ -66,12 +66,17 @@ def find_existing_pr(repo_api: str, header: dict) -> [bool, str]:
         return False, None
 
 
-def get_a_reference(repo_api: str, ref: str, header: dict) -> dict:
-    url = "/".join([repo_api, "refs", ref])
-    return get_request(url, headers=header, output="json")
+def make_fork(api_url: str, header: dict) -> bool:
+    """Create a fork of a repository
 
+    Args:
+        api_url (str): The URL to send the request to
+        header (dict): A dictionary of headers to send with the request. Must
+            include an authorisation token.
 
-def make_fork(repo_api: str, header: dict) -> bool:
-    url = "/".join([repo_api, "forks"])
+    Returns:
+        bool: True once the fork has been created
+    """
+    url = "/".join([api_url, "forks"])
     post_request(url, headers=header)
     return True
