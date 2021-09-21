@@ -22,7 +22,9 @@ def create_blob(api_url: str, header: dict, content: str) -> dict:
     return post_request(url, json=body, headers=header, output="json")
 
 
-def create_commit(api_url: str, header: dict, tree_sha: str, commit_sha: str, commit_msg: str) -> dict:
+def create_commit(
+    api_url: str, header: dict, tree_sha: str, commit_sha: str, commit_msg: str
+) -> dict:
     """Create a new commit using GitHub's git database API endpoint
 
     Args:
@@ -70,7 +72,9 @@ def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
     return post_request(url, headers=header, json=body, return_json=True)
 
 
-def create_tree(api_url: str, header: dict, filepath: str, tree_sha: str, blob_sha: str) -> dict:
+def create_tree(
+    api_url: str, header: dict, filepath: str, tree_sha: str, blob_sha: str
+) -> dict:
     """Create a new tree using GitHub's git database API endpoint
 
     Args:
