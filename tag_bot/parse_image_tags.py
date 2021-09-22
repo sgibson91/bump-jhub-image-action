@@ -1,3 +1,5 @@
+import yaml
+
 from .utils import get_request
 
 RAW_ROOT = "https://raw.githubusercontent.com"
@@ -21,14 +23,15 @@ def get_deployed_image_tags(
         )
 
     url = "/".join([RAW_ROOT, repo_owner, repo_name, branch, filepath])
-    resp = get_request(url, headers=header, output="json")
+    resp = get_request(url, headers=header, output="text")
+    config = yaml.safe_load(resp)
 
-    image_tags[resp["singleuser"]["image"]["name"]] = {
-        "current": resp["singleuser"]["image"]["tag"]
+    image_tags[config["singleuser"]["image"]["name"]] = {
+        "current": config["singleuser"]["image"]["tag"]
     }
 
     if config_type == "profileList":
-        for image in resp["singleuser"]:
+        for image in config["singleuser"]:
             if "kubespawner_override" in image.keys():
                 image_name, image_tag = image["kubespawner_override"]["image"].split(
                     ":"
