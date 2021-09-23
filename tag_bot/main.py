@@ -270,7 +270,7 @@ def run(
         )
 
         if not pr_exists:
-            create_pull_request(REPO_API, HEADER, base_branch, target_branch)
+            create_pr(REPO_API, HEADER, base_branch, target_branch)
 
     elif (len(images_to_update) == 0) and (not dry_run):
         if pr_exists:
