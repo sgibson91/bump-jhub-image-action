@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-from UpdateDockerTags import __version__
-
 # Source dependencies from requirements.txt file.
 try:
     with open("requirements.txt", "r") as f:
@@ -12,7 +10,7 @@ except FileNotFoundError:
 
 setup(
     name="UpdateDockerTags",
-    version=__version__,
+    version="0.0.0",
     install_requires=install_packages,
     include_package_data=True,
     python_requires=">=3.7",
@@ -27,5 +25,5 @@ setup(
     license="MIT",
     packages=find_packages(),
     use_package_data=True,
-    entry_points={"console_scripts": ["docker-tags = UpdateDockerTags.cli:main"]},
+    entry_points={"console_scripts": ["tag-bot = tag_bot.cli:main"]},
 )
