@@ -68,7 +68,7 @@ def get_contents(api_url: str, header: dict, path: str, ref: str) -> dict:
     """
     url = "/".join([api_url, "contents", path])
     query = {"ref": ref}
-    return get_request(url, headers=header, params=query)
+    return get_request(url, headers=header, params=query, output="json")
 
 
 def get_ref(api_url: str, header: dict, ref: str) -> dict:
@@ -84,5 +84,5 @@ def get_ref(api_url: str, header: dict, ref: str) -> dict:
     Returns:
         dict: The JSON payload response of the request
     """
-    url = "/".join([api_url, "refs", ref])
+    url = "/".join([api_url, "git", "ref", "heads", ref])
     return get_request(url, headers=header, output="json")

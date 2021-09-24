@@ -37,7 +37,7 @@ def create_pr(api_url: str, header: dict, base_branch: str, head_branch: str):
         "title": "Bumping Docker image tags",
         "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
         "base": base_branch,
-        "head": head_branch,
+        "head": f"HelmUpgradeBot:{head_branch}",
     }
     post_request(url, headers=header, json=pr)
 

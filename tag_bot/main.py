@@ -1,3 +1,4 @@
+import json
 import yaml
 import base64
 import random
@@ -69,7 +70,7 @@ def edit_config(
                     )
 
     # Encode the file contents
-    encoded_file_contents = file_contents.encode("ascii")
+    encoded_file_contents = json.dumps(file_contents).encode("ascii")
     base64_bytes = base64.b64encode(encoded_file_contents)
     file_contents = base64_bytes.decode("utf-8")
 
@@ -114,7 +115,7 @@ def update_image_tags(
 
     if not pr_exists:
         # Get a reference to HEAD of base_branch
-        resp = get_ref(repo_api, header, f"heads/{base_branch}")
+        resp = get_ref(repo_api, header, base_branch)
 
         # Create head_branch, and return reference SHA and URL
         create_ref(fork_api, header, head_branch, resp["object"]["sha"])
@@ -215,8 +216,9 @@ def run(
             _ = make_fork(REPO_API, HEADER)
 
         update_image_tags(
-            REPO_API,
+            repo_owner,
             repo_name,
+            base_branch,
             head_branch,
             config_file,
             images_to_update,

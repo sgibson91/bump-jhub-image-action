@@ -48,7 +48,7 @@ def main():
     run(
         args.repo_owner,
         args.repo_name,
-        args.config_file,
+        args.config_path,
         args.base_branch,
         args.head_branch,
         token,

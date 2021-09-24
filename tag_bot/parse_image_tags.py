@@ -39,7 +39,7 @@ def get_deployed_image_tags(
         }
 
         if "profileList" in config["singleuser"].keys():
-            for image in config["singleuser"]:
+            for image in config["singleuser"]["profileList"]:
                 if "kubespawner_override" in image.keys():
                     image_name, image_tag = image["kubespawner_override"][
                         "image"
@@ -70,7 +70,7 @@ def get_most_recent_image_tags_dockerhub(image_name: str, image_tags: dict) -> d
     else:
         new_tag = tags_sorted[-1]["name"]
 
-    image_tags[image_name] = {"latest": new_tag}
+    image_tags[image_name]["latest"] = new_tag
 
     return image_tags
 
