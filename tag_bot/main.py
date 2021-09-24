@@ -17,16 +17,13 @@ from .github_api import (
 )
 
 from .git_database import (
-    create_blob,
     create_commit,
     create_ref,
-    create_tree,
+    get_contents,
     get_ref,
-    update_ref,
 )
 
 API_ROOT = "https://api.github.com"
-RAW_ROOT = "https://raw.githubusercontent.com"
 
 
 def edit_config(
