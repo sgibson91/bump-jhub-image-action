@@ -1,4 +1,3 @@
-import json
 import yaml
 import base64
 import random
@@ -70,7 +69,7 @@ def edit_config(
                     )
 
     # Encode the file contents
-    encoded_file_contents = json.dumps(file_contents).encode("ascii")
+    encoded_file_contents = yaml.safe_dump(file_contents).encode("utf-8")
     base64_bytes = base64.b64encode(encoded_file_contents)
     file_contents = base64_bytes.decode("utf-8")
 
