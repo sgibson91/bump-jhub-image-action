@@ -57,29 +57,6 @@ def get_request(
         )
 
 
-def patch_request(
-    url: str, headers: dict = {}, json: dict = {}, return_json: bool = False
-) -> None:
-    """Send a PATCH request to an HTTP API endpoint
-
-    Args:
-        url (str): The URL to send the request to
-        headers (dict, optional): A dictionary of any headers to send with the
-            request. Defaults to {}.
-        json (dict, optional): A dictionary containing JSON payload to send with
-            the request. Defaults to {}.
-        return_json (bool, optional): Return the JSON payload response.
-            Defaults to False.
-    """
-    resp = requests.patch(url, headers=headers, json=json)
-
-    if not resp:
-        raise RuntimeError(resp.text)
-
-    if return_json:
-        return resp.json()
-
-
 def post_request(
     url: str, headers: dict = {}, json: dict = {}, return_json: bool = False
 ) -> None:
