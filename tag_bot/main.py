@@ -1,4 +1,5 @@
 import yaml
+import base64
 import random
 import string
 
@@ -76,6 +77,11 @@ def edit_config(
                 file_contents["singleuser"]["profileList"][i]["kubespawner_override"][
                     "image"
                 ] = ":".join([image_name, image_tags[image_name]["latest"]])
+
+    # Encode the file contents
+    encoded_file_contents = file_contents.encode("ascii")
+    base64_bytes = base64.b64encode(encoded_file_contents)
+    file_contents = base64_bytes.decode("utf-8")
 
     return file_contents
 
