@@ -1,25 +1,6 @@
-from .utils import get_request, patch_request, post_request
+from requests import put
 
-
-def create_blob(api_url: str, header: dict, content: str) -> dict:
-    """Create a new blob using GitHub's git database API endpoint
-
-    Args:
-        api_url (str): The URL to send the request to
-        header (dict): A dictionary of headers to send with the request. Must
-            include an authorisation token.
-        content (str): The contents of the new blob
-
-    Returns:
-        dict: The JSON payload response of the request
-    """
-    url = "/".join(api_url, "git", "blobs")
-    body = {
-        "content": content,
-        "encoding": "utf-8",
-    }
-
-    return post_request(url, json=body, headers=header, output="json")
+from .utils import get_request, post_request
 
 
 def create_commit(
