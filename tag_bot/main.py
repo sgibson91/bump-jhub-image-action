@@ -130,54 +130,29 @@ def update_image_tags(
     repo_api = "/".join([API_ROOT, "repos", repo_owner, repo_name])
     fork_api = "/".join([API_ROOT, "repos", "HelmUpgradeBot", repo_name])
 
-    if pr_exists:
-        # Return commit SHA and URL
-        resp = get_ref(fork_api, header, f"heads/{head_branch}")
-        target_commit_sha = resp["object"]["sha"]
-        target_commit_url = resp["object"]["url"]
-    else:
+    if not pr_exists:
         # Get a reference to HEAD of base_branch
         resp = get_ref(repo_api, header, f"heads/{base_branch}")
 
         # Create head_branch, and return reference SHA and URL
-        resp = create_ref(fork_api, header, head_branch, resp["object"]["sha"])
-        target_commit_sha = resp["object"]["sha"]
-        target_commit_url = resp["object"]["url"]
+        create_ref(fork_api, header, head_branch, resp["object"]["sha"])
 
-    # Get the commit that the HEAD of the reference points to and extract
-    # the tree's SHA
-    resp = get_request(target_commit_url, headers=header, output="json")
-    tree_sha = resp["tree"]["sha"]
-
-    # Download the file
+    # Get the file download URL and blob_sha
     if pr_exists:
-        file_contents_url = "/".join(
-            [RAW_ROOT, "HelmUpgradeBot", repo_name, head_branch, filepath]
-        )
+        resp = get_contents(fork_api, header, filepath, head_branch)
     else:
-        file_contents_url = "/".join(
-            [RAW_ROOT, repo_owner, repo_name, base_branch, filepath]
-        )
+        resp = get_contents(repo_api, header, filepath, base_branch)
+
+    file_contents_url = resp["download_url"]
+    blob_sha = resp["sha"]
 
     file_contents = edit_config(
         file_contents_url, header, images_to_update, image_tags, config_type
     )
 
-    # Create a blob and return it's SHA
-    resp = create_blob(fork_api, header, yaml.safe_dump(file_contents))
-    blob_sha = resp["sha"]
-
-    # Create a tree containing the modified file contents and return it's SHA
-    resp = create_tree(fork_api, header, filepath, tree_sha, blob_sha)
-    new_tree_sha = resp["sha"]
-
-    # Create a commit and return it's SHA
+    # Create a commit
     commit_msg = f"Bump images {[image for image in images_to_update]} to tags {[image_tags[image]['latest'] for image in images_to_update]}, respectively"
-    resp = create_commit(fork_api, header, new_tree_sha, target_commit_sha, commit_msg)
-    commit_sha = resp["sha"]
-
-    # Update the reference
-    update_ref(fork_api, header, head_branch, commit_sha)
+    create_commit(fork_api, header, filepath, head_branch, blob_sha, commit_msg, file_contents)
 
 
 def compare_image_tags(image_tags: dict) -> list:
