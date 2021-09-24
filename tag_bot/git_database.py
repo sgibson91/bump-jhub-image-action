@@ -4,7 +4,13 @@ from .utils import get_request, post_request
 
 
 def create_commit(
-    api_url: str, header: dict, path: str, branch: str, sha: str, commit_msg: str, content: str,
+    api_url: str,
+    header: dict,
+    path: str,
+    branch: str,
+    sha: str,
+    commit_msg: str,
+    content: str,
 ):
     """Create a commit over the GitHub API by creating or updating a file
 
@@ -20,12 +26,7 @@ def create_commit(
         content (str): The content of the file to be updated, encoded in base64
     """
     url = "/".join([api_url, "contents", path])
-    body = {
-        "message": commit_msg,
-        "contents": content,
-        "sha": sha,
-        "branch": branch
-    }
+    body = {"message": commit_msg, "contents": content, "sha": sha, "branch": branch}
     put(url, json=body, headers=header)
 
 
