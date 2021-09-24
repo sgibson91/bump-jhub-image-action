@@ -13,7 +13,6 @@ def get_deployed_image_tags(
     filepath: str,
     header: dict,
     image_tags: dict,
-    config_type: str = "singleuser",
 ) -> dict:
     """Read the tags of the deployed images from a YAML config file
 
@@ -25,36 +24,27 @@ def get_deployed_image_tags(
         header (dict): A dictionary of headers to send with the API requests.
             Must contain an authorisation token.
         image_tags (dict): A dictionary to store the image information in
-        config_type (str, optional): Whether the config supports a single image
-            or multiple images via a profile list. Options are "singleuser" or
-            "profileList" (case sensitive). Defaults to "singleuser".
 
     Returns:
         image_tags (dict): A dictionary containing info on the images currently
             deployed
     """
-    allowed_config_types = ["singleuser", "profileList"]
-    if config_type not in allowed_config_types:
-        raise NotImplementedError(
-            "The type of config you requested has not yet been implemented. Current options are: %s"
-            % allowed_config_types
-        )
-
     url = "/".join([RAW_ROOT, repo_owner, repo_name, branch, filepath])
     resp = get_request(url, headers=header, output="text")
     config = yaml.safe_load(resp)
 
-    image_tags[config["singleuser"]["image"]["name"]] = {
-        "current": config["singleuser"]["image"]["tag"]
-    }
+    if "singleuser" in config.keys():
+        image_tags[config["singleuser"]["image"]["name"]] = {
+            "current": config["singleuser"]["image"]["tag"]
+        }
 
-    if config_type == "profileList":
-        for image in config["singleuser"]:
-            if "kubespawner_override" in image.keys():
-                image_name, image_tag = image["kubespawner_override"]["image"].split(
-                    ":"
-                )
-                image_tags[image_name] = {"current": image_tag}
+        if "profileList" in config["singleuser"].keys():
+            for image in config["singleuser"]:
+                if "kubespawner_override" in image.keys():
+                    image_name, image_tag = image["kubespawner_override"][
+                        "image"
+                    ].split(":")
+                    image_tags[image_name] = {"current": image_tag}
 
     return image_tags
 

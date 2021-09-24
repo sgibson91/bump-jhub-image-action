@@ -15,14 +15,6 @@ parser.add_argument(
     help="Path to the JupyterHub config file relative to the repo root",
 )
 parser.add_argument(
-    "-c",
-    "--config-type",
-    choices=["singleuser", "profileList"],
-    default="singleuser",
-    help="Whether the JupyterHub uses a singleuser image or has a profile list of multiple images.",
-)
-
-parser.add_argument(
     "-b",
     "--base-branch",
     type=str,
@@ -36,7 +28,6 @@ parser.add_argument(
     default="bump_image_tags",
     help="The name of the branch to push changes to and open PRs from. Default: bump_image_tags.",
 )
-
 parser.add_argument(
     "--dry-run",
     action="store_true",
@@ -58,7 +49,6 @@ def main():
         args.repo_owner,
         args.repo_name,
         args.config_file,
-        args.config_type,
         args.base_branch,
         args.head_branch,
         token,

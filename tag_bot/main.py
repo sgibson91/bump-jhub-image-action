@@ -31,7 +31,6 @@ def edit_config(
     header: dict,
     images_to_update: list,
     image_tags: dict,
-    config_type: str,
 ) -> dict:
     """Update the JupyterHub config file with the new image tags
 
@@ -43,37 +42,31 @@ def edit_config(
         image_tags (dict): A dictionary of docker images used by the JupyterHub,
             the tags that are currently deployed, and the most recent tags on
             the container registry.
-        config_type (str): Whether the JupyterHub uses a singleuser image or
-            has a profile list of multiple images. Accepted values are
-            'singluser' or 'profileList' (case sensitive).
 
     Returns:
         dict: The updated JupyterHub config in YAML format
     """
-    allowed_config_types = ["singleuser", "profileList"]
-    if config_type not in allowed_config_types:
-        raise NotImplementedError(
-            "The config type you are trying to use is not supported. Currently accepted config types are: %s"
-            % allowed_config_types
-        )
-
     resp = get_request(download_url, headers=header, output="text")
     file_contents = yaml.safe_load(resp)
 
-    if file_contents["singleuser"]["image"]["name"] in images_to_update:
-        file_contents["singleuser"]["image"]["tag"] = image_tags[
-            file_contents["singleuser"]["image"]["name"]
-        ]["latest"]
+    if "singleuser" in file_contents.keys():
+        if file_contents["singleuser"]["image"]["name"] in images_to_update:
+            file_contents["singleuser"]["image"]["tag"] = image_tags[
+                file_contents["singleuser"]["image"]["name"]
+            ]["latest"]
 
-    if config_type == "profileList":
-        for i, image in enumerate(file_contents["singleuser"]["profileList"]):
-            if ("kubespawner_override" in image.keys()) and (
-                image["kubespawner_override"]["image"].split(":")[0] in images_to_update
-            ):
-                image_name = image["kubespawner_override"]["image"].split(":")[0]
-                file_contents["singleuser"]["profileList"][i]["kubespawner_override"][
-                    "image"
-                ] = ":".join([image_name, image_tags[image_name]["latest"]])
+        if "profileList" in file_contents["singleuser"].keys():
+            for i, image in enumerate(file_contents["singleuser"]["profileList"]):
+                if ("kubespawner_override" in image.keys()) and (
+                    image["kubespawner_override"]["image"].split(":")[0]
+                    in images_to_update
+                ):
+                    image_name = image["kubespawner_override"]["image"].split(":")[0]
+                    file_contents["singleuser"]["profileList"][i][
+                        "kubespawner_override"
+                    ]["image"] = ":".join(
+                        [image_name, image_tags[image_name]["latest"]]
+                    )
 
     # Encode the file contents
     encoded_file_contents = file_contents.encode("ascii")
@@ -93,7 +86,6 @@ def update_image_tags(
     image_tags: dict,
     header: dict,
     pr_exists: bool,
-    config_type: str,
 ) -> None:
     """Function to update the Docker image tags in a JupyterHub config file.
     Makes a series of calls to the GitHub API to create a branch and commit the
@@ -115,17 +107,7 @@ def update_image_tags(
             contain an authorisation token.
         pr_exists (bool): Whether or not the bot has previously opened a PR
             which has not yet been merged
-        config_type (str): Whether the JupyterHub uses a singleuser image or
-            has a profile list of multiple images. Accepted values are
-            'singluser' or 'profileList' (case sensitive).
     """
-    allowed_config_types = ["singleuser", "profileList"]
-    if config_type not in allowed_config_types:
-        raise NotImplementedError(
-            "The config type you are trying to use is not supported. Currently accepted config types are: %s"
-            % allowed_config_types
-        )
-
     # Set API URLs for requests
     repo_api = "/".join([API_ROOT, "repos", repo_owner, repo_name])
     fork_api = "/".join([API_ROOT, "repos", "HelmUpgradeBot", repo_name])
@@ -146,13 +128,13 @@ def update_image_tags(
     file_contents_url = resp["download_url"]
     blob_sha = resp["sha"]
 
-    file_contents = edit_config(
-        file_contents_url, header, images_to_update, image_tags, config_type
-    )
+    file_contents = edit_config(file_contents_url, header, images_to_update, image_tags)
 
     # Create a commit
     commit_msg = f"Bump images {[image for image in images_to_update]} to tags {[image_tags[image]['latest'] for image in images_to_update]}, respectively"
-    create_commit(fork_api, header, filepath, head_branch, blob_sha, commit_msg, file_contents)
+    create_commit(
+        fork_api, header, filepath, head_branch, blob_sha, commit_msg, file_contents
+    )
 
 
 def compare_image_tags(image_tags: dict) -> list:
@@ -178,7 +160,6 @@ def run(
     repo_owner: str,
     repo_name: str,
     config_file: str,
-    config_type: str,
     base_branch: str,
     head_branch: str,
     token: str,
@@ -191,9 +172,6 @@ def run(
         repo_name (str): The name of the GitHub repo where the config is stored
         config_file (str): Path to the JupyterHub config file relative to the
             repo root
-        config_type (str): Whether the JupyterHub uses a singleuser image or
-            has a profile list of multiple images. Accepted values are
-            'singluser' or 'profileList' (case sensitive).
         base_branch (str): The default branch of the repo or the branch PRs
             should be merged into.
         head_branch (str): The name of a branch PRs should be opened from
