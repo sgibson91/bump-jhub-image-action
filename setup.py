@@ -9,7 +9,7 @@ except FileNotFoundError:
     install_packages = []
 
 setup(
-    name="UpdateDockerTags",
+    name="tag-bot",
     version="0.0.0",
     install_requires=install_packages,
     include_package_data=True,
