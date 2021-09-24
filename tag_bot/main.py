@@ -84,7 +84,7 @@ def update_image_tags(
     repo_owner: str,
     repo_name: str,
     base_branch: str,
-    target_branch: str,
+    head_branch: str,
     filepath: str,
     images_to_update: list,
     image_tags: dict,
@@ -101,7 +101,7 @@ def update_image_tags(
         repo_name (str): The name of the GitHub repo where the config is stored
         base_branch (str): The default branch of the repo or the branch PRs
             should be merged into.
-        target_branch (str): The name of a branch PRs should be opened from
+        head_branch (str): The name of a branch PRs should be opened from
         filepath (str): Path to the JupyterHub config file relative to the
             repo root
         images_to_update (list): A list of docker images that need updating
@@ -129,15 +129,15 @@ def update_image_tags(
 
     if pr_exists:
         # Return commit SHA and URL
-        resp = get_ref(fork_api, header, f"heads/{target_branch}")
+        resp = get_ref(fork_api, header, f"heads/{head_branch}")
         target_commit_sha = resp["object"]["sha"]
         target_commit_url = resp["object"]["url"]
     else:
         # Get a reference to HEAD of base_branch
         resp = get_ref(repo_api, header, f"heads/{base_branch}")
 
-        # Create target_branch, and return reference SHA and URL
-        resp = create_ref(fork_api, header, target_branch, resp["object"]["sha"])
+        # Create head_branch, and return reference SHA and URL
+        resp = create_ref(fork_api, header, head_branch, resp["object"]["sha"])
         target_commit_sha = resp["object"]["sha"]
         target_commit_url = resp["object"]["url"]
 
@@ -149,7 +149,7 @@ def update_image_tags(
     # Download the file
     if pr_exists:
         file_contents_url = "/".join(
-            [RAW_ROOT, "HelmUpgradeBot", repo_name, target_branch, filepath]
+            [RAW_ROOT, "HelmUpgradeBot", repo_name, head_branch, filepath]
         )
     else:
         file_contents_url = "/".join(
@@ -174,7 +174,7 @@ def update_image_tags(
     commit_sha = resp["sha"]
 
     # Update the reference
-    update_ref(fork_api, header, target_branch, commit_sha)
+    update_ref(fork_api, header, head_branch, commit_sha)
 
 
 def compare_image_tags(image_tags: dict) -> list:
@@ -202,7 +202,7 @@ def run(
     config_file: str,
     config_type: str,
     base_branch: str,
-    target_branch: str,
+    head_branch: str,
     token: str,
     dry_run: bool = False,
 ) -> None:
@@ -218,7 +218,7 @@ def run(
             'singluser' or 'profileList' (case sensitive).
         base_branch (str): The default branch of the repo or the branch PRs
             should be merged into.
-        target_branch (str): The name of a branch PRs should be opened from
+        head_branch (str): The name of a branch PRs should be opened from
         token (str): A GitHub Personal Access Token to authenticate against
             the API with
         dry_run (bool, optional): When True, perform a dry run and do not open a
@@ -251,9 +251,9 @@ def run(
     if (len(images_to_update) > 0) and (not dry_run):
         if branch_name is None:
             random_id = "".join(random.sample(string.ascii_letters, 4))
-            target_branch = "-".join([target_branch, random_id])
+            head_branch = "-".join([head_branch, random_id])
         else:
-            target_branch = branch_name
+            head_branch = branch_name
 
         if (not fork_exists) and (not pr_exists):
             _ = make_fork(REPO_API, HEADER)
@@ -261,7 +261,7 @@ def run(
         update_image_tags(
             REPO_API,
             repo_name,
-            target_branch,
+            head_branch,
             config_file,
             images_to_update,
             image_tags,
@@ -270,7 +270,7 @@ def run(
         )
 
         if not pr_exists:
-            create_pr(REPO_API, HEADER, base_branch, target_branch)
+            create_pr(REPO_API, HEADER, base_branch, head_branch)
 
     elif (len(images_to_update) == 0) and (not dry_run):
         if pr_exists:

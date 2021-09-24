@@ -31,7 +31,7 @@ parser.add_argument(
 )
 parser.add_argument(
     "-t",
-    "--target-branch",
+    "--head-branch",
     type=str,
     default="bump_image_tags",
     help="The name of the branch to push changes to and open PRs from. Default: bump_image_tags.",
@@ -60,7 +60,7 @@ def main():
         args.config_file,
         args.config_type,
         args.base_branch,
-        args.target_branch,
+        args.head_branch,
         token,
         dry_run=args.dry_run,
     )

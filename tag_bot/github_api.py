@@ -22,7 +22,7 @@ def check_fork_exists(repo_name: str, header: dict = {}) -> bool:
     return bool([x for x in resp if x["name"] == repo_name])
 
 
-def create_pr(api_url: str, header: dict, base_branch: str, target_branch: str):
+def create_pr(api_url: str, header: dict, base_branch: str, head_branch: str):
     """Create a Pull Request via the GitHub API
 
     Args:
@@ -30,14 +30,14 @@ def create_pr(api_url: str, header: dict, base_branch: str, target_branch: str):
         header (dict): A dictionary of headers to send with the request. Must
             contain and authorisation token.
         base_branch (str): The name of the branch to open the PR against
-        target_branch (str): The name of the PR to open the PR from
+        head_branch (str): The name of the PR to open the PR from
     """
     url = "/".join([api_url, "pulls"])
     pr = {
         "title": "Bumping Docker image tags",
         "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
         "base": base_branch,
-        "head": target_branch,
+        "head": head_branch,
     }
     post_request(url, headers=header, json=pr)
 
@@ -51,7 +51,7 @@ def find_existing_pr(api_url: str, header: dict) -> [bool, str]:
 
     Returns:
         pr_exists (bool): True if HelmUpgradeBot already has an open PR. False otherwise.
-        target_branch (str): The name of the branch to send commits to
+        head_branch (str): The name of the branch to send commits to
     """
     url = "/".join([api_url, "pulls"])
     params = {"state": "open", "sort": "created", "direction": "desc"}
