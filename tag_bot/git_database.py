@@ -4,30 +4,29 @@ from .utils import get_request, post_request
 
 
 def create_commit(
-    api_url: str, header: dict, tree_sha: str, commit_sha: str, commit_msg: str
-) -> dict:
-    """Create a new commit using GitHub's git database API endpoint
+    api_url: str, header: dict, path: str, branch: str, sha: str, commit_msg: str, content: str,
+):
+    """Create a commit over the GitHub API by creating or updating a file
 
     Args:
         api_url (str): The URL to send the request to
         header (dict): A dictionary of headers to send with the request. Must
             include an authorisation token.
-        tree_sha (str): The SHA of the new tree containing the information to be
-            captured in the commit.
-        commit_sha (str): The SHA of the parent commit
-        commit_msg (str): A message to provide with the commit
-
-    Returns:
-        dict: The JSON payload response of the request
+        path (str): The path to the file that is to be created or updated,
+            relative to the repo root
+        branch (str): The branch the commit should be made on
+        sha (str): The SHA of the blob to be updated.
+        commit_msg (str): A message describing the changes the commit applies
+        content (str): The content of the file to be updated, encoded in base64
     """
-    url = "/".join([api_url, "git", "commits"])
+    url = "/".join([api_url, "contents", path])
     body = {
         "message": commit_msg,
-        "tree": tree_sha,
-        "parents": [commit_sha],
+        "contents": content,
+        "sha": sha,
+        "branch": branch
     }
-
-    return post_request(url, header, json=body, return_json=True)
+    put(url, json=body, headers=header)
 
 
 def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
@@ -46,44 +45,29 @@ def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
     """
     url = "/".join([api_url, "git", "refs"])
     body = {
-        "ref": f"heads/{ref}",
+        "ref": f"refs/heads/{ref}",
         "sha": sha,
     }
+    post_request(url, headers=header, json=body)
 
-    return post_request(url, headers=header, json=body, return_json=True)
 
-
-def create_tree(
-    api_url: str, header: dict, filepath: str, tree_sha: str, blob_sha: str
-) -> dict:
-    """Create a new tree using GitHub's git database API endpoint
+def get_contents(api_url: str, header: dict, path: str, ref: str) -> dict:
+    """Get the contents of a file in a GitHub repo over the API
 
     Args:
         api_url (str): The URL to send the request to
         header (dict): A dictionary of headers to send with the request. Must
             include an authorisation token.
-        filepath (str): The path to the file to be included in the tree,
-            relative to the project's root.
-        tree_sha (str): The SHA of the parent tree
-        blob_sha (str): The SHA of the blob to be included in the new tree
+        path (str): The path to the file that is to be created or updated,
+            relative to the repo root
+        ref (str): The reference (branch) the file is stored on
 
     Returns:
         dict: The JSON payload response of the request
     """
-    url = "/".join([api_url, "git", "trees"])
-    body = {
-        "base_tree": tree_sha,
-        "tree": [
-            {
-                "path": filepath,
-                "mode": "100644",
-                "type": "blob",
-                "sha": blob_sha,
-            },
-        ],
-    }
-
-    return post_request(url, headers=header, json=body, return_json=True)
+    url = "/".join([api_url, "contents", path])
+    query = {"ref": ref}
+    return get_request(url, headers=header, params=query)
 
 
 def get_ref(api_url: str, header: dict, ref: str) -> dict:
