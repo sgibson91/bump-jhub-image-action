@@ -50,7 +50,7 @@ python setup.py install
 When running the bot you can **either** provide the GitHub PAT on the command line as an environment variable, like so:
 
 ```bash
-GITHUB_TOKEN="TOKEN" tag-bot [-h] [-c {singleuser,profileList}] [-b BASE_BRANCH] [-t HEAD_BRANCH] [--dry-run] repo_owner repo_name config_path
+GITHUB_TOKEN="TOKEN" tag-bot [-h] [-b BASE_BRANCH] [-t HEAD_BRANCH] [--dry-run] repo_owner repo_name config_path
 
 Update the Docker image tags governing the computational environments available on a JupyterHub
 
@@ -61,8 +61,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -c {singleuser,profileList}, --config-type {singleuser,profileList}
-                        Whether the JupyterHub uses a singleuser image or has a profile list of multiple images.
   -b BASE_BRANCH, --base-branch BASE_BRANCH
                         The name of the default branch of the repo, or the branch where PRs should be merged into. Default: main.
   -t HEAD_BRANCH, --head-branch HEAD_BRANCH
