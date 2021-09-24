@@ -101,23 +101,3 @@ def get_ref(api_url: str, header: dict, ref: str) -> dict:
     """
     url = "/".join([api_url, "refs", ref])
     return get_request(url, headers=header, output="json")
-
-
-def update_ref(api_url: str, header: dict, branch: str, commit_sha: str) -> None:
-    """Update an existing reference (specifically, the HEAD reference of a
-    branch) using GitHub's git database API endpoint
-
-    Args:
-        api_url (str): The URL to send the request to
-        header (dict): [A dictionary of headers to send with the request. Must
-            include an authorisation token.
-        branch (str): The branch reference to be updated
-        commit_sha (str): The SHA of the commit that the HEAD of the branch
-            should now point to
-    """
-    url = "/".join([api_url, "git", "refs", "heads", branch])
-    body = {
-        "sha": commit_sha,
-        "force": True,
-    }
-    patch_request(url, headers=header, json=body)
