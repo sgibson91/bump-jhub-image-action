@@ -50,7 +50,7 @@ python setup.py install
 When running the bot you can **either** provide the GitHub PAT on the command line as an environment variable, like so:
 
 ```bash
-GITHUB_TOKEN="TOKEN" tag-bot [-h] [-b BASE_BRANCH] [-t HEAD_BRANCH] [--dry-run] repo_owner repo_name config_path
+GITHUB_TOKEN="TOKEN" tag-bot [-h] [-b BASE_BRANCH] [-t HEAD_BRANCH] [-l LABELS [LABELS ...]] [-r REVIEWERS [REVIEWERS ...]] [--dry-run] repo_owner repo_name config_path
 
 Update the Docker image tags governing the computational environments available on a JupyterHub
 
@@ -65,6 +65,10 @@ optional arguments:
                         The name of the default branch of the repo, or the branch where PRs should be merged into. Default: main.
   -t HEAD_BRANCH, --head-branch HEAD_BRANCH
                         The name of the branch to push changes to and open PRs from. Default: bump_image_tags.
+  -l LABELS [LABELS ...], --labels LABELS [LABELS ...]
+                        List of labels to assign to the Pull Request. Must already exist in the repository.
+  -r REVIEWERS [REVIEWERS ...], --reviewers REVIEWERS [REVIEWERS ...]
+                        List of GitHub handles to request reviews for the Pull Request from. No leading `@` symbol.
   --dry-run             Perform a dry-run. Pull Request will not be opened.
 ```
 

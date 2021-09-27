@@ -29,6 +29,20 @@ parser.add_argument(
     help="The name of the branch to push changes to and open PRs from. Default: bump_image_tags.",
 )
 parser.add_argument(
+    "-l",
+    "--labels",
+    nargs="+",
+    default=[],
+    help="List of labels to assign to the Pull Request. Must already exist in the repository.",
+)
+parser.add_argument(
+    "-r",
+    "--reviewers",
+    nargs="+",
+    default=[],
+    help="List of GitHub handles to request reviews for the Pull Request from. No leading `@` symbol.",
+)
+parser.add_argument(
     "--dry-run",
     action="store_true",
     help="Perform a dry-run. Pull Request will not be opened.",
@@ -51,6 +65,8 @@ def main():
         args.config_path,
         args.base_branch,
         args.head_branch,
+        args.labels,
+        args.reviewers,
         token,
         dry_run=args.dry_run,
     )

@@ -6,6 +6,35 @@ from .utils import delete_request, get_request, post_request
 API_ROOT = "https://api.github.com"
 
 
+def add_labels(labels: list, pr_url: str, header: dict) -> None:
+    """Assign labels to an open Pull Request. The labels must already exist in
+    the repository.
+
+    Args:
+        labels (list): The list of labels to apply
+        pr_url (str): The API URL of the Pull Request (issues endpoint) to
+            send the request to
+        header (dict): A dictionary of headers to send with the request. Must
+            contain an authorisation token.
+    """
+    post_request(pr_url, headers=header, json={"labels": labels})
+
+
+def assign_reviewers(reviewers: list, pr_url: str, header: dict) -> None:
+    """Request reviews from GitHub users on a Pull Request
+
+    Args:
+        reviewers (list): A list of GitHub user to request reviews from
+            (**excluding** the leading `@` symbol)
+        pr_url (str): The API URL of the Pull Request (pulls endpoint) to send
+            the request to
+        header (dict): A dictionary of headers to send with the request. Must
+            contain an authorisation token.
+    """
+    url = "/".join([pr_url, "requested_reviewers"])
+    post_request(url, headers=header, json={"reviewers": reviewers})
+
+
 def check_fork_exists(repo_name: str, header: dict = {}) -> bool:
     """Check if a fork of a GitHub repo already exists
 
@@ -22,7 +51,14 @@ def check_fork_exists(repo_name: str, header: dict = {}) -> bool:
     return bool([x for x in resp if x["name"] == repo_name])
 
 
-def create_pr(api_url: str, header: dict, base_branch: str, head_branch: str):
+def create_pr(
+    api_url: str,
+    header: dict,
+    base_branch: str,
+    head_branch: str,
+    labels: list,
+    reviewers: list,
+) -> None:
     """Create a Pull Request via the GitHub API
 
     Args:
@@ -31,6 +67,8 @@ def create_pr(api_url: str, header: dict, base_branch: str, head_branch: str):
             contain and authorisation token.
         base_branch (str): The name of the branch to open the PR against
         head_branch (str): The name of the PR to open the PR from
+        labels (list): A list of labels to apply to the Pull Request
+        reviewers (list): A list of GitHub users to request reviews from
     """
     url = "/".join([api_url, "pulls"])
     pr = {
@@ -39,7 +77,13 @@ def create_pr(api_url: str, header: dict, base_branch: str, head_branch: str):
         "base": base_branch,
         "head": f"HelmUpgradeBot:{head_branch}",
     }
-    post_request(url, headers=header, json=pr)
+    resp = post_request(url, headers=header, json=pr, return_json=True)
+
+    if len(labels) > 0:
+        add_labels(labels, resp["issue_url"], header)
+
+    if len(reviewers) > 0:
+        assign_reviewers(reviewers, resp["url"], header)
 
 
 def find_existing_pr(api_url: str, header: dict) -> [bool, str]:
