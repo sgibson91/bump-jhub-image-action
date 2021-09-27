@@ -162,6 +162,8 @@ def run(
     config_file: str,
     base_branch: str,
     head_branch: str,
+    labels: list,
+    reviewers: list,
     token: str,
     dry_run: bool = False,
 ) -> None:
@@ -175,6 +177,8 @@ def run(
         base_branch (str): The default branch of the repo or the branch PRs
             should be merged into.
         head_branch (str): The name of a branch PRs should be opened from
+        labels (list): A list of labels to assign to the Pull Request
+        reviewers (list): A list of GitHub users to request reviews from
         token (str): A GitHub Personal Access Token to authenticate against
             the API with
         dry_run (bool, optional): When True, perform a dry run and do not open a
@@ -227,7 +231,7 @@ def run(
         )
 
         if not pr_exists:
-            create_pr(REPO_API, HEADER, base_branch, head_branch)
+            create_pr(REPO_API, HEADER, base_branch, head_branch, labels, reviewers)
 
     elif (len(images_to_update) == 0) and (not dry_run):
         if pr_exists:
