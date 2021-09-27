@@ -1,5 +1,7 @@
 import yaml
 
+from loguru import logger
+
 from .utils import get_request
 
 RAW_ROOT = "https://raw.githubusercontent.com"
@@ -95,10 +97,12 @@ def get_image_tags(
     """
     image_tags = {}
 
+    logger.info("Fetching currently deployed image tags...")
     image_tags = get_deployed_image_tags(
         repo_owner, repo_name, branch, filepath, header, image_tags
     )
 
+    logger.info("Fetching most recently published image tags...")
     for image in image_tags.keys():
         if len(image.split("/")) == 2:
             image_tags = get_most_recent_image_tags_dockerhub(image, image_tags)

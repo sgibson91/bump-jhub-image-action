@@ -2,7 +2,11 @@ import os
 import sys
 import argparse
 
+from loguru import logger
+
 from .main import run
+
+logger.add(level="DEBUG")
 
 DESCRIPTION = "Update the Docker image tags governing the computational environments available on a JupyterHub"
 parser = argparse.ArgumentParser(description=DESCRIPTION)
