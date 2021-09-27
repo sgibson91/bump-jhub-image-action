@@ -35,7 +35,7 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 [HelmUpgradeBot](https://github.com/HelmUpgradeBot) is a series of repositories that tackle and automate specific tasks designed to make the experience of maintaining a [JupyterHub](https://jupyterhub.readthedocs.io) or [BinderHub](https://binderhub.readthedocs.io) deployment easier.
 
-This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide JupyterHub-compatible computational environments for the [`bridge-data-management` deployment](https://github.com/alan-turing-institute/bridge-data-platform) are up-to-date with the most recent tags on Docker Hub.
+This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags on Docker Hub.
 
 This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling.
 
