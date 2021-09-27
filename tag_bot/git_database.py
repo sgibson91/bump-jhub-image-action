@@ -1,4 +1,5 @@
 from requests import put
+from loguru import logger
 
 from .utils import get_request, post_request
 
@@ -25,6 +26,7 @@ def create_commit(
         commit_msg (str): A message describing the changes the commit applies
         content (str): The content of the file to be updated, encoded in base64
     """
+    logger.info("Commiting changes to file: {}", path)
     url = "/".join([api_url, "contents", path])
     body = {"message": commit_msg, "content": content, "sha": sha, "branch": branch}
     put(url, json=body, headers=header)
@@ -44,6 +46,7 @@ def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
     Returns:
         dict: The JSON payload response of the request
     """
+    logger.info("Creating new branch: {}", ref)
     url = "/".join([api_url, "git", "refs"])
     body = {
         "ref": f"refs/heads/{ref}",
@@ -66,6 +69,7 @@ def get_contents(api_url: str, header: dict, path: str, ref: str) -> dict:
     Returns:
         dict: The JSON payload response of the request
     """
+    logger.info("Downloading JupyterHub config from url: {}", api_url)
     url = "/".join([api_url, "contents", path])
     query = {"ref": ref}
     return get_request(url, headers=header, params=query, output="json")
@@ -84,5 +88,6 @@ def get_ref(api_url: str, header: dict, ref: str) -> dict:
     Returns:
         dict: The JSON payload response of the request
     """
+    logger.info("Pulling info for ref: {}", ref)
     url = "/".join([api_url, "git", "ref", "heads", ref])
     return get_request(url, headers=header, output="json")

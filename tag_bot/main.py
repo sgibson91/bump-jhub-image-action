@@ -3,6 +3,7 @@ import base64
 import random
 import string
 
+from loguru import logger
 from itertools import compress
 
 from .utils import get_request
@@ -50,12 +51,17 @@ def edit_config(
     file_contents = yaml.safe_load(resp)
 
     if "singleuser" in file_contents.keys():
+        logger.info("Updating JupyterHub config...")
+        logger.info("Updating singleuser image tag...")
+
         if file_contents["singleuser"]["image"]["name"] in images_to_update:
             file_contents["singleuser"]["image"]["tag"] = image_tags[
                 file_contents["singleuser"]["image"]["name"]
             ]["latest"]
 
         if "profileList" in file_contents["singleuser"].keys():
+            logger.info("Updating image tags for each profile...")
+
             for i, image in enumerate(file_contents["singleuser"]["profileList"]):
                 if ("kubespawner_override" in image.keys()) and (
                     image["kubespawner_override"]["image"].split(":")[0]
@@ -67,8 +73,15 @@ def edit_config(
                     ]["image"] = ":".join(
                         [image_name, image_tags[image_name]["latest"]]
                     )
+        else:
+            logger.info("Your config doesn't specify any images under `singleuser`!")
+
+            import sys
+
+            sys.exit()
 
     # Encode the file contents
+    logger.info("Encoding config in base64...")
     encoded_file_contents = yaml.safe_dump(file_contents).encode("utf-8")
     base64_bytes = base64.b64encode(encoded_file_contents)
     file_contents = base64_bytes.decode("utf-8")
@@ -209,6 +222,10 @@ def run(
     images_to_update = compare_image_tags(image_tags)
 
     if (len(images_to_update) > 0) and (not dry_run):
+        logger.info(
+            "Newer tags are available for the following charts: {}", images_to_update
+        )
+
         if branch_name is None:
             random_id = "".join(random.sample(string.ascii_letters, 4))
             head_branch = "-".join([head_branch, random_id])
@@ -233,7 +250,15 @@ def run(
         if not pr_exists:
             create_pr(REPO_API, HEADER, base_branch, head_branch, labels, reviewers)
 
-    elif (len(images_to_update) == 0) and (not dry_run):
+    elif (len(images_to_update) > 0) and dry_run:
+        logger.info(
+            "Newer tags are available for the following images: {}. Pull Request will not be opened due to --dry-run flag being set.",
+            images_to_update,
+        )
+
+    else:
+        logger.info("All image tags are up-to-date!")
+
         if pr_exists:
             # A PR exists so exit cleanly
             import sys
