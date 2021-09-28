@@ -1,5 +1,5 @@
-jmespath
-loguru
-numpy
-pyyaml
-requests
+jmespath==0.10.0
+loguru==0.5.3
+numpy==1.21.2
+PyYAML==5.4.1
+requests==2.26.0

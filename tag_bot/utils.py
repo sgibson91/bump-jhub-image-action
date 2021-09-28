@@ -51,10 +51,6 @@ def get_request(
         return resp.json()
     elif output == "text":
         return resp.text
-    else:
-        raise NotImplementedError(
-            "Requested output format is not yet implemented: %s" % output
-        )
 
 
 def post_request(

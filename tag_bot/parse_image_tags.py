@@ -95,7 +95,7 @@ def get_image_tags(
         image_tags (dict): A dictionary containing the names and tags, both
             currently deployed and most recently released
     """
-    image_tags = {}
+    image_tags: dict[str, str] = {}
 
     logger.info("Fetching currently deployed image tags...")
     image_tags = get_deployed_image_tags(

@@ -12,7 +12,7 @@ def create_commit(
     sha: str,
     commit_msg: str,
     content: str,
-):
+) -> None:
     """Create a commit over the GitHub API by creating or updating a file
 
     Args:
@@ -26,13 +26,13 @@ def create_commit(
         commit_msg (str): A message describing the changes the commit applies
         content (str): The content of the file to be updated, encoded in base64
     """
-    logger.info("Commiting changes to file: {}", path)
+    logger.info("Committing changes to file: {}", path)
     url = "/".join([api_url, "contents", path])
     body = {"message": commit_msg, "content": content, "sha": sha, "branch": branch}
     put(url, json=body, headers=header)
 
 
-def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
+def create_ref(api_url: str, header: dict, ref: str, sha: str) -> None:
     """Create a new git reference (specifically, a branch) with GitHub's git database API
     endpoint
 
@@ -42,9 +42,6 @@ def create_ref(api_url: str, header: dict, ref: str, sha: str) -> dict:
             include an authorisation token.
         ref (str): The reference or branch name to create
         sha (str): The SHA of the parent commit to point the new reference to
-
-    Returns:
-        dict: The JSON payload response of the request
     """
     logger.info("Creating new branch: {}", ref)
     url = "/".join([api_url, "git", "refs"])
