@@ -53,8 +53,8 @@ def create_pr(
         api_url (str): The URL to send the request to
         header (dict): A dictionary of headers to send with the request. Must
             contain and authorisation token.
-        base_branch (str): The name of the branch to open the PR against
-        head_branch (str): The name of the branch to open the PR from
+        base_branch (str): The name of the branch to open the Pull Request against
+        head_branch (str): The name of the branch to open the Pull Request from
         labels (list): A list of labels to apply to the Pull Request
         reviewers (list): A list of GitHub users to request reviews from
     """
@@ -86,10 +86,11 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
         header (dict): A dictionary of headers to send with the GET request
 
     Returns:
-        pr_exists (bool): True if HelmUpgradeBot already has an open PR. False otherwise.
+        pr_exists (bool): True if there is already an open Pull Request.
+            False otherwise.
         head_branch (str): The name of the branch to send commits to
     """
-    logger.info("Finding Pull Requests previously opened by HelmUpgradeBot...")
+    logger.info("Finding Pull Requests previously opened to bump image tags...")
 
     url = "/".join([api_url, "pulls"])
     params = {"state": "open", "sort": "created", "direction": "desc"}
@@ -104,7 +105,7 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
 
     if len(matching_prs) >= 1:
         logger.info(
-            "More than one Pull Request by HelmUpgradeBot open. Will push new commits to the most recent PR."
+            "More than one Pull Request open. Will push new commits to the most recent Pull Request."
         )
 
         ref = matching_prs[0].split(":")[-1]
@@ -113,7 +114,7 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
 
     elif len(matching_prs) == 1:
         logger.info(
-            "One Pull Request by HelmUpgradeBot open. Will push new commits to that PR."
+            "One Pull Request open. Will push new commits to this Pull Request."
         )
 
         ref = matching_prs[0].split(":")[-1]
@@ -122,6 +123,6 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
 
     else:
         logger.info(
-            "No Pull Requests by HelmUpgradeBot found. A new PR will be opened."
+            "No relevant Pull Requests found. A new Pull Request will be opened."
         )
         return False, None
