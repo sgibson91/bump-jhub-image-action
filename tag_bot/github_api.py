@@ -2,6 +2,7 @@ import time
 import jmespath
 
 from loguru import logger
+from typing import Tuple, Union
 
 from .utils import delete_request, get_request, post_request
 
@@ -96,7 +97,7 @@ def create_pr(
         assign_reviewers(reviewers, resp["url"], header)
 
 
-def find_existing_pr(api_url: str, header: dict) -> [bool, str]:
+def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]]:
     """Check if the bot already has an open Pull Request
 
     Args:
