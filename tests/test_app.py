@@ -3,7 +3,7 @@
 #       - update_image_tags()
 #       - run()
 
-from tag_bot.main import compare_image_tags
+from tag_bot.app import compare_image_tags
 
 
 def test_compare_image_tags_match():
