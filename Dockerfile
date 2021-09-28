@@ -11,8 +11,5 @@ COPY . /app
 # Upgrade pip and install dependencies
 RUN pip install -U pip && pip install -r /app/requirements.txt
 
-# Make main.py executable
-RUN ["chmod", "+x", "/app/src/main.py"]
-
 # Set entrypoint
-ENTRYPOINT ["python", "/app/src/main.py"]
+ENTRYPOINT ["python", "/app/tag_bot/main.py"]
