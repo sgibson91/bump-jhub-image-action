@@ -1,20 +1,6 @@
 import requests
 
 
-def delete_request(url: str, headers: dict = {}) -> None:
-    """Send a DELETE request to an HTTP API endpoint
-
-    Args:
-        url (str): The URL to send the request to
-        headers (dict, optional): A dictionary of any headers to send with the
-            request. Defaults to an empty dictionary.
-    """
-    resp = requests.delete(url, headers=headers)
-
-    if not resp:
-        raise RuntimeError(resp.text)
-
-
 def get_request(
     url: str,
     headers: dict = {},

@@ -4,34 +4,34 @@ from loguru import logger
 
 from .utils import get_request
 
+API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"
 DOCKERHUB_ROOT = "https://hub.docker.com/v2/repositories"
 
 
 def get_deployed_image_tags(
-    repo_owner: str,
-    repo_name: str,
+    api_url: str,
+    header: dict,
     branch: str,
     filepath: str,
-    header: dict,
     image_tags: dict,
 ) -> dict:
     """Read the tags of the deployed images from a YAML config file
 
     Args:
-        repo_owner (str): The GitHub account that owns the host repo
-        repo_name (str): The name of the host repo
+        api_url (str): The URL to send the request to
+        header (dict): A dictionary of headers to send with the request. Must
+            contain and authorisation token.
         branch (str): The branch the config file is located on
         filepath (str): The path to the config file
-        header (dict): A dictionary of headers to send with the API requests.
-            Must contain an authorisation token.
         image_tags (dict): A dictionary to store the image information in
 
     Returns:
         image_tags (dict): A dictionary containing info on the images currently
             deployed
     """
-    url = "/".join([RAW_ROOT, repo_owner, repo_name, branch, filepath])
+    api_url = api_url.replace(API_ROOT, RAW_ROOT)
+    url = "/".join([api_url, branch, filepath])
     resp = get_request(url, headers=header, output="text")
     config = yaml.safe_load(resp)
 
@@ -77,19 +77,16 @@ def get_most_recent_image_tags_dockerhub(image_name: str, image_tags: dict) -> d
     return image_tags
 
 
-def get_image_tags(
-    repo_owner: str, repo_name: str, branch: str, filepath: str, header: dict
-) -> dict:
+def get_image_tags(api_url: str, header: dict, branch: str, filepath: str) -> dict:
     """Get the image names and tags that are deployed in a config file
 
     Args:
-        repo_owner (str): The GitHub account that owns the host repo
-        repo_name (str): The name of the host repo
+        api_url (str): The URL to send the request to
+        header (dict): A dictionary of headers to send with the request. Must
+            contain and authorisation token.
         branch (str): The name of the branch on which the config file is located
         filepath (str): The path to the config file relative to the root of the
             repo
-        header (dict): A dictionary of headers to send with API requests.
-            Must contain an authorisation token.
 
     Returns:
         image_tags (dict): A dictionary containing the names and tags, both
@@ -98,9 +95,7 @@ def get_image_tags(
     image_tags: dict[str, str] = {}
 
     logger.info("Fetching currently deployed image tags...")
-    image_tags = get_deployed_image_tags(
-        repo_owner, repo_name, branch, filepath, header, image_tags
-    )
+    image_tags = get_deployed_image_tags(api_url, header, branch, filepath, image_tags)
 
     logger.info("Fetching most recently published image tags...")
     for image in image_tags.keys():
