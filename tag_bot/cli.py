@@ -4,7 +4,7 @@ import argparse
 
 from loguru import logger
 
-from .main import run
+from .app import run
 
 logger.add(level="DEBUG")  # type: ignore
 
