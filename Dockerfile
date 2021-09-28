@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . /app
 
 # Upgrade pip and install dependencies
-RUN pip install -U pip && pip install -r /app/requirements.txt
+RUN python setup.py install
 
 # Set entrypoint
-ENTRYPOINT ["python", "/app/tag_bot/main.py"]
+ENTRYPOINT ["tag-bot"]
