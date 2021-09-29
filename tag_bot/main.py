@@ -63,7 +63,7 @@ def main():
     else:
         raise ValueError("DRY_RUN variable can only take values 'true' or 'false'")
 
-    # Set API_URLs
+    # Set API URL
     repo_api = "/".join([API_ROOT, "repos", repository])
 
     # Create header for API requests
