@@ -30,7 +30,7 @@ def get_deployed_image_tags(
         image_tags (dict): A dictionary containing info on the images currently
             deployed
     """
-    api_url = api_url.replace(API_ROOT, RAW_ROOT)
+    api_url = api_url.replace(API_ROOT + "/repos", RAW_ROOT)
     url = "/".join([api_url, branch, filepath])
     resp = get_request(url, headers=header, output="text")
     config = yaml.safe_load(resp)
