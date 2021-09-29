@@ -18,7 +18,7 @@ We recommend using bullet points. -->
 - <!-- Enter details of changed filename here -->
 -
 
-### What should a reviewer concetrate their feedback on?
+### What should a reviewer concentrate their feedback on?
 <!-- You can use this section to request specific feedback.
 We recommend using check boxes. -->
 
