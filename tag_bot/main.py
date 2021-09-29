@@ -38,7 +38,6 @@ def main():
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
     dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
-    print("Line 41:", dry_run)
 
     # Reference dict for required inputs
     required_vars = {
