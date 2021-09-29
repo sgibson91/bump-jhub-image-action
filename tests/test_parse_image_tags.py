@@ -12,8 +12,6 @@ test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
 
 
 def test_get_deployed_image_tags_singleuser():
-    repo_owner = "repo_owner"
-    repo_name = "repo_name"
     branch = "test_branch"
     filepath = "config/test_config.yaml"
     input_image_tags = {}
@@ -27,16 +25,14 @@ def test_get_deployed_image_tags_singleuser():
 
     with mock_get as mock:
         output_image_tags = get_deployed_image_tags(
-            repo_owner, repo_name, branch, filepath, test_header, input_image_tags
+            test_url, test_header, branch, filepath, input_image_tags
         )
 
         assert mock.call_count == 1
         mock.assert_called_with(
             "/".join(
                 [
-                    "https://raw.githubusercontent.com",
-                    repo_owner,
-                    repo_name,
+                    test_url,
                     branch,
                     filepath,
                 ]
@@ -48,8 +44,6 @@ def test_get_deployed_image_tags_singleuser():
 
 
 def test_get_deployed_image_tags_profileList():
-    repo_owner = "repo_owner"
-    repo_name = "repo_name"
     branch = "test_branch"
     filepath = "config/test_config.yaml"
     input_image_tags = {}
@@ -78,16 +72,14 @@ def test_get_deployed_image_tags_profileList():
 
     with mock_get as mock:
         output_image_tags = get_deployed_image_tags(
-            repo_owner, repo_name, branch, filepath, test_header, input_image_tags
+            test_url, test_header, branch, filepath, input_image_tags
         )
 
         assert mock.call_count == 1
         mock.assert_called_with(
             "/".join(
                 [
-                    "https://raw.githubusercontent.com",
-                    repo_owner,
-                    repo_name,
+                    test_url,
                     branch,
                     filepath,
                 ]

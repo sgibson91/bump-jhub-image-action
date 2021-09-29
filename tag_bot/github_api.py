@@ -1,12 +1,9 @@
-import time
 import jmespath
 
 from loguru import logger
 from typing import Tuple, Union
 
-from .utils import delete_request, get_request, post_request
-
-API_ROOT = "https://api.github.com"
+from .utils import get_request, post_request
 
 
 def add_labels(labels: list, pr_url: str, header: dict) -> None:
@@ -42,22 +39,6 @@ def assign_reviewers(reviewers: list, pr_url: str, header: dict) -> None:
     post_request(url, headers=header, json={"reviewers": reviewers})
 
 
-def check_fork_exists(repo_name: str, header: dict = {}) -> bool:
-    """Check if a fork of a GitHub repo already exists
-
-    Args:
-        repo_name (str): The name of the repo to check for
-        header (dict, optional): A dictionary of headers to send with the
-            request. Defaults to {}
-
-    Returns:
-        bool: True if a fork exists. False if not.
-    """
-    url = "/".join([API_ROOT, "users", "HelmUpgradeBot", "repos"])
-    resp = get_request(url, headers=header, output="json")
-    return bool([x for x in resp if x["name"] == repo_name])
-
-
 def create_pr(
     api_url: str,
     header: dict,
@@ -72,8 +53,8 @@ def create_pr(
         api_url (str): The URL to send the request to
         header (dict): A dictionary of headers to send with the request. Must
             contain and authorisation token.
-        base_branch (str): The name of the branch to open the PR against
-        head_branch (str): The name of the PR to open the PR from
+        base_branch (str): The name of the branch to open the Pull Request against
+        head_branch (str): The name of the branch to open the Pull Request from
         labels (list): A list of labels to apply to the Pull Request
         reviewers (list): A list of GitHub users to request reviews from
     """
@@ -84,7 +65,7 @@ def create_pr(
         "title": "Bumping Docker image tags",
         "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
         "base": base_branch,
-        "head": f"HelmUpgradeBot:{head_branch}",
+        "head": head_branch,
     }
     resp = post_request(url, headers=header, json=pr, return_json=True)
 
@@ -105,10 +86,11 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
         header (dict): A dictionary of headers to send with the GET request
 
     Returns:
-        pr_exists (bool): True if HelmUpgradeBot already has an open PR. False otherwise.
+        pr_exists (bool): True if there is already an open Pull Request.
+            False otherwise.
         head_branch (str): The name of the branch to send commits to
     """
-    logger.info("Finding Pull Requests previously opened by HelmUpgradeBot...")
+    logger.info("Finding Pull Requests previously opened to bump image tags...")
 
     url = "/".join([api_url, "pulls"])
     params = {"state": "open", "sort": "created", "direction": "desc"}
@@ -119,11 +101,11 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
     matching_labels = head_label_exp.search(resp)
 
     # Create list of labels of matching PRs
-    matching_prs = [label for label in matching_labels if "HelmUpgradeBot" in label]
+    matching_prs = [label for label in matching_labels if "bump_image_tags" in label]
 
     if len(matching_prs) >= 1:
         logger.info(
-            "More than one Pull Request by HelmUpgradeBot open. Will push new commits to the most recent PR."
+            "More than one Pull Request open. Will push new commits to the most recent Pull Request."
         )
 
         ref = matching_prs[0].split(":")[-1]
@@ -132,7 +114,7 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
 
     elif len(matching_prs) == 1:
         logger.info(
-            "One Pull Request by HelmUpgradeBot open. Will push new commits to that PR."
+            "One Pull Request open. Will push new commits to this Pull Request."
         )
 
         ref = matching_prs[0].split(":")[-1]
@@ -141,50 +123,6 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
 
     else:
         logger.info(
-            "No Pull Requests by HelmUpgradeBot found. A new PR will be opened."
+            "No relevant Pull Requests found. A new Pull Request will be opened."
         )
         return False, None
-
-
-def make_fork(api_url: str, header: dict) -> bool:
-    """Create a fork of a repository
-
-    Args:
-        api_url (str): The URL to send the request to
-        header (dict): A dictionary of headers to send with the request. Must
-            include an authorisation token.
-
-    Returns:
-        bool: True once the fork has been created
-    """
-    logger.info("Forking repo...")
-
-    url = "/".join([api_url, "forks"])
-    post_request(url, headers=header)
-
-    time.sleep(5)
-    logger.info("Fork created!")
-
-    return True
-
-
-def remove_fork(repo_name: str, header: dict) -> bool:
-    """Delete a fork of a repository
-
-    Args:
-        repo_name (str): The name of the forked repo to delete
-        header (dict): A dictionary of headers to send with the request. Must
-            contain an authorisation token.
-
-    Returns:
-        bool: False once the fork has been deleted
-    """
-    logger.info("Deleting fork...")
-
-    url = "/".join([API_ROOT, "repos", "HelmUpgradeBot", repo_name])
-    delete_request(url, headers=header)
-
-    time.sleep(5)
-    logger.info("Fork deleted!")
-
-    return False

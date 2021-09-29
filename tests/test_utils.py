@@ -1,32 +1,11 @@
 import pytest
 import responses
 
-from tag_bot.utils import delete_request, get_request, post_request
+from tag_bot.utils import get_request, post_request
 
 test_url = "http://jsonplaceholder.typicode.com/"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
 test_body = {"Payload": "Send this with the request"}
-
-
-@responses.activate
-def test_delete_request():
-    responses.add(responses.DELETE, test_url)
-
-    delete_request(test_url, headers=test_header)
-
-    assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == test_url
-
-
-@responses.activate
-def test_delete_request_exception():
-    responses.add(responses.DELETE, test_url, status=500)
-
-    with pytest.raises(RuntimeError):
-        delete_request(test_url, headers=test_header)
-
-    assert len(responses.calls) == 1
-    assert responses.calls[0].request.url == test_url
 
 
 @responses.activate

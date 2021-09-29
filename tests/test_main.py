@@ -1,36 +1,29 @@
-# TODO: Write tests for the following functions:
-#       - edit_config()
-#       - update_image_tags()
-#       - run()
-
-from tag_bot.main import compare_image_tags
+from tag_bot.main import split_str_to_list
 
 
-def test_compare_image_tags_match():
-    input_image_tags = {
-        "image_name": {
-            "current": "image_name",
-            "latest": "image_name",
-        }
-    }
+def test_split_str_to_list_simple():
+    test_str1 = "label1,label2"
+    test_str2 = "label1 , label2"
 
-    expected_image_names = []
+    expected_output = ["label1", "label2"]
 
-    output_image_names = compare_image_tags(input_image_tags)
+    result1 = split_str_to_list(test_str1)
+    result2 = split_str_to_list(test_str2)
 
-    assert output_image_names == expected_image_names
+    assert result1 == expected_output
+    assert result2 == expected_output
+    assert result1 == result2
 
 
-def test_compare_image_tags_no_match():
-    input_image_tags = {
-        "image_name": {
-            "current": "image_name",
-            "latest": "new_image_name",
-        }
-    }
+def test_split_str_to_list_complex():
+    test_str1 = "type: feature,impact: low"
+    test_str2 = "type: feature , impact: low"
 
-    expected_image_names = ["image_name"]
+    expected_output = ["type: feature", "impact: low"]
 
-    output_image_names = compare_image_tags(input_image_tags)
+    result1 = split_str_to_list(test_str1)
+    result2 = split_str_to_list(test_str2)
 
-    assert output_image_names == expected_image_names
+    assert result1 == expected_output
+    assert result2 == expected_output
+    assert result1 == result2
