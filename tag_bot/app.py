@@ -77,7 +77,7 @@ def edit_config(
 
             import sys
 
-            sys.exit()
+            sys.exit(1)
 
     # Encode the file contents
     logger.info("Encoding config in base64...")
