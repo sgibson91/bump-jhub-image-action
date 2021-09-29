@@ -63,13 +63,11 @@ def main():
     # Check the dry_run variable is properly set
     if isinstance(dry_run, str) and (dry_run == "true"):
         dry_run = True
-        print("Line 66:", dry_run)
-    elif isinstance(dry_run, bool) and not dry_run:
+    elif isinstance(dry_run, str) and (dry_run != "true"):
         dry_run = False
-        print("Line 69:", dry_run)
+    elif isinstance(dry_run, bool) and not dry_run:
+        pass
     else:
-        print(dry_run)
-        print(type(dry_run))
         raise ValueError("DRY_RUN variable can only take values 'true' or 'false'")
 
     # Set API URL
