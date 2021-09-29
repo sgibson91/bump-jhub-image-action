@@ -16,7 +16,7 @@ inputs:
       A GitHub token to make requests to the API with. Requires write
       permissions to: create new branches, make commits, and open Pull Requests.
       Defaults to `token` from the GitHub context, which is functionally
-      equivalent to `${{ secrets.GITHUB_TOKEN }}`.
+      equivalent to `secrets.GITHUB_TOKEN`.
     required: false
     default: ${{ github.token }}
   repository:
