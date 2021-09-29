@@ -1,78 +1,87 @@
 # UpdateDockerTags
 
-[![CI Tests](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml/badge.svg)](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml) [![GitHub](https://img.shields.io/github/license/HelmUpgradeBot/UpdateDockerTags)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md) [![good first issue](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/good%20first%20issue)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/good%20first%20issue) [![help wanted](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/help%20wanted)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/help%20wanted)
+[![CI Tests](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml/badge.svg)](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml) [![GitHub](https://img.shields.io/github/license/HelmUpgradeBot/UpdateDockerTags)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
 
-This is an automatable bot that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
+This is a GitHub Action that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
 If more recent image tags are available, the bot will open a Pull Request to the host repository inserting the new image tags into the JupyterHub configuration file.
 
 **Table of Contents:**
 
 - [:mag: Overview](#mag-overview)
 - [🤔 Assumptions UpdateDockerTags Makes](#-assumptions-helmupgradebot-makes)
-- [:pushpin: Requirements](#pushpin-installation-and-requirements)
-- [:children_crossing: Usage](#children_crossing-usage)
+- [:inbox_tray: Inputs](#inbox_tray-inputs)
+- [:recycle: Example Usage](#recycle-example-usage)
 - [:sparkles: Contributing](#sparkles-contributing)
 
 ---
 
 ## :mag: Overview
 
-This is an overview of the steps the bot executes.
+This is an overview of the steps the Action executes.
 
-- It requires a GitHub [Personal Access Token](https://github.blog/2013-05-16-personal-api-tokens/) (PAT) to be parsed on the command line
-- The bot will read a JupyterHub config file from the host repository and look for the tags of the Docker images describing the computational environments
-- The bot will then check the most recent image tags pushed to [Docker Hub](https://hub.docker.com) for these images
-- If there are more recent image tags available, the bot will open a Pull Request to the host repository with the updated image tags
+- The Action will read a JupyterHub config file from the host repository and look for the tags of the Docker images describing the computational environments.
+  The Action currently recognises images under the `singleuser` and `singleuser.profileList` keys.
+- The Action will then check the most recent image tags pushed to [Docker Hub](https://hub.docker.com) for these images.
+  (Other container registries may be supported in the future.)
+- If there are more recent image tags available, the Action will open a Pull Request to the host repository with the updated image tags added into the JupyterHub configuration file
 
-A moderator should review the Pull Request before merging it.
+A moderator should review the Pull Request before merging it and/or deploying to the JupyterHub.
 
 ## 🤔 Assumptions UpdateDockerTags Makes
 
-Here is a list detailing the assumptions that the bot makes.
+Here is a list detailing the assumptions that the Action makes.
 
-1. The bot has access to a GitHub PAT to authenticate to the API
-2. The JupyterHub configuration file is available in a **public** GitHub repository
-3. The Docker images are publicly available on Docker Hub
+1. You have a GitHub token with enough permissions to access the GitHub API and create branches, commits and Pull Requests
+2. The JupyterHub configuration file is available in a **public** GitHub repository, or you have a token with sufficient permissions to read/write to a **private** repository
+3. The Docker images are publicly available on Docker Hub.
+   (Other container registries may be supported in the future.)
 
-## :pushpin: Installation and Requirements
+## :inbox_tray: Inputs
 
-To install the bot, you will need to clone this repository and install the package.
-It requires Python version >=3.7.
+| Variable | Description | Required? | Default value |
+| :--- | :--- | :--- | :--- |
+| `config_path` | Path to the JupyterHub configuration file, relative to the repository root. | :white_check_mark: | - |
+| `github_token` | A GitHub token to make requests to the API with. Requires write permissions to: create new branches, make commits, and open Pull Requests. | :x: | `${{github.token}}` |
+| `repository` | A GitHub repository containing the config for a JupyterHub deployment. | :x: | `${{github.repository}}` |
+| `base_branch` | The name of the base branch Pull Requests will be merged into. | :x: | `main` |
+| `head_branch` | The name of the branch changes will be pushed to and the Pull Request will be opened from. | :x: | `bump_image_tags-WXYZ` where `WXYZ` will be a randomly generated ascii string (to avoid clashes) |
+| `labels` | A comma-separated list of labels to apply to the opened Pull Request. Labels must already exist in the repository. | :x: | `[]` |
+| `reviewers` | A comma-separated list of GitHub users (without the leading `@`) to request reviews from. | :x: | `[]` |
+| `dry_run` | Perform a dry-run of the action. A Pull Request will not be opened, but a log message will indicate if any image tags can be bumped. | :x: | `False` |
 
-```bash
-git clone https://github.com/HelmUpgradeBot/UpdateDockerTags.git
-cd UpdateDockerTags
-python setup.py install
+## :lock: Permissions
+
+This Action will need permission to read the contents of a file stored in your repository, create a new branch, commit to a branch, and open a Pull Request.
+The [default permissive settings of `GITHUB_TOKEN`](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) should provide the relevant permissions.
+
+If instead your repository is using the default restricted settings of `GITHUB_TOKEN`, you could grant just enough permissions to the Action using a [`permissions`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idpermissions) config, such as the one below:
+
+```yaml
+permissions:
+  contents: write
+  pulls-requests: write
 ```
+## :recycle: Example Usage
 
-## :children_crossing: Usage
+The simplest way to use this Action is documented below.
+This config features a `workflow_dispatch` trigger to allow manual running whenever the maintainers desire, and a cron job trigger scheduled to run at 10am every weekday.
 
-When running the bot you can **either** provide the GitHub PAT on the command line as an environment variable, like so:
+```yaml
+name: Check and Bump image tags in a JupyterHub config
 
-```bash
-GITHUB_TOKEN="TOKEN" tag-bot [-h] [-b BASE_BRANCH] [-t HEAD_BRANCH] [-l LABELS [LABELS ...]] [-r REVIEWERS [REVIEWERS ...]] [--dry-run] repo_owner repo_name config_path
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * 1-5"
 
-Update the Docker image tags governing the computational environments available on a JupyterHub
-
-positional arguments:
-  repo_owner            The GitHub repository owner
-  repo_name             The JupyterHub deployment repo name
-  config_path           Path to the JupyterHub config file relative to the repo root
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -b BASE_BRANCH, --base-branch BASE_BRANCH
-                        The name of the default branch of the repo, or the branch where PRs should be merged into. Default: main.
-  -t HEAD_BRANCH, --head-branch HEAD_BRANCH
-                        The name of the branch to push changes to and open PRs from. Default: bump_image_tags.
-  -l LABELS [LABELS ...], --labels LABELS [LABELS ...]
-                        List of labels to assign to the Pull Request. Must already exist in the repository.
-  -r REVIEWERS [REVIEWERS ...], --reviewers REVIEWERS [REVIEWERS ...]
-                        List of GitHub handles to request reviews for the Pull Request from. No leading `@` symbol.
-  --dry-run             Perform a dry-run. Pull Request will not be opened.
+jobs:
+  bump-image-tags:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: HelmUpgradeBot/UpdateDockerTags@main
+      with:
+        config_path: path/to/config.yaml
 ```
-
-where `TOKEN` is the raw token string.
 
 ## :sparkles: Contributing
 
