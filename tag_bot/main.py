@@ -38,6 +38,7 @@ def main():
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
     dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
+    print("Line 41:", dry_run)
 
     # Reference dict for required inputs
     required_vars = {
@@ -62,9 +63,13 @@ def main():
     # Check the dry_run variable is properly set
     if isinstance(dry_run, str) and (dry_run == "true"):
         dry_run = True
+        print("Line 66:", dry_run)
     elif isinstance(dry_run, bool) and not dry_run:
-        pass
+        dry_run = False
+        print("Line 69:", dry_run)
     else:
+        print(dry_run)
+        print(type(dry_run))
         raise ValueError("DRY_RUN variable can only take values 'true' or 'false'")
 
     # Set API URL
