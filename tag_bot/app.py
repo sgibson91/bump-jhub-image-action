@@ -72,12 +72,12 @@ def edit_config(
                     ]["image"] = ":".join(
                         [image_name, image_tags[image_name]["latest"]]
                     )
-        else:
-            logger.info("Your config doesn't specify any images under `singleuser`!")
+    else:
+        logger.info("Your config doesn't specify any images under `singleuser`!")
 
-            import sys
+        import sys
 
-            sys.exit(1)
+        sys.exit(1)
 
     # Encode the file contents
     logger.info("Encoding config in base64...")
