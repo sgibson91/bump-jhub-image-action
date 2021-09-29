@@ -8,10 +8,14 @@ API_ROOT = "https://api.github.com"
 
 
 def split_str_to_list(input_str: str) -> List[str]:
-    # Remove all whitespace
-    input_str = input_str.replace(" ", "")
-    # Return a list split from a string using `,` char
-    return input_str.split(",")
+    # Split a string into a list using `,` char
+    split_str = input_str.split(",")
+
+    # For each element in split_str, strip leading/trailing whitespace
+    for i, element in enumerate(split_str):
+        split_str[i] = element.strip()
+
+    return split_str
 
 
 def main():
