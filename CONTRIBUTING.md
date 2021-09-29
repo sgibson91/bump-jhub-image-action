@@ -4,7 +4,7 @@
 
 The following is a set of guidelines for contributing to the project on GitHub.
 These are mostly guidelines, not rules.
-Use your best judgement and feel free to propose changes to this document in a Pull Request.
+Use your best judgment and feel free to propose changes to this document in a Pull Request.
 
 **Table of Contents:**
 
@@ -35,7 +35,7 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 [HelmUpgradeBot](https://github.com/HelmUpgradeBot) is a series of repositories that tackle and automate specific tasks designed to make the experience of maintaining a [JupyterHub](https://jupyterhub.readthedocs.io) or [BinderHub](https://binderhub.readthedocs.io) deployment easier.
 
-This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags on Docker Hub.
+This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags published on a container registry.
 
 This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling.
 
@@ -52,11 +52,11 @@ This repository has a [bug report template](.github/ISSUE_TEMPLATE/bug_report.md
 ### :sparkles: Requesting Features
 
 If there was something extra you'd like to see added, please check that the feature hasn't already been requested in the project's issue tracker.
-Feature requests should have the enhancement label.
+Feature requests should have the `enhancement` label.
 Please also check the closed issues to make sure the feature has not already been requested but the project maintainers decided against developing it.
 
 If you find an open issue describing the feature you wish for, you can "+1" the issue by giving a thumbs up reaction on the **top comment of the issue**.
-You may also leave any thoughts or offers for support as new comments on the issue.
+You may also leave any thoughts or offers of support as new comments on the issue.
 
 If you don't find an issue describing your feature, please open a feature request.
 This repository has a [feature request template](.github/ISSUE_TEMPLATE/feature_request.md) to help you map out the feature you'd like.
@@ -76,7 +76,7 @@ To prepare your contribution for review, please follow these steps:
 2. [Create a new branch](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-and-deleting-branches-within-your-repository) on your fork
    1. Where possible and appropriate, please use the following convention when naming your branch: `<type>/<issue-number>/<short-description>`.
       For example, if your contribution is fixing a a typo that was flagged in issue number 11, your branch name would be as follows: `fix/11/typo`.
-3. Edit files or add new ones!
+3. Make your changes!
 4. [Open your Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork)
    1. This repository has a [pull request template](.github/PULL_REQUEST_TEMPLATE.md) which will help you summarise your contribution and help reviewers know where to focus their feedback.
       Please complete it where possible and appropriate.
@@ -97,6 +97,13 @@ These tools are used as the maintainers believe this makes the code easier to re
 
 While flake8 commands can be [disabled](https://flake8.pycqa.org/en/latest/user/violations.html), we only recommend doing this for [specific lines](https://flake8.pycqa.org/en/latest/user/violations.html#in-line-ignoring-errors) in such cases where reformatting would produce "ugly code".
 The maintainers retain final say on what is "ugly code" on a case-by-case basis.
+
+### :keyboard: Python Static Typing and Type Hints
+
+When adding or updating a Python function, we recommend using [static typing and type hints](https://docs.python.org/3/library/typing.html) where appropriate.
+The maintainers encourage this practice since they believe it makes the code easier to read and understand, and explicitly defines what inputs and outputs a function may produce.
+
+While type hints do not affect the code at runtime, the project does implement GitHub Actions to run [`mypy`](https://mypy.readthedocs.io/en/stable/) to check the code conforms to the declared type hints.
 
 ### :pencil: Markdown Styleguide
 
