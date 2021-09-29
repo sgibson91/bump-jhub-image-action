@@ -44,12 +44,8 @@ def edit_config(
     """
     resp = get_request(download_url, headers=header, output="text")
     file_contents = yaml.safe_load(resp)
-    print(file_contents)
-    print(file_contents.keys())
-    print("singleuser" in file_contents.keys())
-    print("singleuser" in list(file_contents.keys()))
 
-    if "singleuser" in list(file_contents.keys()):
+    if "singleuser" in file_contents.keys():
         logger.info("Updating JupyterHub config...")
         logger.info("Updating singleuser image tag...")
 
