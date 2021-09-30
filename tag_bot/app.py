@@ -49,7 +49,9 @@ def edit_config(
         logger.info("Updating JupyterHub config...")
         logger.info("Updating singleuser image tag...")
 
-        if file_contents["singleuser"]["image"]["name"] in images_to_update:
+        if ("image" in file_contents["singleuser"].keys()) and (
+            file_contents["singleuser"]["image"]["name"] in images_to_update
+        ):
             file_contents["singleuser"]["image"]["tag"] = image_tags[
                 file_contents["singleuser"]["image"]["name"]
             ]["latest"]
