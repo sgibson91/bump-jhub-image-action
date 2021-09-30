@@ -103,7 +103,7 @@ def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]
     # Create list of labels of matching PRs
     matching_prs = [label for label in matching_labels if "bump_image_tags" in label]
 
-    if len(matching_prs) >= 1:
+    if len(matching_prs) > 1:
         logger.info(
             "More than one Pull Request open. Will push new commits to the most recent Pull Request."
         )
