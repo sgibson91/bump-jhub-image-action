@@ -274,7 +274,7 @@ def test_find_existing_pr_multiple_matches():
                 "head": {
                     "label": "bump_image_tags2",
                 }
-            }
+            },
         ],
     )
 
