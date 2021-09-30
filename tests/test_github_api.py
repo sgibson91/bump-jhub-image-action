@@ -1,11 +1,10 @@
-# TODO: Add test for find_existing_pr
-
 from unittest.mock import patch
 
 from tag_bot.github_api import (
     add_labels,
     assign_reviewers,
     create_pr,
+    find_existing_pr,
 )
 
 test_url = "http://jsonplaceholder.typicode.com"
@@ -208,3 +207,86 @@ def test_create_pr_with_labels_and_reviewers():
         mock3.assert_called_with(
             test_reviewers, "/".join([test_url, "pulls", "1"]), test_header
         )
+
+
+def test_find_existing_pr_no_matches():
+    mock_get = patch(
+        "tag_bot.github_api.get_request",
+        return_value=[
+            {
+                "head": {
+                    "label": "some_branch",
+                }
+            }
+        ],
+    )
+
+    with mock_get as mock:
+        pr_exists, branch_name = find_existing_pr(test_url, test_header)
+
+        assert mock.call_count == 1
+        mock.assert_called_with(
+            test_url + "/pulls",
+            headers=test_header,
+            params={"state": "open", "sort": "created", "direction": "desc"},
+            output="json",
+        )
+        assert not pr_exists
+        assert branch_name is None
+
+
+def test_find_existing_pr_one_match():
+    mock_get = patch(
+        "tag_bot.github_api.get_request",
+        return_value=[
+            {
+                "head": {
+                    "label": "bump_image_tags",
+                }
+            }
+        ],
+    )
+
+    with mock_get as mock:
+        pr_exists, branch_name = find_existing_pr(test_url, test_header)
+
+        assert mock.call_count == 1
+        mock.assert_called_with(
+            test_url + "/pulls",
+            headers=test_header,
+            params={"state": "open", "sort": "created", "direction": "desc"},
+            output="json",
+        )
+        assert pr_exists
+        assert branch_name == "bump_image_tags"
+
+
+def test_find_existing_pr_multiple_matches():
+    mock_get = patch(
+        "tag_bot.github_api.get_request",
+        return_value=[
+            {
+                "head": {
+                    "label": "bump_image_tags1",
+                }
+            },
+            {
+                "head": {
+                    "label": "bump_image_tags2",
+                }
+            }
+        ],
+    )
+
+    with mock_get as mock:
+        pr_exists, branch_name = find_existing_pr(test_url, test_header)
+
+        assert mock.call_count == 1
+        mock.assert_called_with(
+            test_url + "/pulls",
+            headers=test_header,
+            params={"state": "open", "sort": "created", "direction": "desc"},
+            output="json",
+        )
+        assert pr_exists
+        assert branch_name == "bump_image_tags1"
