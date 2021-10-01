@@ -1,3 +1,5 @@
 [run]
 omit =
     tests/*
+    tag_bot/__init__.py
+    tag_bot/_version.py
