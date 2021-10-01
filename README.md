@@ -1,6 +1,6 @@
 # UpdateDockerTags
 
-[![CI Tests](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml/badge.svg)](https://github.com/HelmUpgradeBot/UpdateDockerTags/actions/workflows/ci.yaml) [![GitHub](https://img.shields.io/github/license/HelmUpgradeBot/UpdateDockerTags)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
+[![CI Tests](https://github.com/sgibson91/UpdateDockerTags/actions/workflows/ci.yaml/badge.svg)](https://github.com/sgibson91/UpdateDockerTags/actions/workflows/ci.yaml) [![GitHub](https://img.shields.io/github/license/sgibson91/UpdateDockerTags)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
 
 This is a GitHub Action that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
 If more recent image tags are available, the bot will open a Pull Request to the host repository inserting the new image tags into the JupyterHub configuration file.
@@ -8,7 +8,7 @@ If more recent image tags are available, the bot will open a Pull Request to the
 **Table of Contents:**
 
 - [:mag: Overview](#mag-overview)
-- [🤔 Assumptions UpdateDockerTags Makes](#-assumptions-helmupgradebot-makes)
+- [🤔 Assumptions UpdateDockerTags Makes](#-assumptions-updatedockertags-makes)
 - [:inbox_tray: Inputs](#inbox_tray-inputs)
 - [:recycle: Example Usage](#recycle-example-usage)
 - [:sparkles: Contributing](#sparkles-contributing)
@@ -78,7 +78,7 @@ jobs:
   bump-image-tags:
     runs-on: ubuntu-latest
     steps:
-    - uses: HelmUpgradeBot/UpdateDockerTags@main
+    - uses: sgibson91/UpdateDockerTags@main
       with:
         config_path: path/to/config.yaml
 ```
