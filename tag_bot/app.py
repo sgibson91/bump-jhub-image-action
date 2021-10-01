@@ -123,11 +123,11 @@ def update_image_tags(
         # Create head_branch, and return reference SHA and URL
         create_ref(api_url, header, head_branch, resp["object"]["sha"])
 
-    # Get the file download URL and blob_sha
-    if pr_exists:
-        resp = get_contents(api_url, header, config_path, head_branch)
-    else:
+        # Get the file download URL and blob_sha
         resp = get_contents(api_url, header, config_path, base_branch)
+    else:
+        # Get the file download URL and blob_sha
+        resp = get_contents(api_url, header, config_path, head_branch)
 
     file_contents_url = resp["download_url"]
     blob_sha = resp["sha"]
