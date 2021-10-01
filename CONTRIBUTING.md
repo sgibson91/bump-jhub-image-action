@@ -33,9 +33,7 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 ### :robot: What is the project?
 
-[HelmUpgradeBot](https://github.com/HelmUpgradeBot) is a series of repositories that tackle and automate specific tasks designed to make the experience of maintaining a [JupyterHub](https://jupyterhub.readthedocs.io) or [BinderHub](https://binderhub.readthedocs.io) deployment easier.
-
-This repository (<https://github.com/HelmUpgradeBot/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags published on a container registry.
+This repository (<https://github.com/sgibson91/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags published on a container registry.
 
 This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling.
 
@@ -64,7 +62,7 @@ This repository has a [feature request template](.github/ISSUE_TEMPLATE/feature_
 ### :hatching_chick: Your First Contribution
 
 Unsure where to start contributing?
-Check out the [![good first issue](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/good%20first%20issue)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/good%20first%20issue) and [![help wanted](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/help%20wanted)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/help%20wanted) labels to see where the project is looking for input.
+Check out the [![good first issue](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/good%20first%20issue)](https://github.com/sgibson91/UpdateDockerTags/labels/good%20first%20issue) and [![help wanted](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/help%20wanted)](https://github.com/sgibson91/UpdateDockerTags/labels/help%20wanted) labels to see where the project is looking for input.
 
 ### :arrow_right: Pull Requests
 
@@ -124,8 +122,8 @@ Below is a table with the currently used labels in the repository.
 
 | Label | Description |
 | :--- | :--- |
-| [![bug](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/bug)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/bug) | Something isn't working |
-| [![documentation](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/documentation)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/documentation) | Improvements or additions to the documentation |
-| [![enhancement](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/enhancement)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/enhancement) | New feature or request |
-| [![good first issue](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/good%20first%20issue)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/good%20first%20issue) | Good for newcomers |
-| [![help wanted](https://img.shields.io/github/labels/HelmUpgradeBot/UpdateDockerTags/help%20wanted)](https://github.com/HelmUpgradeBot/UpdateDockerTags/labels/help%20wanted) | Extra attention is needed |
+| [![bug](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/bug)](https://github.com/sgibson91/UpdateDockerTags/labels/bug) | Something isn't working |
+| [![documentation](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/documentation)](https://github.com/sgibson91/UpdateDockerTags/labels/documentation) | Improvements or additions to the documentation |
+| [![enhancement](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/enhancement)](https://github.com/sgibson91/UpdateDockerTags/labels/enhancement) | New feature or request |
+| [![good first issue](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/good%20first%20issue)](https://github.com/sgibson91/UpdateDockerTags/labels/good%20first%20issue) | Good for newcomers |
+| [![help wanted](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/help%20wanted)](https://github.com/sgibson91/UpdateDockerTags/labels/help%20wanted) | Extra attention is needed |
