@@ -33,7 +33,7 @@ Please report any unacceptable behaviour to [Dr Sarah Gibson](mailto:drsarahlgib
 
 ### :robot: What is the project?
 
-This repository (<https://github.com/sgibson91/UpdateDockerTags>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags published on a container registry.
+This repository (<https://github.com/sgibson91/bump-jhub-image-action>) is specifically designed to check if Docker images that provide computational environments for a given JupyterHub deployment are up-to-date with the most recent tags published on a container registry.
 
 This project is mostly a Python wrapper around [HTTP requests](https://www.codecademy.com/articles/http-requests) to the [GitHub REST API](https://developer.github.com/v3/), with some YAML/JSON handling.
 
@@ -62,7 +62,7 @@ This repository has a [feature request template](.github/ISSUE_TEMPLATE/feature_
 ### :hatching_chick: Your First Contribution
 
 Unsure where to start contributing?
-Check out the [![good first issue](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/good%20first%20issue)](https://github.com/sgibson91/UpdateDockerTags/labels/good%20first%20issue) and [![help wanted](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/help%20wanted)](https://github.com/sgibson91/UpdateDockerTags/labels/help%20wanted) labels to see where the project is looking for input.
+Check out the [![good first issue](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/good%20first%20issue)](https://github.com/sgibson91/bump-jhub-image-action/labels/good%20first%20issue) and [![help wanted](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/help%20wanted)](https://github.com/sgibson91/bump-jhub-image-action/labels/help%20wanted) labels to see where the project is looking for input.
 
 ### :arrow_right: Pull Requests
 
@@ -122,8 +122,8 @@ Below is a table with the currently used labels in the repository.
 
 | Label | Description |
 | :--- | :--- |
-| [![bug](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/bug)](https://github.com/sgibson91/UpdateDockerTags/labels/bug) | Something isn't working |
-| [![documentation](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/documentation)](https://github.com/sgibson91/UpdateDockerTags/labels/documentation) | Improvements or additions to the documentation |
-| [![enhancement](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/enhancement)](https://github.com/sgibson91/UpdateDockerTags/labels/enhancement) | New feature or request |
-| [![good first issue](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/good%20first%20issue)](https://github.com/sgibson91/UpdateDockerTags/labels/good%20first%20issue) | Good for newcomers |
-| [![help wanted](https://img.shields.io/github/labels/sgibson91/UpdateDockerTags/help%20wanted)](https://github.com/sgibson91/UpdateDockerTags/labels/help%20wanted) | Extra attention is needed |
+| [![bug](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/bug)](https://github.com/sgibson91/bump-jhub-image-action/labels/bug) | Something isn't working |
+| [![documentation](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/documentation)](https://github.com/sgibson91/bump-jhub-image-action/labels/documentation) | Improvements or additions to the documentation |
+| [![enhancement](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/enhancement)](https://github.com/sgibson91/bump-jhub-image-action/labels/enhancement) | New feature or request |
+| [![good first issue](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/good%20first%20issue)](https://github.com/sgibson91/bump-jhub-image-action/labels/good%20first%20issue) | Good for newcomers |
+| [![help wanted](https://img.shields.io/github/labels/sgibson91/bump-jhub-image-action/help%20wanted)](https://github.com/sgibson91/bump-jhub-image-action/labels/help%20wanted) | Extra attention is needed |
