@@ -14,7 +14,7 @@ from setuptools import find_packages, setup, Command
 # Package meta-data.
 NAME = "tag-bot"
 DESCRIPTION = "GitHub Action to automatically open Pull Requests containing Docker image tag updates for JupyterHub configs"
-URL = "https://github.com/sgibson91/UpdateDockerTags"
+URL = "https://github.com/sgibson91/bump-jhub-image-action"
 EMAIL = "drsarahlgibson@gmail.com"
 AUTHOR = "Sarah Gibson"
 REQUIRES_PYTHON = ">=3.7.0"
