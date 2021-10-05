@@ -2,8 +2,11 @@ from unittest.mock import patch
 
 import pytest
 
-from tag_bot.parse_image_tags import (get_deployed_image_tags, get_image_tags,
-                                      get_most_recent_image_tags_dockerhub)
+from tag_bot.parse_image_tags import (
+    get_deployed_image_tags,
+    get_image_tags,
+    get_most_recent_image_tags_dockerhub,
+)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
