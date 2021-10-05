@@ -3,7 +3,7 @@ import jmespath
 from loguru import logger
 from typing import Tuple, Union
 
-from .utils import get_request, post_request
+from .http_requests import get_request, post_request
 
 
 def add_labels(labels: list, pr_url: str, header: dict) -> None:

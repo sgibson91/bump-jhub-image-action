@@ -1,7 +1,7 @@
 import pytest
 import responses
 
-from tag_bot.utils import get_request, post_request
+from tag_bot.http_requests import get_request, post_request
 
 test_url = "http://jsonplaceholder.typicode.com/"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}

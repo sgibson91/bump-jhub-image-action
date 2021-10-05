@@ -2,7 +2,7 @@ import yaml
 
 from loguru import logger
 
-from .utils import get_request
+from .http_requests import get_request
 
 API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"

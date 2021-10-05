@@ -6,7 +6,7 @@ import string
 from loguru import logger
 from itertools import compress
 
-from .utils import get_request
+from .http_requests import get_request
 from .parse_image_tags import get_image_tags
 
 from .github_api import (
