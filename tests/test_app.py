@@ -1,12 +1,12 @@
 # TODO: Write tests for the following functions:
 #       - update_image_tags()
 #       - run()
-import yaml
 import base64
-
 from unittest.mock import patch
 
-from tag_bot.app import edit_config, compare_image_tags
+import yaml
+
+from tag_bot.app import compare_image_tags, edit_config
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}

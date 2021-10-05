@@ -1,7 +1,7 @@
-import yaml
 import base64
-
 from unittest.mock import patch
+
+import yaml
 
 from tag_bot.git_database import create_commit, create_ref, get_contents, get_ref
 

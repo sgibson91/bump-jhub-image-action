@@ -1,7 +1,7 @@
-import jmespath
-
-from loguru import logger
 from typing import Tuple, Union
+
+import jmespath
+from loguru import logger
 
 from .http_requests import get_request, post_request
 
