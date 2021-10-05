@@ -1,9 +1,10 @@
-import yaml
 import base64
-
 from unittest.mock import patch
 
-from tag_bot.git_database import create_commit, create_ref, get_contents, get_ref
+import yaml
+
+from tag_bot.git_database import (create_commit, create_ref, get_contents,
+                                  get_ref)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}

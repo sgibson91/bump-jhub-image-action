@@ -1,11 +1,7 @@
 from unittest.mock import patch
 
-from tag_bot.github_api import (
-    add_labels,
-    assign_reviewers,
-    create_pr,
-    find_existing_pr,
-)
+from tag_bot.github_api import (add_labels, assign_reviewers, create_pr,
+                                find_existing_pr)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}

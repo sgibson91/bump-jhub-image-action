@@ -1,5 +1,4 @@
 import yaml
-
 from loguru import logger
 
 from .utils import get_request
