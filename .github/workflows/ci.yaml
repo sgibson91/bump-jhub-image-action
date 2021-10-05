@@ -71,6 +71,8 @@ jobs:
             args: --check
           - tool: flake8
             args: --ignore=E501
+          - tool: isort
+            args: --check --diff
 
     steps:
       - name: Checkout repo

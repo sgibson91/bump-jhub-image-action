@@ -1,5 +1,5 @@
-from requests import put
 from loguru import logger
+from requests import put
 
 from .utils import get_request, post_request
 

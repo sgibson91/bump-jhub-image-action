@@ -1,25 +1,15 @@
-import yaml
 import base64
 import random
 import string
-
-from loguru import logger
 from itertools import compress
 
-from .utils import get_request
+import yaml
+from loguru import logger
+
+from .git_database import create_commit, create_ref, get_contents, get_ref
+from .github_api import create_pr, find_existing_pr
 from .parse_image_tags import get_image_tags
-
-from .github_api import (
-    create_pr,
-    find_existing_pr,
-)
-
-from .git_database import (
-    create_commit,
-    create_ref,
-    get_contents,
-    get_ref,
-)
+from .utils import get_request
 
 
 def edit_config(
