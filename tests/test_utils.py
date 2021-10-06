@@ -1,3 +1,5 @@
+import pytest
+
 from tag_bot.utils import create_reverse_lookup_dict, lookup_key_return_path
 
 
@@ -65,13 +67,19 @@ def test_lookup_key_return_path():
         "image_tag": ["jupyterhub", "singleuser", "image", "tag"],
     }
 
-    expected_output = "jupyterhub.singleuser.image.tag"
+    expected_output = ["jupyterhub", "singleuser", "image", "tag"]
+    expected_output_str = "jupyterhub.singleuser.image.tag"
     expected_output_jq = ".jupyterhub.singleuser.image.tag"
 
     result = lookup_key_return_path(test_target, test_lookup)
-    result_jq = lookup_key_return_path(test_target, test_lookup, jq_format=True)
+    result_str = lookup_key_return_path(test_target, test_lookup, format="str")
+    result_jq = lookup_key_return_path(test_target, test_lookup, format="jq")
     result_null = lookup_key_return_path(null_target, test_lookup)
 
     assert result == expected_output
+    assert result_str == expected_output_str
     assert result_jq == expected_output_jq
     assert result_null is None
+
+    with pytest.raises(ValueError):
+        lookup_key_return_path(test_target, test_lookup, format="dict")
