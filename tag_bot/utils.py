@@ -45,7 +45,7 @@ def create_reverse_lookup_dict(nested_dict: dict) -> Dict[str, List[str]]:
 
 
 def lookup_key_return_path(
-    target_key: str, lookup_dict: dict, jq_format: bool = False
+    target_key: str, lookup_dict: dict, format: str = "list"
 ) -> Union[str, None]:
     """For a given target in a reverse lookup dict, return the keypath for the
     original dictionary as a string. Optionally format this with a leading "."
@@ -55,23 +55,34 @@ def lookup_key_return_path(
         target_key (str): The target key in the lookup dictionary to return the
             keypath for
         lookup_dict (dict): The lookup dictionary to search
-        jq_format (bool, optional): Add a leading "." to be compatible with jq
-            commands. Defaults to False.
+        format (str, optional): Select format in which to return the path.
+            Accepts values "list" (no formatting), "str" (joins contents of list
+            together with "."s) or "jq" (same as "str" but adds a leading "." to
+            be compatible with jq commands). Defaults to "list".
 
     Returns:
         str: The keypath to the desired value in the original dictionary.
             Returns None if the target is not found.
     """
+    accepted_formats = ["list", "str", "jq"]
+    if format not in accepted_formats:
+        raise ValueError(
+            f"{format} is not an accepted format! Please use one of: {accepted_formats}"
+        )
+
     if target_key in lookup_dict.keys():
         path_list = lookup_dict[target_key]
 
         if "singleuser" in path_list:
             path_list[-1] = "tag"
 
-        if jq_format:
+        if format == "list":
+            return path_list
+        elif format == "str":
+            return ".".join(path_list)
+        elif format == "jq":
             path_list = [""] + path_list
-
-        return ".".join(path_list)
+            return ".".join(path_list)
 
     else:
         return None
