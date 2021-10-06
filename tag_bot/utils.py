@@ -44,9 +44,9 @@ def create_reverse_lookup_dict(nested_dict: dict) -> Dict[str, List[str]]:
     return reverse_dict
 
 
-def lookup_key_return_path(
+def lookup_key_return_path(  # type: ignore[return]
     target_key: str, lookup_dict: dict, format: str = "list"
-) -> Union[str, None]:
+) -> Union[List[str], str, None]:
     """For a given target in a reverse lookup dict, return the keypath for the
     original dictionary as a string. Optionally format this with a leading "."
     to be compatible with jq commands.
