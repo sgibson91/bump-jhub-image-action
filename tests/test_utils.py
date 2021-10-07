@@ -59,6 +59,77 @@ def test_create_reverse_lookup_dict_complex():
     assert result == expected_output
 
 
+def test_create_reverse_lookup_dict_2i2c_style():
+    test_dict = {
+        "hubs": [
+            {
+                "name": "hub1",
+                "config": {
+                    "jupyterhub": {
+                        "singleuser": {
+                            "image": {"name": "image_name1", "tag": "image_tag1"}
+                        },
+                        "profileList": [
+                            {"default": True},
+                            {
+                                "kubespawner_override": {
+                                    "image": "image_name2:image_tag2"
+                                }
+                            },
+                        ],
+                    }
+                },
+            },
+            {
+                "name": "hub2",
+                "config": {
+                    "jupyterhub": {
+                        "singleuser": {
+                            "image": {"name": "image_name3", "tag": "image_tag3"}
+                        }
+                    }
+                },
+            },
+        ]
+    }
+
+    expected_output = {
+        True: ["hubs[0]", "config", "jupyterhub", "profileList[0]", "default"],
+        "hub1": ["hubs[0]", "name"],
+        "hub2": ["hubs[1]", "name"],
+        "image_name1": [
+            "hubs[0]",
+            "config",
+            "jupyterhub",
+            "singleuser",
+            "image",
+            "name",
+        ],
+        "image_name2:image_tag2": [
+            "hubs[0]",
+            "config",
+            "jupyterhub",
+            "profileList[1]",
+            "kubespawner_override",
+            "image",
+        ],
+        "image_name3": [
+            "hubs[1]",
+            "config",
+            "jupyterhub",
+            "singleuser",
+            "image",
+            "name",
+        ],
+        "image_tag1": ["hubs[0]", "config", "jupyterhub", "singleuser", "image", "tag"],
+        "image_tag3": ["hubs[1]", "config", "jupyterhub", "singleuser", "image", "tag"],
+    }
+
+    result = create_reverse_lookup_dict(test_dict)
+
+    assert result == expected_output
+
+
 def test_lookup_key_return_path():
     test_target = "image_name"
     null_target = "something_else"
