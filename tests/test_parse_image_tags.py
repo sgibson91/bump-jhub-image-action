@@ -17,7 +17,9 @@ def test_get_deployed_image_tags_singleuser():
     filepath = "config/test_config.yaml"
     input_image_tags = {}
 
-    expected_image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+    expected_image_tags = {
+        "image_owner/image_name": {"current": "image_tag", "is_profileList": False}
+    }
 
     mock_get = patch(
         "tag_bot.parse_image_tags.get_request",
@@ -50,8 +52,8 @@ def test_get_deployed_image_tags_profileList():
     input_image_tags = {}
 
     expected_image_tags = {
-        "image_owner/image_name1": {"current": "image_tag1"},
-        "image_owner/image_name2": {"current": "image_tag2"},
+        "image_owner/image_name1": {"current": "image_tag1", "is_profileList": False},
+        "image_owner/image_name2": {"current": "image_tag2", "is_profileList": True},
     }
 
     mock_get = patch(
