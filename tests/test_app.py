@@ -15,7 +15,11 @@ test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
 def test_edit_config_singleuser():
     input_images_to_update = ["image_owner/image_name"]
     input_image_tags = {
-        "image_owner/image_name": {"current": "image_tag", "latest": "new_image_tag"}
+        "image_owner/image_name": {
+            "current": "image_tag",
+            "latest": "new_image_tag",
+            "is_profileList": False,
+        }
     }
 
     expected_output = {
@@ -53,7 +57,11 @@ def test_edit_config_singleuser():
 def test_edit_config_profileList():
     input_images_to_update = ["image_owner/image_name"]
     input_image_tags = {
-        "image_owner/image_name": {"current": "image_tag", "latest": "new_image_tag"}
+        "image_owner/image_name": {
+            "current": "image_tag",
+            "latest": "new_image_tag",
+            "is_profileList": True,
+        }
     }
 
     expected_output = {
@@ -106,10 +114,12 @@ def test_edit_config_both():
         "image_owner/image_name1": {
             "current": "image_tag1",
             "latest": "new_image_tag1",
+            "is_profileList": False,
         },
         "image_owner/image_name2": {
             "current": "image_tag2",
             "latest": "new_image_tag2",
+            "is_profileList": True,
         },
     }
 
