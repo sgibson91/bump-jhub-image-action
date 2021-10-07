@@ -67,16 +67,16 @@ def test_create_reverse_lookup_dict_2i2c_style():
                 "config": {
                     "jupyterhub": {
                         "singleuser": {
-                            "image": {"name": "image_name1", "tag": "image_tag1"}
+                            "image": {"name": "image_name1", "tag": "image_tag1"},
+                            "profileList": [
+                                {"default": True},
+                                {
+                                    "kubespawner_override": {
+                                        "image": "image_name2:image_tag2"
+                                    }
+                                },
+                            ],
                         },
-                        "profileList": [
-                            {"default": True},
-                            {
-                                "kubespawner_override": {
-                                    "image": "image_name2:image_tag2"
-                                }
-                            },
-                        ],
                     }
                 },
             },
@@ -94,7 +94,14 @@ def test_create_reverse_lookup_dict_2i2c_style():
     }
 
     expected_output = {
-        True: ["hubs[0]", "config", "jupyterhub", "profileList[0]", "default"],
+        True: [
+            "hubs[0]",
+            "config",
+            "jupyterhub",
+            "singleuser",
+            "profileList[0]",
+            "default",
+        ],
         "hub1": ["hubs[0]", "name"],
         "hub2": ["hubs[1]", "name"],
         "image_name1": [
@@ -109,6 +116,7 @@ def test_create_reverse_lookup_dict_2i2c_style():
             "hubs[0]",
             "config",
             "jupyterhub",
+            "singleuser",
             "profileList[1]",
             "kubespawner_override",
             "image",

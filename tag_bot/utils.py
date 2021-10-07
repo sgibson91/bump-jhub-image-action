@@ -73,7 +73,7 @@ def lookup_key_return_path(  # type: ignore[return]
     if target_key in lookup_dict.keys():
         path_list = lookup_dict[target_key]
 
-        if "singleuser" in path_list:
+        if "profileList" not in path_list:
             path_list[-1] = "tag"
 
         if format == "list":
