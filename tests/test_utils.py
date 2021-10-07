@@ -1,6 +1,10 @@
 import pytest
 
-from tag_bot.utils import create_reverse_lookup_dict, lookup_key_return_path
+from tag_bot.utils import (
+    create_reverse_lookup_dict,
+    lookup_key_return_path,
+    update_config_with_jq,
+)
 
 
 def test_create_reverse_lookup_dict_simple():
@@ -193,3 +197,52 @@ def test_lookup_key_return_path_profileList():
 
     with pytest.raises(ValueError):
         lookup_key_return_path(test_target, test_lookup, format="dict")
+
+
+def test_update_config_with_jq_singleuser():
+    test_config = {"singleuser": {"image": {"name": "image_name", "tag": "old_tag"}}}
+    test_image_tags = {"image_name": {"current": "old_tag", "latest": "new_tag"}}
+
+    lookup_config = create_reverse_lookup_dict(test_config)
+    tag_path = lookup_key_return_path(
+        test_image_tags["image_name"]["current"], lookup_config, format="jq"
+    )
+    new_config = update_config_with_jq(
+        test_config, tag_path, test_image_tags["image_name"]["latest"]
+    )
+
+    expected_output = {
+        "singleuser": {"image": {"name": "image_name", "tag": "new_tag"}}
+    }
+
+    assert new_config == expected_output
+
+
+def test_update_config_with_jq_profileList():
+    test_config = {
+        "singleuser": {
+            "profileList": [
+                {"default": True},
+                {"kubespawner_override": {"image": "image_name:old_tag"}},
+            ]
+        }
+    }
+    test_image_tags = {"image_name": {"current": "old_tag", "latest": "new_tag"}}
+    lookup_config = create_reverse_lookup_dict(test_config)
+
+    target_key = f"image_name:{test_image_tags['image_name']['current']}"
+    new_var = f"image_name:{test_image_tags['image_name']['latest']}"
+
+    tag_path = lookup_key_return_path(target_key, lookup_config, format="jq")
+    new_config = update_config_with_jq(test_config, tag_path, new_var)
+
+    expected_output = {
+        "singleuser": {
+            "profileList": [
+                {"default": True},
+                {"kubespawner_override": {"image": "image_name:new_tag"}},
+            ]
+        }
+    }
+
+    assert new_config == expected_output
