@@ -8,8 +8,13 @@ from loguru import logger
 
 from .git_database import create_commit, create_ref, get_contents, get_ref
 from .github_api import create_pr, find_existing_pr
+from .http_requests import get_request
 from .parse_image_tags import get_image_tags
-from .utils import get_request
+from .utils import (
+    create_reverse_lookup_dict,
+    lookup_key_return_path,
+    update_config_with_jq,
+)
 
 
 def edit_config(
@@ -34,38 +39,27 @@ def edit_config(
     """
     resp = get_request(download_url, headers=header, output="text")
     file_contents = yaml.safe_load(resp)
+    lookup_dict = create_reverse_lookup_dict(file_contents)
 
-    if "singleuser" in file_contents.keys():
-        logger.info("Updating JupyterHub config...")
-        logger.info("Updating singleuser image tag...")
+    logger.info("Updating JupyterHub config...")
+    for image in images_to_update:
+        if image_tags[image]["is_profileList"]:
+            logger.info("Updating image tags for profiles...")
 
-        if ("image" in file_contents["singleuser"].keys()) and (
-            file_contents["singleuser"]["image"]["name"] in images_to_update
-        ):
-            file_contents["singleuser"]["image"]["tag"] = image_tags[
-                file_contents["singleuser"]["image"]["name"]
-            ]["latest"]
+            target_key = f"{image}:{image_tags[image]['current']}"
+            target_path = lookup_key_return_path(target_key, lookup_dict, format="jq")
 
-        if "profileList" in file_contents["singleuser"].keys():
-            logger.info("Updating image tags for each profile...")
+            new_var = f"{image}:{image_tags[image]['latest']}"
+            file_contents = update_config_with_jq(file_contents, target_path, new_var)  # type: ignore[arg-type]
 
-            for i, image in enumerate(file_contents["singleuser"]["profileList"]):
-                if ("kubespawner_override" in image.keys()) and (
-                    image["kubespawner_override"]["image"].split(":")[0]
-                    in images_to_update
-                ):
-                    image_name = image["kubespawner_override"]["image"].split(":")[0]
-                    file_contents["singleuser"]["profileList"][i][
-                        "kubespawner_override"
-                    ]["image"] = ":".join(
-                        [image_name, image_tags[image_name]["latest"]]
-                    )
-    else:
-        logger.info("Your config doesn't specify any images under `singleuser`!")
-
-        import sys
-
-        sys.exit(1)
+        elif not image_tags[image]["is_profileList"]:
+            logger.info("Updating singleuser image tag...")
+            target_path = lookup_key_return_path(
+                image_tags[image]["current"], lookup_dict, format="jq"
+            )
+            file_contents = update_config_with_jq(
+                file_contents, target_path, image_tags[image]["latest"]  # type: ignore[arg-type]
+            )
 
     # Encode the file contents
     logger.info("Encoding config in base64...")

@@ -1,7 +1,7 @@
 import yaml
 from loguru import logger
 
-from .utils import get_request
+from .http_requests import get_request
 
 API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"
@@ -36,7 +36,8 @@ def get_deployed_image_tags(
 
     if "singleuser" in config.keys():
         image_tags[config["singleuser"]["image"]["name"]] = {
-            "current": config["singleuser"]["image"]["tag"]
+            "current": config["singleuser"]["image"]["tag"],
+            "is_profileList": False,
         }
 
         if "profileList" in config["singleuser"].keys():
@@ -45,7 +46,10 @@ def get_deployed_image_tags(
                     image_name, image_tag = image["kubespawner_override"][
                         "image"
                     ].split(":")
-                    image_tags[image_name] = {"current": image_tag}
+                    image_tags[image_name] = {
+                        "current": image_tag,
+                        "is_profileList": True,
+                    }
 
     return image_tags
 
