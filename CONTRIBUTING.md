@@ -89,7 +89,7 @@ Once you and the maintainers are happy, your contribution will be merged!
 
 ### :snake: Python Styleguide
 
-When writing Python scripts for this repository, it is recommended that contributors use [black](https://github.com/psf/black) and [flake8](https://flake8.pycqa.org/en/latest/) for formatting and linting styles.
+When writing Python scripts for this repository, it is recommended that contributors use [black](https://github.com/psf/black), [flake8](https://flake8.pycqa.org/en/latest/) and [isort](https://pycqa.github.io/isort/) for formatting/linting styles and sorting imports.
 The repository has GitHub Actions to check files are conforming to this styleguide, though not doing so will not prevent your contribution from being merged.
 These tools are used as the maintainers believe this makes the code easier to read and keeps consistent formatting as more people contribute to the project.
 
