@@ -1,3 +1,6 @@
+import json
+import subprocess
+import tempfile
 from collections import defaultdict
 from collections.abc import Mapping
 from typing import Dict, Generator, List, Union
@@ -86,3 +89,33 @@ def lookup_key_return_path(  # type: ignore[return]
 
     else:
         return None
+
+
+def update_config_with_jq(config: dict, var_path: str, new_var: str) -> Dict[str, str]:
+    """Run a jq command to update a variable in a dictionary given the keypath
+    to that variable.
+
+    Args:
+        config (dict): The dictionary config to be updated
+        var_path (str): The keypath to the variable that should be updated
+        new_var (str): The new value to set the variable to
+
+    Returns:
+        updated_config (dict): The updated dictionary config
+    """
+    # Use a temporary file for jq to "read"
+    with tempfile.NamedTemporaryFile(mode="r+", suffix=".json") as fp:
+        # Construct the jq command to run
+        cmd = ["jq", f'{var_path} = "{new_var}"', fp.name]
+
+        # Dump the config to the temp file
+        json.dump(config, fp)
+        fp.flush()
+
+        # Run the jq command and capture the result
+        call_output = subprocess.check_output(cmd)
+
+    # Cleaning up of the jq output, make sure it is dict format!
+    updated_config = json.loads(call_output.decode("utf-8").strip("\n"))
+
+    return updated_config
