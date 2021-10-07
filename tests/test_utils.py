@@ -27,6 +27,11 @@ def test_create_reverse_lookup_dict_simple():
 def test_create_reverse_lookup_dict_complex():
     test_dict = {
         "jupyterhub": {
+            "hub": {
+                "config": {
+                    "Authenticator": {"allowed_users": ["userA", "userB", "userC"]}
+                }
+            },
             "singleuser": {
                 "image": {"name": "image_name", "tag": "image_tag"},
                 "profileList": [
@@ -34,7 +39,7 @@ def test_create_reverse_lookup_dict_complex():
                     {"kubespawner_override": {"image": "image_name:image_tag"}},
                     {"kubespawner_override": {"image": "image_name2:image_tag2"}},
                 ],
-            }
+            },
         }
     }
 
@@ -56,6 +61,9 @@ def test_create_reverse_lookup_dict_complex():
             "image",
         ],
         "image_tag": ["jupyterhub", "singleuser", "image", "tag"],
+        "userA": ["jupyterhub", "hub", "config", "Authenticator", "allowed_users[0]"],
+        "userB": ["jupyterhub", "hub", "config", "Authenticator", "allowed_users[1]"],
+        "userC": ["jupyterhub", "hub", "config", "Authenticator", "allowed_users[2]"],
     }
 
     result = create_reverse_lookup_dict(test_dict)

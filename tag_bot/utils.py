@@ -19,10 +19,16 @@ def keypaths(nested_dict: Mapping) -> Generator:
         if isinstance(value, Mapping):
             for subkey, subvalue in keypaths(value):
                 yield [key] + subkey, subvalue
+
         elif isinstance(value, list):
             for i in range(len(value)):
-                for subkey, subvalue in keypaths(value[i]):
-                    yield [f"{key}[{str(i)}]"] + subkey, subvalue
+                if isinstance(value[i], dict):
+                    for subkey, subvalue in keypaths(value[i]):
+                        yield [f"{key}[{str(i)}]"] + subkey, subvalue
+
+                elif isinstance(value[i], str):
+                    yield [f"{key}[{str(i)}]"], value[i]
+
         else:
             yield [key], value
 
