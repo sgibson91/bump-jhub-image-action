@@ -55,7 +55,7 @@ inputs:
     required: false
 runs:
   using: 'docker'
-  image: 'Dockerfile'
+  image: 'docker://sgibson91/bump-jhub-image-action:main'
 branding:
   icon: check-circle
   color: purple
