@@ -50,7 +50,7 @@ def edit_config(
             target_path = lookup_key_return_path(target_key, lookup_dict, format="jq")
 
             new_var = f"{image}:{image_tags[image]['latest']}"
-            file_contents = update_config_with_jq(file_contents, target_path, new_var)
+            file_contents = update_config_with_jq(file_contents, target_path, new_var)  # type: ignore[arg-type]
 
         elif not image_tags[image]["is_profileList"]:
             logger.info("Updating singleuser image tag...")
@@ -58,7 +58,7 @@ def edit_config(
                 image_tags[image]["current"], lookup_dict, format="jq"
             )
             file_contents = update_config_with_jq(
-                file_contents, target_path, image_tags[image]["latest"]
+                file_contents, target_path, image_tags[image]["latest"]  # type: ignore[arg-type]
             )
 
     # Encode the file contents
