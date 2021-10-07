@@ -138,7 +138,7 @@ def test_create_reverse_lookup_dict_2i2c_style():
     assert result == expected_output
 
 
-def test_lookup_key_return_path():
+def test_lookup_key_return_path_singleuser():
     test_target = "image_name"
     null_target = "something_else"
     test_lookup = {
@@ -149,6 +149,37 @@ def test_lookup_key_return_path():
     expected_output = ["jupyterhub", "singleuser", "image", "tag"]
     expected_output_str = "jupyterhub.singleuser.image.tag"
     expected_output_jq = ".jupyterhub.singleuser.image.tag"
+
+    result = lookup_key_return_path(test_target, test_lookup)
+    result_str = lookup_key_return_path(test_target, test_lookup, format="str")
+    result_jq = lookup_key_return_path(test_target, test_lookup, format="jq")
+    result_null = lookup_key_return_path(null_target, test_lookup)
+
+    assert result == expected_output
+    assert result_str == expected_output_str
+    assert result_jq == expected_output_jq
+    assert result_null is None
+
+    with pytest.raises(ValueError):
+        lookup_key_return_path(test_target, test_lookup, format="dict")
+
+
+def test_lookup_key_return_path_profileList():
+    test_target = "image_name:image_tag"
+    null_target = "something_else:another_tag"
+    test_lookup = {
+        True: ["singleuser", "profileList[0]", "default"],
+        "image_name:image_tag": [
+            "singleuser",
+            "profileList[1]",
+            "kubespawner_override",
+            "image",
+        ],
+    }
+
+    expected_output = ["singleuser", "profileList[1]", "kubespawner_override", "image"]
+    expected_output_str = "singleuser.profileList[1].kubespawner_override.image"
+    expected_output_jq = ".singleuser.profileList[1].kubespawner_override.image"
 
     result = lookup_key_return_path(test_target, test_lookup)
     result_str = lookup_key_return_path(test_target, test_lookup, format="str")
