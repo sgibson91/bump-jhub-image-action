@@ -62,6 +62,7 @@ permissions:
   contents: write
   pull-requests: write
 ```
+
 ## :recycle: Example Usage
 
 The simplest way to use this Action is documented below.
