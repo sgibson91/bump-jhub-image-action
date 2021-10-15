@@ -59,7 +59,7 @@ If instead your repository is using the default restricted settings of `GITHUB_T
 ```yaml
 permissions:
   contents: write
-  pulls-requests: write
+  pull-requests: write
 ```
 ## :recycle: Example Usage
 
