@@ -10,6 +10,7 @@ If more recent image tags are available, the bot will open a Pull Request to the
 - [:mag: Overview](#mag-overview)
 - [🤔 Assumptions `bump-jhub-image-action` Makes](#-assumptions-bump-jhub-image-action-makes)
 - [:inbox_tray: Inputs](#inbox_tray-inputs)
+- [:lock: Permissions](#lock-permissions)
 - [:recycle: Example Usage](#recycle-example-usage)
 - [:sparkles: Contributing](#sparkles-contributing)
 
