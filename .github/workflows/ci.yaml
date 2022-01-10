@@ -9,6 +9,10 @@ on:
       - main
 
 jobs:
+  python-lint-format:
+    uses:
+      sgibson91/.github/.github/workflows/python-lint-format.yaml@main
+
   run-tests:
     runs-on: ubuntu-latest
     strategy:
@@ -60,33 +64,3 @@ jobs:
       - name: Run mypy static checker
         run: |
           mypy tag_bot/
-
-  lint-and-format:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - tool: black
-            args: --check
-          - tool: flake8
-            args: --ignore=E501
-          - tool: isort
-            args: --check --diff
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
-      - name: Setup Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      - name: Install ${{ matrix.tool }}
-        run: |
-          pip install ${{ matrix.tool }}
-
-      - name: Run ${{ matrix.tool }}
-        run: |
-          ${{ matrix.tool }} ${{ matrix.args }} .
