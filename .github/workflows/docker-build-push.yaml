@@ -12,28 +12,5 @@ on:
 
 jobs:
   docker-build-push:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Calculate Docker metadata
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ github.repository }}
-
-      - name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
-        with:
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.output.tags }}
+    uses:
+      sgibson91/.github/.github/workflows/docker-build.yaml
