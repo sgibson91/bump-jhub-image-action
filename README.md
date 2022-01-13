@@ -1,6 +1,6 @@
 # Bump Docker image tags in a JupyterHub config file
 
-[![CI Tests](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml) [![GitHub](https://img.shields.io/github/license/sgibson91/bump-jhub-image-action)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
+[![CI Tests](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml) [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sgibson91/bump-jhub-image-action/main.svg)](https://results.pre-commit.ci/latest/github/sgibson91/bump-jhub-image-action/main) [![GitHub](https://img.shields.io/github/license/sgibson91/bump-jhub-image-action)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
 
 This is a GitHub Action that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
 If more recent image tags are available, the bot will open a Pull Request to the host repository inserting the new image tags into the JupyterHub configuration file.
@@ -10,6 +10,7 @@ If more recent image tags are available, the bot will open a Pull Request to the
 - [:mag: Overview](#mag-overview)
 - [🤔 Assumptions `bump-jhub-image-action` Makes](#-assumptions-bump-jhub-image-action-makes)
 - [:inbox_tray: Inputs](#inbox_tray-inputs)
+- [:lock: Permissions](#lock-permissions)
 - [:recycle: Example Usage](#recycle-example-usage)
 - [:sparkles: Contributing](#sparkles-contributing)
 
@@ -59,8 +60,9 @@ If instead your repository is using the default restricted settings of `GITHUB_T
 ```yaml
 permissions:
   contents: write
-  pulls-requests: write
+  pull-requests: write
 ```
+
 ## :recycle: Example Usage
 
 The simplest way to use this Action is documented below.
