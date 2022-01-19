@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
       - name: Checkout repo
@@ -39,7 +39,16 @@ jobs:
 
       - name: Print coverage report
         run: |
-          python -m coverage report
+          coverage report && coverage xml
+
+      - name: Print coverage report
+        run: |
+          coverage report && coverage xml
+      - name: "Upload coverage to Codecov"
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   check-static-typing:
     runs-on: ubuntu-latest
