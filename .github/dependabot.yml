@@ -15,3 +15,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    # Disable version updates for docker dependencies until
+    # PR 63 has been debugged and fixed
+    # https://github.com/sgibson91/bump-jhub-image-action/pull/63
+    open-pull-requests-limit: 0
