@@ -1,7 +1,7 @@
 incremental==21.3.0
 jmespath==0.10.0
 loguru==0.6.0
-numpy==1.22.1
+numpy==1.22.2
 PyYAML==6.0
 requests==2.27.1
 twisted==21.7.0
