@@ -5,11 +5,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/London"
   # Maintain dependencies for pip
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/London"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
@@ -18,6 +24,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
+      time: "00:00"
+      timezone: "Europe/London"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
