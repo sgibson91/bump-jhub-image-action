@@ -1,7 +1,9 @@
-import yaml
 from loguru import logger
+from ruamel.yaml import YAML
 
 from .http_requests import get_request
+
+yaml = YAML(typ="safe", pure=True)
 
 API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"
@@ -32,7 +34,7 @@ def get_deployed_image_tags(
     api_url = api_url.replace(API_ROOT + "/repos", RAW_ROOT)
     url = "/".join([api_url, branch, filepath])
     resp = get_request(url, headers=header, output="text")
-    config = yaml.safe_load(resp)
+    config = yaml.load(resp)
 
     if "singleuser" in config.keys():
         image_tags[config["singleuser"]["image"]["name"]] = {

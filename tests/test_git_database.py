@@ -1,9 +1,11 @@
 import base64
 from unittest.mock import patch
 
-import yaml
+from ruamel.yaml import YAML
 
 from tag_bot.git_database import create_commit, create_ref, get_contents, get_ref
+
+yaml = YAML(typ="safe", pure=True)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
@@ -16,8 +18,7 @@ def test_create_commit():
     test_commit_msg = "This is a commit message"
 
     test_contents = {"key1": "This is a test"}
-    test_contents = yaml.safe_dump(test_contents).encode("utf-8")
-    test_contents = base64.b64encode(test_contents)
+    test_contents = base64.b64encode(str(test_contents).encode("utf-8"))
     test_contents = test_contents.decode("utf-8")
 
     test_body = {
