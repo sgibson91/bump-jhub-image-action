@@ -1,7 +1,9 @@
-import yaml
 from loguru import logger
+from ruamel.yaml import YAML
 
 from .http_requests import get_request
+
+yaml = YAML(typ="safe", pure=True)
 
 API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"

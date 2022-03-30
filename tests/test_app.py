@@ -4,9 +4,11 @@
 import base64
 from unittest.mock import patch
 
-import yaml
+from ruamel.yaml import YAML
 
 from tag_bot.app import compare_image_tags, edit_config
+
+yaml = YAML(typ="safe", pure=True)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}

@@ -3,8 +3,8 @@ import random
 import string
 from itertools import compress
 
-import yaml
 from loguru import logger
+from ruamel.yaml import YAML
 
 from .git_database import create_commit, create_ref, get_contents, get_ref
 from .github_api import create_pr, find_existing_pr
@@ -15,6 +15,8 @@ from .utils import (
     lookup_key_return_path,
     update_config_with_jq,
 )
+
+yaml = YAML(typ="safe", pure=True)
 
 
 def edit_config(
