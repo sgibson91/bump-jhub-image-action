@@ -34,7 +34,7 @@ def get_deployed_image_tags(
     api_url = api_url.replace(API_ROOT + "/repos", RAW_ROOT)
     url = "/".join([api_url, branch, filepath])
     resp = get_request(url, headers=header, output="text")
-    config = yaml.safe_load(resp)
+    config = yaml.load(resp)
 
     if "singleuser" in config.keys():
         image_tags[config["singleuser"]["image"]["name"]] = {

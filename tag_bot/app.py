@@ -40,7 +40,7 @@ def edit_config(
         file_contents (str): The updated JupyterHub config in YAML format and encoded in base64
     """
     resp = get_request(download_url, headers=header, output="text")
-    file_contents = yaml.safe_load(resp)
+    file_contents = yaml.load(resp)
     lookup_dict = create_reverse_lookup_dict(file_contents)
 
     logger.info("Updating JupyterHub config...")
@@ -65,8 +65,7 @@ def edit_config(
 
     # Encode the file contents
     logger.info("Encoding config in base64...")
-    encoded_file_contents = yaml.safe_dump(file_contents).encode("utf-8")
-    base64_bytes = base64.b64encode(encoded_file_contents)
+    base64_bytes = base64.b64encode(str(file_contents).encode("utf-8"))
     file_contents = base64_bytes.decode("utf-8")
 
     return file_contents
