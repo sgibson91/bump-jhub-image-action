@@ -5,7 +5,6 @@ from itertools import compress
 
 import yaml
 from loguru import logger
-from ruamel.yaml import YAML
 
 from .git_database import create_commit, create_ref, get_contents, get_ref
 from .github_api import create_pr, find_existing_pr
