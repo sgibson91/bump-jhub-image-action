@@ -4,11 +4,9 @@
 import base64
 from unittest.mock import patch
 
-from ruamel.yaml import YAML
+import yaml
 
 from tag_bot.app import compare_image_tags, edit_config
-
-yaml = YAML(typ="safe", pure=True)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
@@ -29,7 +27,8 @@ def test_edit_config_singleuser():
             "image": {"name": "image_owner/image_name", "tag": "new_image_tag"},
         }
     }
-    expected_output = base64.b64encode(str(expected_output).encode("utf-8"))
+    expected_output = yaml.safe_dump(expected_output).encode("utf-8")
+    expected_output = base64.b64encode(expected_output)
     expected_output = expected_output.decode("utf-8")
 
     mock_get = patch(
@@ -76,7 +75,8 @@ def test_edit_config_profileList():
             ]
         }
     }
-    expected_output = base64.b64encode(str(expected_output).encode("utf-8"))
+    expected_output = yaml.safe_dump(expected_output).encode("utf-8")
+    expected_output = base64.b64encode(expected_output)
     expected_output = expected_output.decode("utf-8")
 
     mock_get = patch(
@@ -135,7 +135,8 @@ def test_edit_config_both():
             ],
         }
     }
-    expected_output = base64.b64encode(str(expected_output).encode("utf-8"))
+    expected_output = yaml.safe_dump(expected_output).encode("utf-8")
+    expected_output = base64.b64encode(expected_output)
     expected_output = expected_output.decode("utf-8")
 
     mock_get = patch(
