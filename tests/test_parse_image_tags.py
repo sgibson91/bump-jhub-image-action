@@ -6,6 +6,7 @@ from tag_bot.parse_image_tags import (
     get_deployed_image_tags,
     get_image_tags,
     get_most_recent_image_tags_dockerhub,
+    get_most_recent_image_tags_quayio,
 )
 
 test_url = "http://jsonplaceholder.typicode.com"
@@ -137,6 +138,48 @@ def test_get_most_recent_image_tags_dockerhub():
         assert output_image_tags == expected_image_tags
 
 
+def test_get_most_recent_image_tags_quayio():
+    image = "image_owner/image_name"
+    input_image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+
+    expected_image_tags = {
+        "image_owner/image_name": {
+            "current": "image_tag",
+            "latest": "new_image_tag",
+        }
+    }
+
+    mock_get = patch(
+        "tag_bot.parse_image_tags.get_request",
+        return_value={
+            "tags": {
+                "latest": {
+                    "last_modified": "Mon, 27 Sep 2021 16:00:00 -0000",
+                    "name": "latest",
+                },
+                "new_image_tag": {
+                    "last_modified": "Mon, 27 Sep 2021 15:59:00 -0000",
+                    "name": "new_image_tag",
+                },
+                "some_other_tag": {
+                    "last_modified": "Fri, 27 Aug 2021 16:00:00 -0000",
+                    "name": "some_other_tag",
+                },
+            }
+        },
+    )
+
+    with mock_get as mock:
+        output_image_tags = get_most_recent_image_tags_quayio(image, input_image_tags)
+
+        assert mock.call_count == 1
+        mock.assert_called_with(
+            "/".join(["https://quay.io/api/v1/repository", image]),
+            output="json",
+        )
+        assert output_image_tags == expected_image_tags
+
+
 def test_get_image_tags():
     branch = "test_branch"
     filepath = "config/config.yaml"
@@ -187,7 +230,7 @@ def test_get_image_tags_not_implemented_error():
 
     mock_deployed_tags = patch(
         "tag_bot.parse_image_tags.get_deployed_image_tags",
-        return_value={"quay.io/image_owner/image_name": {"current": "image_tag"}},
+        return_value={"gcr.io/image_owner/image_name": {"current": "image_tag"}},
     )
 
     with mock_deployed_tags as mock1, pytest.raises(NotImplementedError):
