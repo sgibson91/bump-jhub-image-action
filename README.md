@@ -2,7 +2,7 @@
 
 [![CI Tests](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml/badge.svg)](https://github.com/sgibson91/bump-jhub-image-action/actions/workflows/ci.yaml) [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/sgibson91/bump-jhub-image-action/main.svg)](https://results.pre-commit.ci/latest/github/sgibson91/bump-jhub-image-action/main) [![codecov](https://codecov.io/gh/sgibson91/bump-jhub-image-action/branch/main/graph/badge.svg?token=01VEBJ62LA)](https://codecov.io/gh/sgibson91/bump-jhub-image-action) [![GitHub](https://img.shields.io/github/license/sgibson91/bump-jhub-image-action)](LICENSE) [![badge](https://img.shields.io/static/v1?label=Code%20of&message=Conduct&color=blueviolet)](CODE_OF_CONDUCT.md) [![badge](https://img.shields.io/static/v1?label=Contributing&message=Guidelines&color=blueviolet)](CONTRIBUTING.md)
 
-This is a GitHub Action that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources on Docker Hub.
+This is a GitHub Action that will check the tags of Docker images providing the computational environments for a JupyterHub are up-to-date with their sources in a container registry.
 If more recent image tags are available, the bot will open a Pull Request to the host repository inserting the new image tags into the JupyterHub configuration file.
 
 **Table of Contents:**
@@ -22,8 +22,7 @@ This is an overview of the steps the Action executes.
 
 - The Action will read a JupyterHub config file from the host repository and look for the tags of the Docker images describing the computational environments.
   The Action currently recognises images under the `singleuser` and `singleuser.profileList` keys.
-- The Action will then check the most recent image tags pushed to [Docker Hub](https://hub.docker.com) for these images.
-  (Other container registries may be supported in the future.)
+- The Action will then check the most recent image tags pushed to a container registry (extracted from the image name) for these images.
 - If there are more recent image tags available, the Action will open a Pull Request to the host repository with the updated image tags added into the JupyterHub configuration file
 
 A moderator should review the Pull Request before merging it and/or deploying to the JupyterHub.
@@ -34,8 +33,9 @@ Here is a list detailing the assumptions that the Action makes.
 
 1. You have a GitHub token with enough permissions to access the GitHub API and create branches, commits and Pull Requests
 2. The JupyterHub configuration file is available in a **public** GitHub repository, or you have a token with sufficient permissions to read/write to a **private** repository
-3. The Docker images are publicly available on Docker Hub.
-   (Other container registries may be supported in the future.)
+3. The Docker images are publicly available on one of the following container registries (other container registries may be supported in the future):
+   - [Docker Hub](https://hub.docker.com)
+   - [quay.io](https://quay.io)
 
 ## :inbox_tray: Inputs
 
