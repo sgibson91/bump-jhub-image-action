@@ -7,5 +7,5 @@ Provides tag_bot version information.
 
 from incremental import Version
 
-__version__ = Version("tag_bot", 1, 0, 0)
+__version__ = Version("tag_bot", 1, 1, 0)
 __all__ = ["__version__"]

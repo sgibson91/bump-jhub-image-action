@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import yaml
 from loguru import logger
 
@@ -6,6 +8,7 @@ from .http_requests import get_request
 API_ROOT = "https://api.github.com"
 RAW_ROOT = "https://raw.githubusercontent.com"
 DOCKERHUB_ROOT = "https://hub.docker.com/v2/repositories"
+QUAYIO_ROOT = "https://quay.io/api/v1/repository"
 
 
 def get_deployed_image_tags(
@@ -80,6 +83,38 @@ def get_most_recent_image_tags_dockerhub(image_name: str, image_tags: dict) -> d
     return image_tags
 
 
+def get_most_recent_image_tags_quayio(image_name: str, image_tags: dict) -> dict:
+    """For an image hosted on quay.io, look up the most recent tag
+
+    Args:
+        image_name (str): The name of the image to look up tags for
+        image_tags (dict): A dictionary to store the most recent tag in
+
+    Returns:
+        image_tags (dict): A dictionary containing info on the images and their
+            most recent tags
+    """
+    url = "/".join([QUAYIO_ROOT, image_name])
+    resp = get_request(url, output="json")
+    tags = [resp["tags"][key] for key in resp["tags"].keys()]
+
+    for tag in tags:
+        tag["last_modified"] = datetime.strptime(
+            tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
+        )
+
+    tags_sorted = sorted(tags, key=lambda k: k["last_modified"])
+
+    if tags_sorted[-1]["name"] == "latest":
+        new_tag = tags_sorted[-2]["name"]
+    else:
+        new_tag = tags_sorted[-1]["name"]
+
+    image_tags[image_name]["latest"] = new_tag
+
+    return image_tags
+
+
 def get_image_tags(api_url: str, header: dict, branch: str, filepath: str) -> dict:
     """Get the image names and tags that are deployed in a config file
 
@@ -105,9 +140,14 @@ def get_image_tags(api_url: str, header: dict, branch: str, filepath: str) -> di
         if len(image.split("/")) == 2:
             image_tags = get_most_recent_image_tags_dockerhub(image, image_tags)
         elif len(image.split("/")) > 2:
-            raise NotImplementedError(
-                "Cannot currently retrieve images from: %s" % image.split("/")[0]
-            )
+            if image.split("/")[0] == "quay.io":
+                image_tags = get_most_recent_image_tags_quayio(
+                    "/".join(image.split("/")[1:]), image_tags
+                )
+            else:
+                raise NotImplementedError(
+                    "Cannot currently retrieve images from: %s" % image.split("/")[0]
+                )
         else:
             raise ValueError("Unknown image name: %s" % image)
 
