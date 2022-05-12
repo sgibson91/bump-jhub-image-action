@@ -29,21 +29,15 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install package requirements
+      - name: Install requirements
         run: |
+          python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
-
-      - name: Install dev requirements
-        run: |
           python -m pip install -r dev-requirements.txt
 
       - name: Run test suite
         run: |
           python -m coverage run -m pytest -vvv --color=yes
-
-      - name: Print coverage report
-        run: |
-          coverage report && coverage xml
 
       - name: Print coverage report
         run: |
@@ -69,6 +63,7 @@ jobs:
 
       - name: Install dev requirements
         run: |
+          python -m pip install --upgrade pip
           python -m pip install -r dev-requirements.txt
 
       - name: Run mypy static checker
