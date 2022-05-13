@@ -36,6 +36,7 @@ def main():
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
+    team_reviewers = os.environ["INPUT_TEAM_REVIEWERS"] if "INPUT_TEAM_REVIEWERS" in os.environ else []
     dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
 
     # Reference dict for required inputs
@@ -57,6 +58,8 @@ def main():
         labels = split_str_to_list(labels)
     if len(reviewers) > 0:
         reviewers = split_str_to_list(reviewers)
+    if len(team_reviewers) > 0:
+        team_reviewers = split_str_to_list(team_reviewers)
 
     # Check the dry_run variable is properly set
     if isinstance(dry_run, str) and (dry_run == "true"):
@@ -85,6 +88,7 @@ def main():
         head_branch,
         labels=labels,
         reviewers=reviewers,
+        team_reviewers=team_reviewers,
         dry_run=dry_run,
     )
 
