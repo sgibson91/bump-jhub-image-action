@@ -43,7 +43,7 @@ def test_get_request_text():
 
 
 def test_get_request_output_exception():
-    with pytest.raises(requests.HTTPError):
+    with pytest.raises(ValueError):
         _ = get_request(test_url, headers=test_header, output="yaml")
 
 
