@@ -22,13 +22,13 @@ def test_assign_reviewers():
     test_reviewers = ["reviewer1", "reviewer2"]
 
     with patch("tag_bot.github_api.post_request") as mocked_func:
-        assign_reviewers(test_reviewers, test_url, test_header)
+        assign_reviewers(test_reviewers, [], test_url, test_header)
 
         assert mocked_func.call_count == 1
         mocked_func.assert_called_with(
             "/".join([test_url, "requested_reviewers"]),
             headers=test_header,
-            json={"reviewers": test_reviewers},
+            json={"reviewers": test_reviewers, "team_reviewers": []},
         )
 
 
@@ -37,6 +37,7 @@ def test_create_pr_no_labels_no_reviewers():
     test_head_branch = "head"
     test_labels = []
     test_reviewers = []
+    test_team_reviewers = []
 
     expected_pr = {
         "title": "Bumping Docker image tags",
@@ -53,6 +54,7 @@ def test_create_pr_no_labels_no_reviewers():
             test_head_branch,
             labels=test_labels,
             reviewers=test_reviewers,
+            team_reviewers=test_team_reviewers,
         )
 
         assert mocked_func.call_count == 1
@@ -69,6 +71,7 @@ def test_create_pr_with_labels_no_reviewers():
     test_head_branch = "head"
     test_labels = ["label1", "label2"]
     test_reviewers = []
+    test_team_reviewers = []
 
     expected_pr = {
         "title": "Bumping Docker image tags",
@@ -91,6 +94,7 @@ def test_create_pr_with_labels_no_reviewers():
             test_head_branch,
             labels=test_labels,
             reviewers=test_reviewers,
+            team_reviewers=test_team_reviewers,
         )
 
         assert mock1.call_count == 1
@@ -112,6 +116,7 @@ def test_create_pr_no_labels_with_reviewers():
     test_head_branch = "head"
     test_labels = []
     test_reviewers = ["reviewer1", "reviewer2"]
+    test_team_reviewers = []
 
     expected_pr = {
         "title": "Bumping Docker image tags",
@@ -134,6 +139,7 @@ def test_create_pr_no_labels_with_reviewers():
             test_head_branch,
             labels=test_labels,
             reviewers=test_reviewers,
+            team_reviewers=test_team_reviewers,
         )
 
         assert mock1.call_count == 1
@@ -146,7 +152,7 @@ def test_create_pr_no_labels_with_reviewers():
         )
         assert mock2.call_count == 1
         mock2.assert_called_with(
-            test_reviewers, "/".join([test_url, "pulls", "1"]), test_header
+            test_reviewers, test_team_reviewers, "/".join([test_url, "pulls", "1"]), test_header
         )
 
 
@@ -155,6 +161,7 @@ def test_create_pr_with_labels_and_reviewers():
     test_head_branch = "head"
     test_labels = ["label1", "label2"]
     test_reviewers = ["reviewer1", "reviewer2"]
+    test_team_reviewers = []
 
     expected_pr = {
         "title": "Bumping Docker image tags",
@@ -181,6 +188,7 @@ def test_create_pr_with_labels_and_reviewers():
             test_head_branch,
             labels=test_labels,
             reviewers=test_reviewers,
+            team_reviewers=test_team_reviewers,
         )
 
         assert mock1.call_count == 1
@@ -200,7 +208,7 @@ def test_create_pr_with_labels_and_reviewers():
         )
         assert mock3.call_count == 1
         mock3.assert_called_with(
-            test_reviewers, "/".join([test_url, "pulls", "1"]), test_header
+            test_reviewers, test_team_reviewers, "/".join([test_url, "pulls", "1"]), test_header
         )
 
 

@@ -43,7 +43,7 @@ def assign_reviewers(reviewers: list, team_reviewers: list, pr_url: str, header:
         logger.info("Assigning team reviewers: {}", team_reviewers)
 
     url = "/".join([pr_url, "requested_reviewers"])
-    post_request(url, headers=header, json={"reviewers": reviewers, team_reviewers})
+    post_request(url, headers=header, json={"reviewers": reviewers, "team_reviewers": team_reviewers})
 
 
 def create_pr(
