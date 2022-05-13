@@ -1,6 +1,11 @@
 from unittest.mock import patch
 
-from tag_bot.github_api import add_labels, assign_reviewers, create_pr, find_existing_pr
+from tag_bot.github_api import (
+    add_labels,
+    assign_reviewers,
+    create_update_pr,
+    find_existing_pr,
+)
 
 test_url = "http://jsonplaceholder.typicode.com"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
@@ -32,29 +37,51 @@ def test_assign_reviewers():
         )
 
 
-def test_create_pr_no_labels_no_reviewers():
+def test_create_update_pr_no_labels_no_reviewers():
     test_base_branch = "main"
     test_head_branch = "head"
+    test_image_tags = {
+        "image_owner/image1": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+        "image_owner/image2": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+    }
+    test_images_to_update = ["image_owner/image1", "image_owner/image2"]
     test_labels = []
     test_reviewers = []
     test_team_reviewers = []
 
     expected_pr = {
-        "title": "Bumping Docker image tags",
-        "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
+        "title": "Bumping Docker image tags in JupyterHub config",
+        "body": (
+            "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+            + "\n".join(
+                [
+                    f"`{image}`: `{test_image_tags[image]['current']}` -> `{test_image_tags[image]['latest']}`"
+                    for image in test_images_to_update
+                ]
+            )
+        ),
         "base": test_base_branch,
         "head": test_head_branch,
     }
 
     with patch("tag_bot.github_api.post_request") as mocked_func:
-        create_pr(
+        create_update_pr(
             test_url,
             test_header,
             test_base_branch,
             test_head_branch,
+            test_image_tags,
+            test_images_to_update,
             labels=test_labels,
             reviewers=test_reviewers,
             team_reviewers=test_team_reviewers,
+            pr_exists=False,
         )
 
         assert mocked_func.call_count == 1
@@ -66,39 +93,64 @@ def test_create_pr_no_labels_no_reviewers():
         )
 
 
-def test_create_pr_with_labels_no_reviewers():
+def test_create_update_pr_with_labels_no_reviewers():
     test_base_branch = "main"
     test_head_branch = "head"
+    test_image_tags = {
+        "image_owner/image1": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+        "image_owner/image2": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+    }
+    test_images_to_update = ["image_owner/image1", "image_owner/image2"]
     test_labels = ["label1", "label2"]
     test_reviewers = []
     test_team_reviewers = []
 
     expected_pr = {
-        "title": "Bumping Docker image tags",
-        "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
+        "title": "Bumping Docker image tags in JupyterHub config",
+        "body": (
+            "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+            + "\n".join(
+                [
+                    f"`{image}`: `{test_image_tags[image]['current']}` -> `{test_image_tags[image]['latest']}`"
+                    for image in test_images_to_update
+                ]
+            )
+        ),
         "base": test_base_branch,
         "head": test_head_branch,
     }
 
     mock_post = patch(
         "tag_bot.github_api.post_request",
-        return_value={"issue_url": "/".join([test_url, "issues", "1"])},
+        return_value={"issue_url": "/".join([test_url, "issues", "1"]), "number": 1},
     )
     mock_labels = patch("tag_bot.github_api.add_labels")
 
     with mock_post as mock1, mock_labels as mock2:
-        create_pr(
+        create_update_pr(
             test_url,
             test_header,
             test_base_branch,
             test_head_branch,
+            test_image_tags,
+            test_images_to_update,
             labels=test_labels,
             reviewers=test_reviewers,
             team_reviewers=test_team_reviewers,
+            pr_exists=False,
         )
 
         assert mock1.call_count == 1
-        assert mock1.return_value == {"issue_url": "/".join([test_url, "issues", "1"])}
+        assert mock1.return_value == {
+            "issue_url": "/".join([test_url, "issues", "1"]),
+            "number": 1,
+        }
         mock1.assert_called_with(
             "/".join([test_url, "pulls"]),
             headers=test_header,
@@ -111,39 +163,64 @@ def test_create_pr_with_labels_no_reviewers():
         )
 
 
-def test_create_pr_no_labels_with_reviewers():
+def test_create_update_pr_no_labels_with_reviewers():
     test_base_branch = "main"
     test_head_branch = "head"
+    test_image_tags = {
+        "image_owner/image1": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+        "image_owner/image2": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+    }
+    test_images_to_update = ["image_owner/image1", "image_owner/image2"]
     test_labels = []
     test_reviewers = ["reviewer1", "reviewer2"]
     test_team_reviewers = []
 
     expected_pr = {
-        "title": "Bumping Docker image tags",
-        "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
+        "title": "Bumping Docker image tags in JupyterHub config",
+        "body": (
+            "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+            + "\n".join(
+                [
+                    f"`{image}`: `{test_image_tags[image]['current']}` -> `{test_image_tags[image]['latest']}`"
+                    for image in test_images_to_update
+                ]
+            )
+        ),
         "base": test_base_branch,
         "head": test_head_branch,
     }
 
     mock_post = patch(
         "tag_bot.github_api.post_request",
-        return_value={"url": "/".join([test_url, "pulls", "1"])},
+        return_value={"url": "/".join([test_url, "pulls", "1"]), "number": 1},
     )
     mock_reviewers = patch("tag_bot.github_api.assign_reviewers")
 
     with mock_post as mock1, mock_reviewers as mock2:
-        create_pr(
+        create_update_pr(
             test_url,
             test_header,
             test_base_branch,
             test_head_branch,
+            test_image_tags,
+            test_images_to_update,
             labels=test_labels,
             reviewers=test_reviewers,
             team_reviewers=test_team_reviewers,
+            pr_exists=False,
         )
 
         assert mock1.call_count == 1
-        assert mock1.return_value == {"url": "/".join([test_url, "pulls", "1"])}
+        assert mock1.return_value == {
+            "url": "/".join([test_url, "pulls", "1"]),
+            "number": 1,
+        }
         mock1.assert_called_with(
             "/".join([test_url, "pulls"]),
             headers=test_header,
@@ -159,16 +236,35 @@ def test_create_pr_no_labels_with_reviewers():
         )
 
 
-def test_create_pr_with_labels_and_reviewers():
+def test_create_update_pr_with_labels_and_reviewers():
     test_base_branch = "main"
     test_head_branch = "head"
+    test_image_tags = {
+        "image_owner/image1": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+        "image_owner/image2": {
+            "current": "old_tag",
+            "latest": "new_tag",
+        },
+    }
+    test_images_to_update = ["image_owner/image1", "image_owner/image2"]
     test_labels = ["label1", "label2"]
     test_reviewers = ["reviewer1", "reviewer2"]
     test_team_reviewers = []
 
     expected_pr = {
-        "title": "Bumping Docker image tags",
-        "body": "This PR is bumping the Docker image tags for the computational environments to the most recently published",
+        "title": "Bumping Docker image tags in JupyterHub config",
+        "body": (
+            "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+            + "\n".join(
+                [
+                    f"`{image}`: `{test_image_tags[image]['current']}` -> `{test_image_tags[image]['latest']}`"
+                    for image in test_images_to_update
+                ]
+            )
+        ),
         "base": test_base_branch,
         "head": test_head_branch,
     }
@@ -178,26 +274,31 @@ def test_create_pr_with_labels_and_reviewers():
         return_value={
             "issue_url": "/".join([test_url, "issues", "1"]),
             "url": "/".join([test_url, "pulls", "1"]),
+            "number": 1,
         },
     )
     mock_labels = patch("tag_bot.github_api.add_labels")
     mock_reviewers = patch("tag_bot.github_api.assign_reviewers")
 
     with mock_post as mock1, mock_labels as mock2, mock_reviewers as mock3:
-        create_pr(
+        create_update_pr(
             test_url,
             test_header,
             test_base_branch,
             test_head_branch,
+            test_image_tags,
+            test_images_to_update,
             labels=test_labels,
             reviewers=test_reviewers,
             team_reviewers=test_team_reviewers,
+            pr_exists=False,
         )
 
         assert mock1.call_count == 1
         assert mock1.return_value == {
             "issue_url": "/".join([test_url, "issues", "1"]),
             "url": "/".join([test_url, "pulls", "1"]),
+            "number": 1,
         }
         mock1.assert_called_with(
             "/".join([test_url, "pulls"]),
