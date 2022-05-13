@@ -7,7 +7,7 @@ import yaml
 from loguru import logger
 
 from .git_database import create_commit, create_ref, get_contents, get_ref
-from .github_api import create_pr, find_existing_pr
+from .github_api import create_update_pr, find_existing_pr
 from .http_requests import get_request
 from .parse_image_tags import get_image_tags
 from .utils import (
@@ -218,16 +218,18 @@ def run(
             pr_exists,
         )
 
-        if not pr_exists:
-            create_pr(
-                api_url,
-                header,
-                base_branch,
-                head_branch,
-                labels,
-                reviewers,
-                team_reviewers,
-            )
+        create_update_pr(
+            api_url,
+            header,
+            base_branch,
+            head_branch,
+            image_tags,
+            images_to_update,
+            labels,
+            reviewers,
+            team_reviewers,
+            pr_exists,
+        )
 
     elif (len(images_to_update) > 0) and dry_run:
         logger.info(
