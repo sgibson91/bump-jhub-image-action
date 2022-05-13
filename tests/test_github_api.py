@@ -152,7 +152,10 @@ def test_create_pr_no_labels_with_reviewers():
         )
         assert mock2.call_count == 1
         mock2.assert_called_with(
-            test_reviewers, test_team_reviewers, "/".join([test_url, "pulls", "1"]), test_header
+            test_reviewers,
+            test_team_reviewers,
+            "/".join([test_url, "pulls", "1"]),
+            test_header,
         )
 
 
@@ -208,7 +211,10 @@ def test_create_pr_with_labels_and_reviewers():
         )
         assert mock3.call_count == 1
         mock3.assert_called_with(
-            test_reviewers, test_team_reviewers, "/".join([test_url, "pulls", "1"]), test_header
+            test_reviewers,
+            test_team_reviewers,
+            "/".join([test_url, "pulls", "1"]),
+            test_header,
         )
 
 

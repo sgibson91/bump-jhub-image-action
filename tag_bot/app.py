@@ -219,7 +219,15 @@ def run(
         )
 
         if not pr_exists:
-            create_pr(api_url, header, base_branch, head_branch, labels, reviewers, team_reviewers)
+            create_pr(
+                api_url,
+                header,
+                base_branch,
+                head_branch,
+                labels,
+                reviewers,
+                team_reviewers,
+            )
 
     elif (len(images_to_update) > 0) and dry_run:
         logger.info(

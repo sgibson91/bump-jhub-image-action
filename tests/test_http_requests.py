@@ -1,6 +1,6 @@
 import pytest
-import responses
 import requests
+import responses
 
 from tag_bot.http_requests import get_request, post_request
 

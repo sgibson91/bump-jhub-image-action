@@ -22,7 +22,9 @@ def add_labels(labels: list, pr_url: str, header: dict) -> None:
     post_request(pr_url, headers=header, json={"labels": labels})
 
 
-def assign_reviewers(reviewers: list, team_reviewers: list, pr_url: str, header: dict) -> None:
+def assign_reviewers(
+    reviewers: list, team_reviewers: list, pr_url: str, header: dict
+) -> None:
     """Request reviews from GitHub users on a Pull Request
 
     Args:
@@ -43,7 +45,11 @@ def assign_reviewers(reviewers: list, team_reviewers: list, pr_url: str, header:
         logger.info("Assigning team reviewers: {}", team_reviewers)
 
     url = "/".join([pr_url, "requested_reviewers"])
-    post_request(url, headers=header, json={"reviewers": reviewers, "team_reviewers": team_reviewers})
+    post_request(
+        url,
+        headers=header,
+        json={"reviewers": reviewers, "team_reviewers": team_reviewers},
+    )
 
 
 def create_pr(

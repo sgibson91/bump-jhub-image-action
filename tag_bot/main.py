@@ -36,7 +36,11 @@ def main():
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
-    team_reviewers = os.environ["INPUT_TEAM_REVIEWERS"] if "INPUT_TEAM_REVIEWERS" in os.environ else []
+    team_reviewers = (
+        os.environ["INPUT_TEAM_REVIEWERS"]
+        if "INPUT_TEAM_REVIEWERS" in os.environ
+        else []
+    )
     dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
 
     # Reference dict for required inputs
