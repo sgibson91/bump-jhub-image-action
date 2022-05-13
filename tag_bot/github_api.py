@@ -22,21 +22,34 @@ def add_labels(labels: list, pr_url: str, header: dict) -> None:
     post_request(pr_url, headers=header, json={"labels": labels})
 
 
-def assign_reviewers(reviewers: list, pr_url: str, header: dict) -> None:
+def assign_reviewers(
+    reviewers: list, team_reviewers: list, pr_url: str, header: dict
+) -> None:
     """Request reviews from GitHub users on a Pull Request
 
     Args:
         reviewers (list): A list of GitHub user to request reviews from
             (**excluding** the leading `@` symbol)
+        team_reviewers (list): A list of GitHub teams to request reviews from, in the
+            form ORG_NAME/TEAM_NAME
         pr_url (str): The API URL of the Pull Request (pulls endpoint) to send
             the request to
         header (dict): A dictionary of headers to send with the request. Must
             contain an authorisation token.
     """
     logger.info("Assigning reviewers to Pull Request: {}", pr_url)
-    logger.info("Assigning reviewers: {}", reviewers)
+
+    if reviewers:
+        logger.info("Assigning reviewers: {}", reviewers)
+    if team_reviewers:
+        logger.info("Assigning team reviewers: {}", team_reviewers)
+
     url = "/".join([pr_url, "requested_reviewers"])
-    post_request(url, headers=header, json={"reviewers": reviewers})
+    post_request(
+        url,
+        headers=header,
+        json={"reviewers": reviewers, "team_reviewers": team_reviewers},
+    )
 
 
 def create_pr(
@@ -46,6 +59,7 @@ def create_pr(
     head_branch: str,
     labels: list,
     reviewers: list,
+    team_reviewers: list,
 ) -> None:
     """Create a Pull Request via the GitHub API
 
@@ -57,6 +71,8 @@ def create_pr(
         head_branch (str): The name of the branch to open the Pull Request from
         labels (list): A list of labels to apply to the Pull Request
         reviewers (list): A list of GitHub users to request reviews from
+        team_reviewers (list): A list of GitHub teams to request reviews from, in the
+            form ORG_NAME/TEAM_NAME
     """
     logger.info("Creating Pull Request...")
 
@@ -71,11 +87,11 @@ def create_pr(
 
     logger.info("Pull Request created!")
 
-    if len(labels) > 0:
+    if labels:
         add_labels(labels, resp["issue_url"], header)
 
-    if len(reviewers) > 0:
-        assign_reviewers(reviewers, resp["url"], header)
+    if reviewers or team_reviewers:
+        assign_reviewers(reviewers, team_reviewers, resp["url"], header)
 
 
 def find_existing_pr(api_url: str, header: dict) -> Tuple[bool, Union[str, None]]:

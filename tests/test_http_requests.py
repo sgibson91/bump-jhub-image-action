@@ -1,4 +1,5 @@
 import pytest
+import requests
 import responses
 
 from tag_bot.http_requests import get_request, post_request
@@ -50,7 +51,7 @@ def test_get_request_output_exception():
 def test_get_request_url_exception():
     responses.add(responses.GET, test_url, status=500)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(requests.HTTPError):
         _ = get_request(test_url, headers=test_header)
 
     assert len(responses.calls) == 1
@@ -82,7 +83,7 @@ def test_post_request_return_json():
 def test_post_request_exception():
     responses.add(responses.POST, test_url, status=500)
 
-    with pytest.raises(RuntimeError):
+    with pytest.raises(requests.HTTPError):
         post_request(test_url, headers=test_header, json=test_body)
 
     assert len(responses.calls) == 1

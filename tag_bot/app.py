@@ -152,6 +152,7 @@ def run(
     head_branch: str,
     labels: list = [],
     reviewers: list = [],
+    team_reviewers: list = [],
     dry_run: bool = False,
 ) -> None:
     """Run the action to check if the docker images are up to date
@@ -169,6 +170,8 @@ def run(
             They must already exist in the repository. Defaults to [].
         reviewers (list, optional): A list of GitHub users to request reviews
             from. Defaults to [].
+        team_reviewers (list, optional): A list of GitHub teams to request reviews from,
+            in the form ORG_NAME/TEAM_NAME. Defaults to [].
         dry_run (bool, optional): Perform a dry-run where a Pull Request will
             not be opened. Defaults to False.
     """
@@ -216,7 +219,15 @@ def run(
         )
 
         if not pr_exists:
-            create_pr(api_url, header, base_branch, head_branch, labels, reviewers)
+            create_pr(
+                api_url,
+                header,
+                base_branch,
+                head_branch,
+                labels,
+                reviewers,
+                team_reviewers,
+            )
 
     elif (len(images_to_update) > 0) and dry_run:
         logger.info(
