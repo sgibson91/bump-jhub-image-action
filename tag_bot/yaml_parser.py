@@ -1,9 +1,10 @@
-import ruamel.yaml
 from io import StringIO
+
+import ruamel.yaml
 
 
 def represent_none(self, data):
-    return self.represent_scalar(u"tag:yaml.org,2002:null", u"null")
+    return self.represent_scalar("tag:yaml.org,2002:null", "null")
 
 
 class YamlParser:
