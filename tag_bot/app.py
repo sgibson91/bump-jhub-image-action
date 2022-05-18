@@ -3,7 +3,6 @@ import random
 import string
 from itertools import compress
 
-import yaml
 from loguru import logger
 
 from .git_database import create_commit, create_ref, get_contents, get_ref
@@ -15,6 +14,9 @@ from .utils import (
     lookup_key_return_path,
     update_config_with_jq,
 )
+from .yaml_parser import YamlParser
+
+yaml = YamlParser()
 
 
 def edit_config(
@@ -38,7 +40,7 @@ def edit_config(
         file_contents (str): The updated JupyterHub config in YAML format and encoded in base64
     """
     resp = get_request(download_url, headers=header, output="text")
-    file_contents = yaml.safe_load(resp)
+    file_contents = yaml.yaml_string_to_object(resp)
     lookup_dict = create_reverse_lookup_dict(file_contents)
 
     logger.info("Updating JupyterHub config...")
@@ -63,7 +65,7 @@ def edit_config(
 
     # Encode the file contents
     logger.info("Encoding config in base64...")
-    encoded_file_contents = yaml.safe_dump(file_contents).encode("utf-8")
+    encoded_file_contents = yaml.object_to_yaml_str(file_contents).encode("utf-8")
     base64_bytes = base64.b64encode(encoded_file_contents)
     file_contents = base64_bytes.decode("utf-8")
 
