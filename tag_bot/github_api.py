@@ -8,6 +8,8 @@ from .http_requests import get_request, patch_request, post_request
 
 
 class GitHubAPI:
+    """Interact with the GitHub API and perform varios git-flow tasks"""
+
     def __init__(self, inputs):
         self.inputs = inputs
         self.api_url = "/".join(
@@ -15,12 +17,25 @@ class GitHubAPI:
         )
 
     def _assign_labels(self, pr_url):
+        """Assign labels to an open Pull Request. The labels must already exist in
+        the repository.
+
+        Args:
+            pr_url (str): The API URL of the Pull Request (issues endpoint) to
+                send the request to
+        """
         url = "/".join([pr_url, "labels"])
         post_request(
             url, headers=self.inputs.headers, json={"labels": self.inputs.labels}
         )
 
     def _assign_reviewers(self, pr_url):
+        """Request reviews from GitHub users or teams on a Pull Request
+
+        Args:
+            pr_url (str): The API URL of the Pull Request (pulls endpoint) to send
+                the request to
+        """
         url = "/".join([pr_url, "requested_reviewers"])
         post_request(
             url,
@@ -32,6 +47,12 @@ class GitHubAPI:
         )
 
     def create_commit(self, commit_msg, content):
+        """Create a commit over the GitHub API by creating or updating a file
+
+        Args:
+            commit_msg (str): A message describing the changes the commit applies
+            content (str): The content of the file to be updated, encoded in base64
+        """
         url = "/".join([self.api_url, "contents", self.inputs.config_path])
         body = {
             "message": commit_msg,
@@ -42,6 +63,13 @@ class GitHubAPI:
         put(url, json=body, headers=self.inputs.headers)
 
     def create_ref(self, ref, sha):
+        """Create a new git reference (specifically, a branch) with GitHub's git database API
+        endpoint
+
+        Args:
+            ref (str): The reference or branch name to create
+            sha (str): The SHA of the parent commit to point the new reference to
+        """
         url = "/".join([self.api_url, "git", "refs"])
         body = {
             "ref": f"refs/heads/{ref}",
@@ -50,6 +78,7 @@ class GitHubAPI:
         post_request(url, headers=self.inputs.headers, json=body)
 
     def create_update_pull_request(self):
+        """Credate or update a Pull Request via the GitHub API"""
         url = "/".join([self.api_url, "pulls"])
         pr = {
             "title": "Bumping Docker image tags in JupyterHub config",
@@ -83,6 +112,7 @@ class GitHubAPI:
                 self._assign_reviewers(resp["url"])
 
     def find_existing_pull_request(self):
+        """Check if the bot already has an open Pull Request"""
         url = "/".join([self.api_url, "pulls"])
         params = {"state": "open", "sort": "created", "direction": "desc"}
         resp = get_request(
@@ -102,5 +132,14 @@ class GitHubAPI:
             self.pr_exists = False
 
     def get_ref(self, ref):
+        """Get a git reference (specifically, a HEAD ref) using GitHub's git
+        database API endpoint
+
+        Args:
+            ref (str): The reference for which to return information for
+
+        Returns:
+            dict: The JSON payload response of the request
+        """
         url = "/".join([self.api_url, "git", "ref", "heads", ref])
         return get_request(url, headers=self.inputs.headers, output="json")

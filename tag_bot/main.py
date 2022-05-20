@@ -11,6 +11,8 @@ yaml = YamlParser()
 
 
 class UpdateImageTags:
+    """Update the tags of images stored in a JupyterHub YAML config"""
+
     def __init__(
         self,
         repository,
@@ -40,6 +42,12 @@ class UpdateImageTags:
         }
 
     def update_config(self):
+        """Update the JupyterHub config file with the new image tags
+
+        Returns:
+            file_contents (str): The updated JupyterHub config in YAML format and
+                encoded in base64
+        """
         for image in self.images_to_update:
             value = read_config_with_jq(self.config, self.image_tags[image]["path"])
 
@@ -63,6 +71,7 @@ class UpdateImageTags:
         return config
 
     def update(self):
+        """Run the action to check if the docker images are up to date"""
         github = GitHubAPI(self)
         github.find_existing_pull_request()
 
@@ -83,7 +92,16 @@ class UpdateImageTags:
 
 
 def split_str_to_list(input_str: str, split_char: str = " ") -> List[str]:
-    # Split a string into a list
+    """Split a string into a list of elements.
+
+    Args:
+        input_str (str): The string to split
+        split_char (str, optional): The character to split the string by. Defaults
+            to " " (a single whitespace).
+
+    Returns:
+        List[str]: The string split into a list
+    """
     split_str = input_str.split(split_char)
 
     # For each element in split_str, strip leading/trailing whitespace
@@ -108,10 +126,10 @@ def main():
         os.environ["INPUT_REPOSITORY"] if "INPUT_REPOSITORY" in os.environ else None
     )
     base_branch = (
-        os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else None
+        os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else "main"
     )
     head_branch = (
-        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else None
+        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else "bump-image-tags"
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
@@ -128,8 +146,6 @@ def main():
         "VALUES_PATHS": values_paths,
         "GITHUB_TOKEN": github_token,
         "REPOSITORY": repository,
-        "BASE_BRANCH": base_branch,
-        "HEAD_BRANCH": head_branch,
     }
 
     # Check all the required inputs are properly set
@@ -137,6 +153,7 @@ def main():
         if v is None:
             raise ValueError(f"{k} must be set!")
 
+    # Split the parsed values paths into a list
     values_paths = split_str_to_list(values_paths)
 
     # If labels/reviewers have been provided, transform from string into a list

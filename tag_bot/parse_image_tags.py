@@ -10,6 +10,11 @@ yaml = YamlParser()
 
 
 class ImageTags:
+    """
+    Check the tags of images in a JupyterHub config against the most recently
+    published version on a container repository and update if needed.
+    """
+
     def __init__(self, inputs, branch):
         self.inputs = inputs
         self.branch = branch
@@ -19,6 +24,14 @@ class ImageTags:
         self.image_tags = {}
 
     def _get_config(self, ref):
+        """Get the contents of a file in a GitHub repo over the API
+
+        Args:
+            ref (str): The reference (branch) the file is stored on
+
+        Returns:
+            dict: The JSON payload response of the request
+        """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
         resp = get_request(url, headers=self.headers, params=query, output="json")
@@ -30,6 +43,7 @@ class ImageTags:
         return yaml.yaml_string_to_object(resp), sha
 
     def _get_local_image_tags(self):
+        """Read the tags currently stored in a JupyterHub YAML config file"""
         for values_path in self.inputs.values_paths:
             value = read_config_with_jq(self.inputs.config, values_path)
 
@@ -53,6 +67,11 @@ class ImageTags:
                 continue
 
     def _get_most_recent_image_tag_dockerhub(self, image_name):
+        """For an image hosted on DockerHub, look up the most recent tag
+
+        Args:
+            image_name (str): The name of the image to look up tags for
+        """
         url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
         resp = get_request(url, output="json")
 
@@ -66,6 +85,11 @@ class ImageTags:
         self.image_tags[image_name]["latest"] = latest_tag
 
     def _get_most_recent_image_tag_quayio(self, image_name):
+        """For an image hosted on quay.io, look up the most recent tag
+
+        Args:
+            image_name (str): The name of the image to look up tags for
+        """
         url = "/".join(["https://quay.io/api/v1/repository", image_name])
         resp = get_request(url, output="json")
         tags = [resp["tags"][key] for key in resp["tags"].keys()]
@@ -85,6 +109,10 @@ class ImageTags:
         self.image_tags[image_name]["latest"] = latest_tag
 
     def _get_remote_tags(self):
+        """
+        Decipher which container registry an image is stored in and find its most
+        recent tags
+        """
         for image in self.image_tags.keys():
             if len(image.split("/")) == 2:
                 self._get_most_recent_image_tag_dockerhub(image)
@@ -101,6 +129,12 @@ class ImageTags:
                 continue
 
     def _compare_image_tags(self):
+        """Compare the image tags from the config file to those most recently
+        published on the container registry and ascertain if an image can be updated
+
+        Returns:
+            images_to_update (list): A list of docker images that need updating
+        """
         cond = [
             self.image_tags[image]["current"] != self.image_tags[image]["latest"]
             for image in self.image_tags.keys()
@@ -108,6 +142,11 @@ class ImageTags:
         return list(compress(self.image_tags.keys(), cond))
 
     def get_image_tags(self):
+        """
+        Get the image names and tags from a JupyterHub config file, the most recent
+        tag published in a container registry, and compare which images are out of
+        date
+        """
         self.inputs.config, self.inputs.sha = self._get_config()
         self._get_local_image_tags()
         self._get_remote_tags()

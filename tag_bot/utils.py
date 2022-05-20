@@ -5,7 +5,7 @@ from typing import Dict
 
 
 def update_config_with_jq(config: dict, var_path: str, new_var: str) -> Dict[str, str]:
-    """Run a jq command to update a variable in a dictionary given the keypath
+    """Run a jq command to update a variable in a JSON dictionary given the keypath
     to that variable.
 
     Args:
@@ -36,6 +36,17 @@ def update_config_with_jq(config: dict, var_path: str, new_var: str) -> Dict[str
 
 
 def read_config_with_jq(config: dict, var_path: str):
+    """Run a jq command to read a variable in a JSON dictionary given the keypath
+    to that variable.
+
+    Args:
+        config (dict): The JSON dictionary config to be read
+        var_path (str): The keypath to the variable that should be read
+
+    Returns:
+        (dict or str): The value stored at the provided keypath. If it is not a pure
+            string, the value will be parsed by a JSON library to return the object.
+    """
     cmd = ["jq", "-r", var_path]
 
     with tempfile.NamedTemporaryFile(mode="r+", suffix=".json") as fp:
