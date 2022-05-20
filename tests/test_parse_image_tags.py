@@ -1,268 +1,208 @@
+import unittest
 from unittest.mock import patch
 
-import pytest
-
-from tag_bot.parse_image_tags import (
-    get_deployed_image_tags,
-    get_image_tags,
-    get_most_recent_image_tags_dockerhub,
-    get_most_recent_image_tags_quayio,
-)
-
-test_url = "http://jsonplaceholder.typicode.com"
-test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
+from tag_bot.main import UpdateImageTags
+from tag_bot.parse_image_tags import ImageTags
 
 
-def test_get_deployed_image_tags_singleuser():
-    branch = "test_branch"
-    filepath = "config/test_config.yaml"
-    input_image_tags = {}
-
-    expected_image_tags = {
-        "image_owner/image_name": {"current": "image_tag", "is_profileList": False}
-    }
-
-    mock_get = patch(
-        "tag_bot.parse_image_tags.get_request",
-        return_value='{"singleuser": {"image": {"name": "image_owner/image_name", "tag": "image_tag"}}}',
-    )
-
-    with mock_get as mock:
-        output_image_tags = get_deployed_image_tags(
-            test_url, test_header, branch, filepath, input_image_tags
+class TestImageTags(unittest.TestCase):
+    def test_get_local_image_tags_singleuser(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
         )
-
-        assert mock.call_count == 1
-        mock.assert_called_with(
-            "/".join(
-                [
-                    test_url,
-                    branch,
-                    filepath,
-                ]
-            ),
-            headers=test_header,
-            output="text",
-        )
-        assert output_image_tags == expected_image_tags
-
-
-def test_get_deployed_image_tags_profileList():
-    branch = "test_branch"
-    filepath = "config/test_config.yaml"
-    input_image_tags = {}
-
-    expected_image_tags = {
-        "image_owner/image_name1": {"current": "image_tag1", "is_profileList": False},
-        "image_owner/image_name2": {"current": "image_tag2", "is_profileList": True},
-    }
-
-    mock_get = patch(
-        "tag_bot.parse_image_tags.get_request",
-        return_value="""{
+        image_parser = ImageTags(main, "main")
+        image_parser.inputs.config = {
             "singleuser": {
-                "image": {"name": "image_owner/image_name1", "tag": "image_tag1"},
+                "image": {
+                    "name": "image_owner/image_name",
+                    "tag": "image_tag",
+                }
+            }
+        }
+
+        expected_image_tags = {
+            "image_owner/image_name": {
+                "current": "image_tag",
+                "path": ".singleuser.image.tag",
+            }
+        }
+
+        image_parser._get_local_image_tags()
+
+        self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
+    def test_get_deployed_image_tags_profileList(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.profileList[0].kubespawner_override.image"],
+        )
+        image_parser = ImageTags(main, "main")
+        image_parser.inputs.config = {
+            "singleuser": {
                 "profileList": [
-                    {"default": true},
                     {
                         "kubespawner_override": {
-                            "image": "image_owner/image_name2:image_tag2"
+                            "image": "image_owner/image_name:image_tag"
                         }
-                    },
-                ],
-            },
-        }""",
-    )
-
-    with mock_get as mock:
-        output_image_tags = get_deployed_image_tags(
-            test_url, test_header, branch, filepath, input_image_tags
-        )
-
-        assert mock.call_count == 1
-        mock.assert_called_with(
-            "/".join(
-                [
-                    test_url,
-                    branch,
-                    filepath,
+                    }
                 ]
-            ),
-            headers=test_header,
-            output="text",
-        )
-        assert output_image_tags == expected_image_tags
-
-
-def test_get_most_recent_image_tags_dockerhub():
-    image = "image_owner/image_name"
-    input_image_tags = {"image_owner/image_name": {"current": "image_tag"}}
-
-    expected_image_tags = {
-        "image_owner/image_name": {
-            "current": "image_tag",
-            "latest": "new_image_tag",
-        }
-    }
-
-    mock_get = patch(
-        "tag_bot.parse_image_tags.get_request",
-        return_value={
-            "results": [
-                {
-                    "last_updated": "2021-09-27T16:00:00.000000Z",
-                    "name": "latest",
-                },
-                {
-                    "last_updated": "2021-09-27T15:59:00.000000Z",
-                    "name": "new_image_tag",
-                },
-                {
-                    "last_updated": "2021-08-27T16:00:00.000000Z",
-                    "name": "some_other_tag",
-                },
-            ]
-        },
-    )
-
-    with mock_get as mock:
-        output_image_tags = get_most_recent_image_tags_dockerhub(
-            image, input_image_tags
-        )
-
-        assert mock.call_count == 1
-        mock.assert_called_with(
-            "/".join(["https://hub.docker.com/v2/repositories", image, "tags"]),
-            output="json",
-        )
-        assert output_image_tags == expected_image_tags
-
-
-def test_get_most_recent_image_tags_quayio():
-    image = "image_owner/image_name"
-    input_image_tags = {"image_owner/image_name": {"current": "image_tag"}}
-
-    expected_image_tags = {
-        "image_owner/image_name": {
-            "current": "image_tag",
-            "latest": "new_image_tag",
-        }
-    }
-
-    mock_get = patch(
-        "tag_bot.parse_image_tags.get_request",
-        return_value={
-            "tags": {
-                "latest": {
-                    "last_modified": "Mon, 27 Sep 2021 16:00:00 -0000",
-                    "name": "latest",
-                },
-                "new_image_tag": {
-                    "last_modified": "Mon, 27 Sep 2021 15:59:00 -0000",
-                    "name": "new_image_tag",
-                },
-                "some_other_tag": {
-                    "last_modified": "Fri, 27 Aug 2021 16:00:00 -0000",
-                    "name": "some_other_tag",
-                },
             }
-        },
-    )
+        }
 
-    with mock_get as mock:
-        output_image_tags = get_most_recent_image_tags_quayio(image, input_image_tags)
+        expected_image_tags = {
+            "image_owner/image_name": {
+                "current": "image_tag",
+                "path": ".singleuser.profileList[0].kubespawner_override.image",
+            },
+        }
 
-        assert mock.call_count == 1
-        mock.assert_called_with(
-            "/".join(["https://quay.io/api/v1/repository", image]),
-            output="json",
+        image_parser._get_local_image_tags()
+
+        self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
+    def test_get_most_recent_image_tags_dockerhub(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
         )
-        assert output_image_tags == expected_image_tags
+        image_parser = ImageTags(main, "main")
+        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+        image = "image_owner/image_name"
 
-
-def test_get_image_tags():
-    branch = "test_branch"
-    filepath = "config/config.yaml"
-
-    mock_deployed_tags = patch(
-        "tag_bot.parse_image_tags.get_deployed_image_tags",
-        return_value={"image_owner/image_name": {"current": "image_tag"}},
-    )
-    mock_dockerhub_tags = patch(
-        "tag_bot.parse_image_tags.get_most_recent_image_tags_dockerhub",
-        return_value={
+        expected_image_tags = {
             "image_owner/image_name": {
                 "current": "image_tag",
                 "latest": "new_image_tag",
             }
-        },
-    )
-
-    expected_image_tags = {
-        "image_owner/image_name": {
-            "current": "image_tag",
-            "latest": "new_image_tag",
         }
-    }
 
-    with mock_deployed_tags as mock1, mock_dockerhub_tags as mock2:
-        image_tags = get_image_tags(test_url, test_header, branch, filepath)
-
-        assert mock1.call_count == 1
-        mock1.assert_called_with(
-            test_url,
-            test_header,
-            branch,
-            filepath,
-            {},
-        )
-        assert mock2.call_count == 1
-        mock2.assert_called_with(
-            "image_owner/image_name",
-            mock1.return_value,
-        )
-        assert image_tags == expected_image_tags
-
-
-def test_get_image_tags_not_implemented_error():
-    branch = "test_branch"
-    filepath = "config/config.yaml"
-
-    mock_deployed_tags = patch(
-        "tag_bot.parse_image_tags.get_deployed_image_tags",
-        return_value={"gcr.io/image_owner/image_name": {"current": "image_tag"}},
-    )
-
-    with mock_deployed_tags as mock1, pytest.raises(NotImplementedError):
-        _ = get_image_tags(test_url, test_header, branch, filepath)
-
-        assert mock1.call_count == 1
-        mock1.assert_called_with(
-            test_url,
-            test_header,
-            branch,
-            filepath,
-            {},
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value={
+                "results": [
+                    {
+                        "last_updated": "2021-09-27T16:00:00.000000Z",
+                        "name": "latest",
+                    },
+                    {
+                        "last_updated": "2021-09-27T15:59:00.000000Z",
+                        "name": "new_image_tag",
+                    },
+                    {
+                        "last_updated": "2021-08-27T16:00:00.000000Z",
+                        "name": "some_other_tag",
+                    },
+                ]
+            },
         )
 
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_dockerhub(image)
 
-def test_get_image_tags_value_error():
-    branch = "test_branch"
-    filepath = "config/config.yaml"
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join(["https://hub.docker.com/v2/repositories", image, "tags"]),
+                output="json",
+            )
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
 
-    mock_deployed_tags = patch(
-        "tag_bot.parse_image_tags.get_deployed_image_tags",
-        return_value={"image_name": {"current": "image_tag"}},
-    )
-
-    with mock_deployed_tags as mock1, pytest.raises(ValueError):
-        _ = get_image_tags(test_url, test_header, branch, filepath)
-
-        assert mock1.call_count == 1
-        mock1.assert_called_with(
-            test_url,
-            test_header,
-            branch,
-            filepath,
-            {},
+    def test_get_most_recent_image_tags_quayio(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
         )
+        image_parser = ImageTags(main, "main")
+        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+        image = "image_owner/image_name"
+
+        expected_image_tags = {
+            "image_owner/image_name": {
+                "current": "image_tag",
+                "latest": "new_image_tag",
+            }
+        }
+
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value={
+                "tags": {
+                    "latest": {
+                        "last_modified": "Mon, 27 Sep 2021 16:00:00 -0000",
+                        "name": "latest",
+                    },
+                    "new_image_tag": {
+                        "last_modified": "Mon, 27 Sep 2021 15:59:00 -0000",
+                        "name": "new_image_tag",
+                    },
+                    "some_other_tag": {
+                        "last_modified": "Fri, 27 Aug 2021 16:00:00 -0000",
+                        "name": "some_other_tag",
+                    },
+                }
+            },
+        )
+
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_quayio(image)
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join(["https://quay.io/api/v1/repository", image]),
+                output="json",
+            )
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
+    def test_compare_image_tags_match(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
+        image_parser = ImageTags(main, "main")
+        image_parser.image_tags = {
+            "image_name": {
+                "current": "image_name",
+                "latest": "image_name",
+            }
+        }
+
+        expected = []
+
+        result = image_parser._compare_image_tags()
+
+        self.assertEqual(result, expected)
+
+    def test_compare_image_tags_no_match(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
+        image_parser = ImageTags(main, "main")
+        image_parser.image_tags = {
+            "image_name": {
+                "current": "image_name",
+                "latest": "new_image_name",
+            }
+        }
+
+        expected = ["image_name"]
+
+        result = image_parser._compare_image_tags()
+
+        self.assertEqual(result, expected)
+
+
+if __name__ == "__main__":
+    unittest.main()

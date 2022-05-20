@@ -2,7 +2,7 @@ import pytest
 import requests
 import responses
 
-from tag_bot.http_requests import get_request, post_request
+from tag_bot.http_requests import get_request, patch_request, post_request
 
 test_url = "http://jsonplaceholder.typicode.com/"
 test_header = {"Authorization": "token ThIs_Is_A_ToKeN"}
@@ -85,6 +85,40 @@ def test_post_request_exception():
 
     with pytest.raises(requests.HTTPError):
         post_request(test_url, headers=test_header, json=test_body)
+
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url == test_url
+
+
+@responses.activate
+def test_patch_request():
+    responses.add(responses.PATCH, test_url, status=200)
+
+    patch_request(test_url, headers=test_header, json=test_body)
+
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url == test_url
+
+
+@responses.activate
+def test_patch_request_return_json():
+    responses.add(responses.PATCH, test_url, json={"Request": "Sent"}, status=200)
+
+    resp = patch_request(
+        test_url, headers=test_header, json=test_body, return_json=True
+    )
+
+    assert len(responses.calls) == 1
+    assert responses.calls[0].request.url == test_url
+    assert resp == {"Request": "Sent"}
+
+
+@responses.activate
+def test_patch_request_exception():
+    responses.add(responses.PATCH, test_url, status=500)
+
+    with pytest.raises(requests.HTTPError):
+        patch_request(test_url, headers=test_header, json=test_body)
 
     assert len(responses.calls) == 1
     assert responses.calls[0].request.url == test_url
