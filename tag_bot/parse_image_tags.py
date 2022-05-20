@@ -1,156 +1,115 @@
+import warnings
 from datetime import datetime
-
-from loguru import logger
+from itertools import compress
 
 from .http_requests import get_request
+from .utils import read_config_with_jq
 from .yaml_parser import YamlParser
-
-API_ROOT = "https://api.github.com"
-RAW_ROOT = "https://raw.githubusercontent.com"
-DOCKERHUB_ROOT = "https://hub.docker.com/v2/repositories"
-QUAYIO_ROOT = "https://quay.io/api/v1/repository"
 
 yaml = YamlParser()
 
 
-def get_deployed_image_tags(
-    api_url: str,
-    header: dict,
-    branch: str,
-    filepath: str,
-    image_tags: dict,
-) -> dict:
-    """Read the tags of the deployed images from a YAML config file
-
-    Args:
-        api_url (str): The URL to send the request to
-        header (dict): A dictionary of headers to send with the request. Must
-            contain and authorisation token.
-        branch (str): The branch the config file is located on
-        filepath (str): The path to the config file
-        image_tags (dict): A dictionary to store the image information in
-
-    Returns:
-        image_tags (dict): A dictionary containing info on the images currently
-            deployed
-    """
-    api_url = api_url.replace(API_ROOT + "/repos", RAW_ROOT)
-    url = "/".join([api_url, branch, filepath])
-    resp = get_request(url, headers=header, output="text")
-    config = yaml.yaml_string_to_object(resp)
-
-    if "singleuser" in config.keys():
-        image_tags[config["singleuser"]["image"]["name"]] = {
-            "current": config["singleuser"]["image"]["tag"],
-            "is_profileList": False,
-        }
-
-        if "profileList" in config["singleuser"].keys():
-            for image in config["singleuser"]["profileList"]:
-                if "kubespawner_override" in image.keys():
-                    image_name, image_tag = image["kubespawner_override"][
-                        "image"
-                    ].split(":")
-                    image_tags[image_name] = {
-                        "current": image_tag,
-                        "is_profileList": True,
-                    }
-
-    return image_tags
-
-
-def get_most_recent_image_tags_dockerhub(image_name: str, image_tags: dict) -> dict:
-    """For an image hosted on DockerHub, look up the most recent tag
-
-    Args:
-        image_name (str): The name of the image to look up tags for
-        image_tags (dict): A dictionary to store the most recent tag in
-
-    Returns:
-        image_tags (dict): A dictionary containing info on the images and their
-            most recent tags
-    """
-    url = "/".join([DOCKERHUB_ROOT, image_name, "tags"])
-    resp = get_request(url, output="json")
-
-    tags_sorted = sorted(resp["results"], key=lambda k: k["last_updated"])
-
-    if tags_sorted[-1]["name"] == "latest":
-        new_tag = tags_sorted[-2]["name"]
-    else:
-        new_tag = tags_sorted[-1]["name"]
-
-    image_tags[image_name]["latest"] = new_tag
-
-    return image_tags
-
-
-def get_most_recent_image_tags_quayio(image_name: str, image_tags: dict) -> dict:
-    """For an image hosted on quay.io, look up the most recent tag
-
-    Args:
-        image_name (str): The name of the image to look up tags for
-        image_tags (dict): A dictionary to store the most recent tag in
-
-    Returns:
-        image_tags (dict): A dictionary containing info on the images and their
-            most recent tags
-    """
-    url = "/".join([QUAYIO_ROOT, image_name])
-    resp = get_request(url, output="json")
-    tags = [resp["tags"][key] for key in resp["tags"].keys()]
-
-    for tag in tags:
-        tag["last_modified"] = datetime.strptime(
-            tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
+class ImageTags:
+    def __init__(self, inputs, branch):
+        self.inputs = inputs
+        self.branch = branch
+        self.github_api_url = "/".join(
+            ["https://api.github.com", "repos", self.inputs.repository]
         )
+        self.image_tags = {}
 
-    tags_sorted = sorted(tags, key=lambda k: k["last_modified"])
+    def _get_config(self, ref):
+        url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
+        query = {"ref": ref}
+        resp = get_request(url, headers=self.headers, params=query, output="json")
 
-    if tags_sorted[-1]["name"] == "latest":
-        new_tag = tags_sorted[-2]["name"]
-    else:
-        new_tag = tags_sorted[-1]["name"]
+        download_url = resp["download_url"]
+        sha = resp["sha"]
 
-    image_tags[image_name]["latest"] = new_tag
+        resp = get_request(download_url, headers=self.headers, output="text")
+        return yaml.yaml_string_to_object(resp), sha
 
-    return image_tags
+    def _get_local_image_tags(self):
+        for values_path in self.inputs.values_paths:
+            value = read_config_with_jq(self.inputs.config, values_path)
 
-
-def get_image_tags(api_url: str, header: dict, branch: str, filepath: str) -> dict:
-    """Get the image names and tags that are deployed in a config file
-
-    Args:
-        api_url (str): The URL to send the request to
-        header (dict): A dictionary of headers to send with the request. Must
-            contain and authorisation token.
-        branch (str): The name of the branch on which the config file is located
-        filepath (str): The path to the config file relative to the root of the
-            repo
-
-    Returns:
-        image_tags (dict): A dictionary containing the names and tags, both
-            currently deployed and most recently released
-    """
-    image_tags: dict[str, str] = {}
-
-    logger.info("Fetching currently deployed image tags...")
-    image_tags = get_deployed_image_tags(api_url, header, branch, filepath, image_tags)
-
-    logger.info("Fetching most recently published image tags...")
-    for image in image_tags.keys():
-        if len(image.split("/")) == 2:
-            image_tags = get_most_recent_image_tags_dockerhub(image, image_tags)
-        elif len(image.split("/")) > 2:
-            if image.split("/")[0] == "quay.io":
-                image_tags = get_most_recent_image_tags_quayio(
-                    "/".join(image.split("/")[1:]), image_tags
-                )
+            if (
+                isinstance(value, dict)
+                and ("name" in value.keys())
+                and ("tag" in value.keys())
+            ):
+                path = values_path + ".tag"
+                self.image_tags[value["name"]] = {
+                    "current": value["tag"],
+                    "path": path,
+                }
+            elif isinstance(value, str):
+                name, tag = value.split(":")
+                self.image_tags[name] = {"current": tag, "path": values_path}
             else:
-                raise NotImplementedError(
-                    "Cannot currently retrieve images from: %s" % image.split("/")[0]
+                warnings.warn(
+                    f"Unknown image definition in path. Skipping for now. {values_path}"
                 )
-        else:
-            raise ValueError("Unknown image name: %s" % image)
+                continue
 
-    return image_tags
+    def _get_most_recent_image_tag_dockerhub(self, image_name):
+        url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
+        resp = get_request(url, output="json")
+
+        tags_sorted = sorted(resp["results"], key=lambda k: k["last_updated"])
+
+        if tags_sorted[-1]["name"] == "latest":
+            latest_tag = tags_sorted[-2]["name"]
+        else:
+            latest_tag = tags_sorted[-1]["name"]
+
+        self.image_tags[image_name]["latest"] = latest_tag
+
+    def _get_most_recent_image_tag_quayio(self, image_name):
+        url = "/".join(["https://quay.io/api/v1/repository", image_name])
+        resp = get_request(url, output="json")
+        tags = [resp["tags"][key] for key in resp["tags"].keys()]
+
+        for tag in tags:
+            tag["last_modified"] = datetime.strptime(
+                tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
+            )
+
+        tags_sorted = sorted(tags, key=lambda k: k["last_modified"])
+
+        if tags_sorted[-1]["name"] == "latest":
+            latest_tag = tags_sorted[-2]["name"]
+        else:
+            latest_tag = tags_sorted[-1]["name"]
+
+        self.image_tags[image_name]["latest"] = latest_tag
+
+    def _get_remote_tags(self):
+        for image in self.image_tags.keys():
+            if len(image.split("/")) == 2:
+                self._get_most_recent_image_tag_dockerhub(image)
+            elif len(image.split("/")) > 2:
+                if image.split("/")[0] == "quay.io":
+                    self._get_most_recent_image_tag_quayio(image)
+                else:
+                    warnings.warn(
+                        f"NotImplemented: Cannot currently retrieve image from {image.split('/')[0]}"
+                    )
+                    continue
+            else:
+                warnings.warn(f"UnknownImage: Cannot recognise image {image}")
+                continue
+
+    def _compare_image_tags(self):
+        cond = [
+            self.image_tags[image]["current"] != self.image_tags[image]["latest"]
+            for image in self.image_tags.keys()
+        ]
+        return list(compress(self.image_tags.keys(), cond))
+
+    def get_image_tags(self):
+        self.inputs.config, self.inputs.sha = self._get_config()
+        self._get_local_image_tags()
+        self._get_remote_tags()
+        self.inputs.images_to_update = self._compare_image_tags()
+        self.inputs.image_tags = self.image_tags
