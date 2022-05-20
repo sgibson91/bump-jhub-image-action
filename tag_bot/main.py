@@ -1,6 +1,5 @@
 import base64
 import os
-from typing import List
 
 from .github_api import GitHubAPI
 from .parse_image_tags import ImageTags
@@ -91,7 +90,7 @@ class UpdateImageTags:
         github.create_update_pull_request()
 
 
-def split_str_to_list(input_str: str, split_char: str = " ") -> List[str]:
+def split_str_to_list(input_str, split_char=" "):
     """Split a string into a list of elements.
 
     Args:

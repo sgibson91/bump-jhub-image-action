@@ -1,10 +1,9 @@
 import json
 import subprocess
 import tempfile
-from typing import Dict
 
 
-def update_config_with_jq(config: dict, var_path: str, new_var: str) -> Dict[str, str]:
+def update_config_with_jq(config, var_path, new_var):
     """Run a jq command to update a variable in a JSON dictionary given the keypath
     to that variable.
 
