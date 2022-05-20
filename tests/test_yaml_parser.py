@@ -1,4 +1,5 @@
 import unittest
+
 from tag_bot.yaml_parser import YamlParser
 
 

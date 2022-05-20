@@ -128,7 +128,9 @@ def main():
         os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else "main"
     )
     head_branch = (
-        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else "bump-image-tags"
+        os.environ["INPUT_HEAD_BRANCH"]
+        if "INPUT_HEAD_BRANCH" in os.environ
+        else "bump-image-tags"
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
