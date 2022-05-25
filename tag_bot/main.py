@@ -84,11 +84,14 @@ class UpdateImageTags:
 
         image_parser.get_image_tags()
 
-        updated_config = self.update_config()
-        commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
-        github.create_commit(commit_msg, updated_config)
-        github.create_update_pull_request()
+        if len(self.images_to_update) > 0 and not self.dry_run:
+            updated_config = self.update_config()
+            commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
+            github.create_commit(commit_msg, updated_config)
+            github.create_update_pull_request()
 
+        elif len(self.images_to_update) > 0 and self.dry_run:
+            logger.info(
 
 def split_str_to_list(input_str, split_char=" "):
     """Split a string into a list of elements.
