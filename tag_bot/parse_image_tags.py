@@ -2,6 +2,8 @@ import warnings
 from datetime import datetime
 from itertools import compress
 
+from loguru import logger
+
 from .http_requests import get_request
 from .utils import read_config_with_jq
 from .yaml_parser import YamlParser
@@ -44,6 +46,7 @@ class ImageTags:
 
     def _get_local_image_tags(self):
         """Read the tags currently stored in a JupyterHub YAML config file"""
+        logger.info("Fetching current image tags from config...")
         for values_path in self.inputs.values_paths:
             value = read_config_with_jq(self.inputs.config, values_path)
 
@@ -113,6 +116,7 @@ class ImageTags:
         Decipher which container registry an image is stored in and find its most
         recent tags
         """
+        logger.info("Fetching most recently published image tags...")
         for image in self.image_tags.keys():
             if len(image.split("/")) == 2:
                 self._get_most_recent_image_tag_dockerhub(image)

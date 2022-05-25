@@ -2,6 +2,7 @@ import random
 import string
 
 import jmespath
+from loguru import logger
 from requests import put
 
 from .http_requests import get_request, patch_request, post_request
@@ -24,6 +25,8 @@ class GitHubAPI:
             pr_url (str): The API URL of the Pull Request (issues endpoint) to
                 send the request to
         """
+        logger.info("Assigning labels to Pull Request: {}", pr_url)
+        logger.info("Assigning labels: {}", self.inputs.labels)
         url = "/".join([pr_url, "labels"])
         post_request(
             url, headers=self.inputs.headers, json={"labels": self.inputs.labels}
@@ -36,6 +39,13 @@ class GitHubAPI:
             pr_url (str): The API URL of the Pull Request (pulls endpoint) to send
                 the request to
         """
+        logger.info("Assigning reviewers to Pull Request: {}", pr_url)
+
+        if self.inputs.reviewers:
+            logger.info("Assigning reviewers: {}", self.inputs.reviewers)
+        if self.inputs.team_reviewers:
+            logger.info("Assigning team reviewers: {}", self.inputs.team_reviewers)
+
         url = "/".join([pr_url, "requested_reviewers"])
         post_request(
             url,
@@ -53,6 +63,7 @@ class GitHubAPI:
             commit_msg (str): A message describing the changes the commit applies
             content (str): The content of the file to be updated, encoded in base64
         """
+        logger.info("Committing changes to file: {}", self.inputs.config_path)
         url = "/".join([self.api_url, "contents", self.inputs.config_path])
         body = {
             "message": commit_msg,
@@ -70,6 +81,7 @@ class GitHubAPI:
             ref (str): The reference or branch name to create
             sha (str): The SHA of the parent commit to point the new reference to
         """
+        logger.info("Creating new branch: {}", ref)
         url = "/".join([self.api_url, "git", "refs"])
         body = {
             "ref": f"refs/heads/{ref}",
@@ -95,15 +107,23 @@ class GitHubAPI:
         }
 
         if self.pr_exists:
+            logger.info("Updating Pull Request...")
+
             pr["state"] = "open"
             resp = patch_request(
                 url, headers=self.inputs.headers, json=pr, return_json=True
             )
+
+            logger.info(f"Pull Request #{resp['number']} updated!")
         else:
+            logger.info("Creating Pull Request...")
+
             pr["head"] = self.inputs.head_branch
             resp = post_request(
                 url, headers=self.inputs.headers, json=pr, return_json=True
             )
+
+            logger.info(f"Pull Request #{resp['number']} created!")
 
             if self.inputs.labels:
                 self._assign_labels(resp["issue_url"])
@@ -113,6 +133,8 @@ class GitHubAPI:
 
     def find_existing_pull_request(self):
         """Check if the bot already has an open Pull Request"""
+        logger.info("Finding Pull Requests previously opened...")
+
         url = "/".join([self.api_url, "pulls"])
         params = {"state": "open", "sort": "created", "direction": "desc"}
         resp = get_request(
@@ -124,9 +146,13 @@ class GitHubAPI:
         matches = [label for label in matches if self.inputs.head_branch in label]
 
         if (len(matches) > 1) or (len(matches) == 1):
+            logger.info("Pull Request found!")
             self.inputs.head_branch = matches[0].split(":")[-1]
             self.pr_exists = True
         else:
+            logger.info(
+                "No relevant Pull Requests found. A new Pull Request will be opened."
+            )
             random_id = "".join(random.sample(string.ascii_letters, 4))
             self.inputs.head_branch = "-".join([self.inputs.head_branch, random_id])
             self.pr_exists = False
@@ -141,5 +167,6 @@ class GitHubAPI:
         Returns:
             dict: The JSON payload response of the request
         """
+        logger.info("Pulling info for ref: {}", ref)
         url = "/".join([self.api_url, "git", "ref", "heads", ref])
         return get_request(url, headers=self.inputs.headers, output="json")
