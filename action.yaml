@@ -11,6 +11,11 @@ inputs:
       Path to the JupyterHub configuration file relative to the root of the
       repository.
     required: true
+  values_paths:
+    description: |
+      A list of space-delimited JMESPath expressions that describe the location of
+      images to check in the JupyterHub configuration file.
+    required: true
   github_token:
     description: |
       A GitHub token to make requests to the API with. Requires write
