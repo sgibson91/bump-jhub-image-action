@@ -51,7 +51,7 @@ class UpdateImageTags:
         """
         logger.info("Updating JupyterHub config...")
         for image in self.images_to_update:
-            logger.info("Updating tag for image: {}", self.images[image])
+            logger.info("Updating tag for image: {}", self.image_tags[image])
             value = read_config_with_jq(self.config, self.image_tags[image]["path"])
 
             if ":" in value:
