@@ -1,6 +1,8 @@
 import base64
 import os
 
+from loguru import logger
+
 from .github_api import GitHubAPI
 from .parse_image_tags import ImageTags
 from .utils import read_config_with_jq, update_config_with_jq
@@ -47,7 +49,9 @@ class UpdateImageTags:
             file_contents (str): The updated JupyterHub config in YAML format and
                 encoded in base64
         """
+        logger.info("Updating JupyterHub config...")
         for image in self.images_to_update:
+            logger.info("Updating tag for image: {}", self.image_tags[image])
             value = read_config_with_jq(self.config, self.image_tags[image]["path"])
 
             if ":" in value:
@@ -63,6 +67,7 @@ class UpdateImageTags:
                     self.image_tags[image]["latest"],
                 )
 
+        logger.info("Encoding config in base64...")
         encoded_config = yaml.object_to_yaml_str(self.config).encode("utf-8")
         base64_bytes = base64.b64encode(encoded_config)
         config = base64_bytes.decode("utf-8")
@@ -84,10 +89,24 @@ class UpdateImageTags:
 
         image_parser.get_image_tags()
 
-        updated_config = self.update_config()
-        commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
-        github.create_commit(commit_msg, updated_config)
-        github.create_update_pull_request()
+        if len(self.images_to_update) > 0 and not self.dry_run:
+            logger.info(
+                "Newer tags are available for the following images: {}",
+                self.images_to_update,
+            )
+
+            updated_config = self.update_config()
+            commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
+            github.create_commit(commit_msg, updated_config)
+            github.create_update_pull_request()
+
+        elif len(self.images_to_update) > 0 and self.dry_run:
+            logger.info(
+                "Newer tags are available for the following images: {}. Pull Request will not be opened due to --dry-run flag being set.",
+                self.images_to_update,
+            )
+        else:
+            logger.info("All image tags are up-to-date!")
 
 
 def split_str_to_list(input_str, split_char=" "):
