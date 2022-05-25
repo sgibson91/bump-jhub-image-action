@@ -91,7 +91,8 @@ class UpdateImageTags:
 
         if len(self.images_to_update) > 0 and not self.dry_run:
             logger.info(
-                "Newer tags are available for the following images: {}", self.images_to_update
+                "Newer tags are available for the following images: {}",
+                self.images_to_update,
             )
 
             updated_config = self.update_config()
