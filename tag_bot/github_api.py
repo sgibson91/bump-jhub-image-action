@@ -16,6 +16,7 @@ class GitHubAPI:
         self.api_url = "/".join(
             ["https://api.github.com", "repos", self.inputs.repository]
         )
+        self.fork_exists = False
 
     def _assign_labels(self, pr_url):
         """Assign labels to an open Pull Request. The labels must already exist in
@@ -56,15 +57,36 @@ class GitHubAPI:
             json=body,
         )
 
+    def check_fork_exists(self):
+        """
+        Check if the authenticated user (the owner of GITHUB_TOKEN stored in
+        self.inputs.headers) has a fork of the parent repository or not
+        """
+        url = "/".join([self.api_url, "forks"])
+        resp = get_request(url, headers=self.inputs.headers, output="json")
+
+        forks = jmespath.search("[*].full_name", resp)
+
+        for fork in forks:
+            self.fork_exists = self.inputs.push_to_users_fork in fork
+            if self.fork_exists:
+                break
+
     def create_commit(self, commit_msg, content):
-        """Create a commit over the GitHub API by creating or updating a file
+        """Create a commit over the GitHub API by creating or updating a file. Pushes
+        the commit to a branch on the parent repository or a fork if one exists.
 
         Args:
             commit_msg (str): A message describing the changes the commit applies
             content (str): The content of the file to be updated, encoded in base64
         """
         logger.info("Committing changes to file: {}", self.inputs.config_path)
-        url = "/".join([self.api_url, "contents", self.inputs.config_path])
+
+        if self.fork_exists and (self.inputs.push_to_users_fork is not None):
+            url = "/".join([self.fork_api_url, "contents", self.inputs.config_path])
+        else:
+            url = "/".join([self.api_url, "contents", self.inputs.config_path])
+
         body = {
             "message": commit_msg,
             "content": content,
@@ -73,16 +95,39 @@ class GitHubAPI:
         }
         put(url, json=body, headers=self.inputs.headers)
 
+    def create_fork(self):
+        """
+        Create a fork of the defined repository in a user's account. The owner of the
+        fork is determined by the owner of GITHUB_TOKEN stored in self.inputs.headers.
+        """
+        url = "/".join([self.api_url, "forks"])
+        post_request(url, headers=self.inputs.headers)
+
+        self.fork_api_url = "/".join(
+            [
+                "https://api.github.com",
+                "repos",
+                self.inputs.push_to_users_fork,
+                self.inputs.repository.split("/")[-1],
+            ]
+        )
+
     def create_ref(self, ref, sha):
-        """Create a new git reference (specifically, a branch) with GitHub's git database API
-        endpoint
+        """Create a new git reference (specifically, a branch) with GitHub's git database
+        API endpoint. The branch can be created in the original repository or a fork if
+        one exists.
 
         Args:
             ref (str): The reference or branch name to create
             sha (str): The SHA of the parent commit to point the new reference to
         """
         logger.info("Creating new branch: {}", ref)
-        url = "/".join([self.api_url, "git", "refs"])
+
+        if self.fork_exists and (self.inputs.push_to_users_fork is not None):
+            url = "/".join([self.fork_api_url, "git", "refs"])
+        else:
+            url = "/".join([self.api_url, "git", "refs"])
+
         body = {
             "ref": f"refs/heads/{ref}",
             "sha": sha,
@@ -90,7 +135,7 @@ class GitHubAPI:
         post_request(url, headers=self.inputs.headers, json=body)
 
     def create_update_pull_request(self):
-        """Credate or update a Pull Request via the GitHub API"""
+        """Create or update a Pull Request via the GitHub API"""
         url = "/".join([self.api_url, "pulls"])
         pr = {
             "title": "Bumping Docker image tags in JupyterHub config",
@@ -118,7 +163,13 @@ class GitHubAPI:
         else:
             logger.info("Creating Pull Request...")
 
-            pr["head"] = self.inputs.head_branch
+            if self.fork_exists and (self.inputs.push_to_users_fork is not None):
+                pr["head"] = ":".join(
+                    [self.inputs.push_to_users_fork, self.inputs.head_branch]
+                )
+            else:
+                pr["head"] = self.inputs.head_branch
+
             resp = post_request(
                 url, headers=self.inputs.headers, json=pr, return_json=True
             )
@@ -141,8 +192,7 @@ class GitHubAPI:
             url, headers=self.inputs.headers, params=params, output="json"
         )
 
-        head_label_exp = jmespath.compile("[*].head.label")
-        matches = head_label_exp.search(resp)
+        matches = jmespath.search("[*].head.label", resp)
         matches = [label for label in matches if self.inputs.head_branch in label]
 
         if (len(matches) > 1) or (len(matches) == 1):
@@ -168,5 +218,19 @@ class GitHubAPI:
             dict: The JSON payload response of the request
         """
         logger.info("Pulling info for ref: {}", ref)
-        url = "/".join([self.api_url, "git", "ref", "heads", ref])
+
+        if self.fork_exists and (self.inputs.push_to_users_fork is not None):
+            url = "/".join([self.fork_api_url, "git", "ref", "heads", ref])
+        else:
+            url = "/".join([self.api_url, "git", "ref", "heads", ref])
+
         return get_request(url, headers=self.inputs.headers, output="json")
+
+    def merge_upstream(self):
+        """
+        Ensure the default branch of a fork is synced with the default branch of the
+        original repository.
+        """
+        url = "/".join([self.fork_api_url, "merge-upstream"])
+        body = {"branch": self.inputs.base_branch}
+        post_request(url, headers=self.inputs.headers, json=body)
