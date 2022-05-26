@@ -40,20 +40,20 @@ class GitHubAPI:
                 the request to
         """
         logger.info("Assigning reviewers to Pull Request: {}", pr_url)
+        body = {}
 
         if self.inputs.reviewers:
             logger.info("Assigning reviewers: {}", self.inputs.reviewers)
+            body["reviewers"] = self.inputs.reviewers
         if self.inputs.team_reviewers:
             logger.info("Assigning team reviewers: {}", self.inputs.team_reviewers)
+            body["team_reviewers"] = self.inputs.team_reviewers
 
         url = "/".join([pr_url, "requested_reviewers"])
         post_request(
             url,
             headers=self.inputs.headers,
-            json={
-                "reviewers": self.inputs.reviewers,
-                "team_reviewers": self.inputs.team_reviewers,
-            },
+            json=body,
         )
 
     def create_commit(self, commit_msg, content):
