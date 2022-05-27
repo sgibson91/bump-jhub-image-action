@@ -9,7 +9,7 @@ from .http_requests import get_request, patch_request, post_request
 
 
 class GitHubAPI:
-    """Interact with the GitHub API and perform varios git-flow tasks"""
+    """Interact with the GitHub API and perform various git-flow tasks"""
 
     def __init__(self, inputs):
         self.inputs = inputs

@@ -24,13 +24,14 @@ class ImageTags:
         self.image_tags = {}
 
     def _get_config(self, ref):
-        """Get the contents of a file in a GitHub repo over the API
+        """Get the contents of a JupyterHub YAML config file in a GitHub repo over the API
 
         Args:
             ref (str): The reference (branch) the file is stored on
 
         Returns:
-            dict: The JSON payload response of the request
+            config (dict): The JupyterHub YAML config
+            sha (str): The SHA of the file
         """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
@@ -151,7 +152,7 @@ class ImageTags:
         tag published in a container registry, and compare which images are out of
         date
         """
-        self.inputs.config, self.inputs.sha = self._get_config()
+        self.inputs.config, self.inputs.sha = self._get_config(self.branch)
         self._get_local_image_tags()
         self._get_remote_tags()
         self.inputs.images_to_update = self._compare_image_tags()
