@@ -205,7 +205,9 @@ class TestImageTags(unittest.TestCase):
 
     @patch("tag_bot.parse_image_tags.get_request")
     def test_get_config(self, mock_get):
-        main = UpdateImageTags("octocat/octocat", "t0k3n", "config/config.yaml", [".singleuser.image"])
+        main = UpdateImageTags(
+            "octocat/octocat", "t0k3n", "config/config.yaml", [".singleuser.image"]
+        )
         image_parser = ImageTags(main, main.repository, main.base_branch)
 
         mock_get.side_effect = [

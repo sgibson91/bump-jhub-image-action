@@ -34,7 +34,9 @@ class ImageTags:
         """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
-        resp = get_request(url, headers=self.inputs.headers, params=query, output="json")
+        resp = get_request(
+            url, headers=self.inputs.headers, params=query, output="json"
+        )
 
         download_url = resp["download_url"]
         sha = resp["sha"]
