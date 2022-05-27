@@ -24,13 +24,14 @@ class ImageTags:
         self.image_tags = {}
 
     def _get_config(self, ref):
-        """Get the contents of a file in a GitHub repo over the API
+        """Get the contents of a JupyterHub YAML config file in a GitHub repo over the API
 
         Args:
             ref (str): The reference (branch) the file is stored on
 
         Returns:
-            dict: The JSON payload response of the request
+            config (dict): The JupyterHub YAML config
+            sha (str): The SHA of the file
         """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
