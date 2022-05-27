@@ -50,6 +50,26 @@ class TestGitHubAPI(unittest.TestCase):
                 json={"reviewers": main.reviewers},
             )
 
+    def test_assign_team_reviewers(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "token ThIs_Is_A_ToKeN",
+            "config/config.yaml",
+            [".singleuser.image"],
+            team_reviewers=["team1", "team2"],
+        )
+        github = GitHubAPI(main)
+        pr_url = "/".join([github.api_url, "pull", "1"])
+
+        with patch("tag_bot.github_api.post_request") as mock:
+            github._assign_reviewers(pr_url)
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join([pr_url, "requested_reviewers"]),
+                headers=main.headers,
+                json={"team_reviewers": main.team_reviewers},
+            )
+
     def test_create_pr_no_labels_no_reviewers(self):
         main = UpdateImageTags(
             "octocat/octocat",
@@ -507,6 +527,105 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertDictEqual(resp, {"object": {"sha": "sha"}})
+
+    def test_check_fork_exists_true(self):
+        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        github = GitHubAPI(main)
+        main.push_to_users_fork = "user1/octocat"
+
+        mock_get = patch("tag_bot.github_api.get_request", return_value=[{"full_name": "user1/octocat"}])
+
+        with mock_get as mock:
+            github.check_fork_exists()
+
+            self.assertTrue(github.fork_exists)
+            mock.assert_called_with(
+                "/".join([github.api_url, "forks"]),
+                headers=main.headers,
+                output="json",
+            )
+
+    def test_check_fork_exists_false(self):
+        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        github = GitHubAPI(main)
+        main.push_to_users_fork = "user1/octocat"
+
+        mock_get = patch("tag_bot.github_api.get_request", return_value=[{"full_name": "user2/octocat"}])
+
+        with mock_get as mock:
+            github.check_fork_exists()
+
+            self.assertFalse(github.fork_exists)
+            mock.assert_called_with(
+                "/".join([github.api_url, "forks"]),
+                headers=main.headers,
+                output="json",
+            )
+
+    def test_create_fork(self):
+        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"], push_to_users_fork="user1")
+        github = GitHubAPI(main)
+
+        mock_post = patch("tag_bot.github_api.post_request")
+
+        with mock_post as mock:
+            github.create_fork()
+
+            mock.assert_called_with(
+                "/".join([github.api_url, "forks"]),
+                headers=main.headers,
+            )
+
+    def test_merge_upstream(self):
+        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        github = GitHubAPI(main)
+        github.fork_api_url = "/".join(["https://api.github.com", "repos", "user", "octocat"])
+
+        mock_post = patch("tag_bot.github_api.post_request")
+
+        with mock_post as mock:
+            github.merge_upstream()
+
+            mock.assert_called_with(
+                "/".join([github.fork_api_url, "merge-upstream"]),
+                headers=main.headers,
+                json={"branch": main.base_branch},
+            )
+
+    def test_update_existing_pr(self):
+        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        github = GitHubAPI(main)
+        github.pr_exists = True
+        main.image_tags = {"image": {"current": "old_tag", "latest": "new_tag"}}
+        main.images_to_update = ["image"]
+
+        expected_pr = {
+            "title": "Bumping Docker image tags in JupyterHub config",
+            "body": (
+                "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+                + "\n".join(
+                    [
+                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        for image in main.images_to_update
+                    ]
+                )
+            ),
+            "base": main.base_branch,
+            "state": "open",
+        }
+
+        mock_patch = patch("tag_bot.github_api.patch_request", return_value={"number": 1})
+
+        with mock_patch as mock:
+            github.create_update_pull_request()
+
+            mock.assert_called_with(
+                "/".join([github.api_url, "pulls"]),
+                headers=main.headers,
+                json=expected_pr,
+                return_json=True,
+            )
+            self.assertEqual(mock.return_value, {"number": 1})
 
 
 if __name__ == "__main__":
