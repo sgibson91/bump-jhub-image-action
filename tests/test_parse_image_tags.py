@@ -203,6 +203,28 @@ class TestImageTags(unittest.TestCase):
 
         self.assertEqual(result, expected)
 
+    @patch("tag_bot.parse_image_tags.get_request")
+    def test_get_config(self, mock_get):
+        main = UpdateImageTags("octocat/octocat", "t0k3n", "config/config.yaml", [".singleuser.image"])
+        image_parser = ImageTags(main, main.repository, main.base_branch)
+
+        mock_get.side_effect = [
+            {
+                "download_url": "https://example.com",
+                "sha": "123456789",
+            },
+            "hello: world",
+        ]
+
+        expected_config = {"hello": "world"}
+        expected_sha = "123456789"
+
+        with mock_get as mock:
+            config, sha = image_parser._get_config(main.base_branch)
+
+            self.assertDictEqual(config, expected_config)
+            self.assertEqual(sha, expected_sha)
+
 
 if __name__ == "__main__":
     unittest.main()

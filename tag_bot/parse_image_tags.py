@@ -34,12 +34,12 @@ class ImageTags:
         """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
-        resp = get_request(url, headers=self.headers, params=query, output="json")
+        resp = get_request(url, headers=self.inputs.headers, params=query, output="json")
 
         download_url = resp["download_url"]
         sha = resp["sha"]
 
-        resp = get_request(download_url, headers=self.headers, output="text")
+        resp = get_request(download_url, headers=self.inputs.headers, output="text")
         return yaml.yaml_string_to_object(resp), sha
 
     def _get_local_image_tags(self):
