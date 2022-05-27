@@ -348,7 +348,7 @@ class TestGitHubAPI(unittest.TestCase):
             "token ThIs_Is_A_ToKeN",
             "config/config.yaml",
             [".singleuser.image"],
-            push_to_users_fork="user"
+            push_to_users_fork="user",
         )
         github = GitHubAPI(main)
         github.pr_exists = False
@@ -504,7 +504,9 @@ class TestGitHubAPI(unittest.TestCase):
         )
         github = GitHubAPI(main)
         github.fork_exists = True
-        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+        github.fork_api_url = "/".join(
+            ["https://api.github.com", "repos", main.push_to_users_fork, "octocat"]
+        )
 
         main.sha = "test_sha"
         commit_msg = "This is a commit message"
@@ -567,7 +569,9 @@ class TestGitHubAPI(unittest.TestCase):
         )
         github = GitHubAPI(main)
         github.fork_exists = True
-        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+        github.fork_api_url = "/".join(
+            ["https://api.github.com", "repos", main.push_to_users_fork, "octocat"]
+        )
         test_ref = "test_ref"
         test_sha = "test_sha"
 
@@ -618,7 +622,9 @@ class TestGitHubAPI(unittest.TestCase):
         )
         github = GitHubAPI(main)
         github.fork_exists = True
-        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+        github.fork_api_url = "/".join(
+            ["https://api.github.com", "repos", main.push_to_users_fork, "octocat"]
+        )
         test_ref = "test_ref"
 
         mock_get = patch(
@@ -635,7 +641,6 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertDictEqual(resp, {"object": {"sha": "sha"}})
-
 
     def test_check_fork_exists_true(self):
         main = UpdateImageTags(
