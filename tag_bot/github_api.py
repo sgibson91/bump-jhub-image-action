@@ -109,6 +109,7 @@ class GitHubAPI:
         if self.pr_exists:
             logger.info("Updating Pull Request...")
 
+            url = "/".join([url, self.pr_number])
             pr["state"] = "open"
             resp = patch_request(
                 url, headers=self.inputs.headers, json=pr, return_json=True
@@ -143,19 +144,27 @@ class GitHubAPI:
 
         head_label_exp = jmespath.compile("[*].head.label")
         matches = head_label_exp.search(resp)
-        matches = [label for label in matches if self.inputs.head_branch in label]
+        indx, match = next(
+            (
+                (indx, match)
+                for (indx, match) in enumerate(matches)
+                if self.inputs.head_branch in match
+            ),
+            (None, None),
+        )
 
-        if (len(matches) > 1) or (len(matches) == 1):
-            logger.info("Pull Request found!")
-            self.inputs.head_branch = matches[0].split(":")[-1]
-            self.pr_exists = True
-        else:
+        if (indx is None) and (match is None):
             logger.info(
                 "No relevant Pull Requests found. A new Pull Request will be opened."
             )
             random_id = "".join(random.sample(string.ascii_letters, 4))
             self.inputs.head_branch = "-".join([self.inputs.head_branch, random_id])
             self.pr_exists = False
+        else:
+            logger.info("Pull Request found!")
+            self.inputs.head_branch = match.split(":")[-1]
+            self.pr_number = resp[indx]["number"]
+            self.pr_exists = True
 
     def get_ref(self, ref):
         """Get a git reference (specifically, a HEAD ref) using GitHub's git
