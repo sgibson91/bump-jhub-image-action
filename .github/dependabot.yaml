@@ -8,6 +8,8 @@ updates:
       day: "monday"
       time: "00:00"
       timezone: "Europe/London"
+    pull-request-branch-name:
+      separator: "-"
   # Maintain dependencies for pip
   - package-ecosystem: "pip"
     directory: "/"
@@ -19,6 +21,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+    pull-request-branch-name:
+      separator: "-"
   # Maintain dependencies for docker
   - package-ecosystem: "docker"
     directory: "/"
@@ -30,3 +34,5 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-patch"]
+    pull-request-branch-name:
+      separator: "-"
