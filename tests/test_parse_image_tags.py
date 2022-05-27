@@ -13,7 +13,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
             "singleuser": {
                 "image": {
@@ -41,7 +41,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.profileList[0].kubespawner_override.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
             "singleuser": {
                 "profileList": [
@@ -72,7 +72,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
         image = "image_owner/image_name"
 
@@ -120,7 +120,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
         image = "image_owner/image_name"
 
@@ -168,7 +168,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
             "image_name": {
                 "current": "image_name",
@@ -189,7 +189,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
             "image_name": {
                 "current": "image_name",
@@ -202,6 +202,29 @@ class TestImageTags(unittest.TestCase):
         result = image_parser._compare_image_tags()
 
         self.assertEqual(result, expected)
+
+    @patch("tag_bot.parse_image_tags.get_request")
+    def test_get_config(self, mock_get):
+        main = UpdateImageTags(
+            "octocat/octocat", "t0k3n", "config/config.yaml", [".singleuser.image"]
+        )
+        image_parser = ImageTags(main, main.repository, main.base_branch)
+
+        mock_get.side_effect = [
+            {
+                "download_url": "https://example.com",
+                "sha": "123456789",
+            },
+            "hello: world",
+        ]
+
+        expected_config = {"hello": "world"}
+        expected_sha = "123456789"
+
+        config, sha = image_parser._get_config(main.base_branch)
+
+        self.assertDictEqual(config, expected_config)
+        self.assertEqual(sha, expected_sha)
 
 
 if __name__ == "__main__":

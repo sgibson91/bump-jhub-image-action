@@ -17,12 +17,10 @@ class ImageTags:
     published version on a container repository and update if needed.
     """
 
-    def __init__(self, inputs, branch):
+    def __init__(self, inputs, repository, branch):
         self.inputs = inputs
         self.branch = branch
-        self.github_api_url = "/".join(
-            ["https://api.github.com", "repos", self.inputs.repository]
-        )
+        self.github_api_url = "/".join(["https://api.github.com", "repos", repository])
         self.image_tags = {}
 
     def _get_config(self, ref):
@@ -36,12 +34,14 @@ class ImageTags:
         """
         url = "/".join([self.github_api_url, "contents", self.inputs.config_path])
         query = {"ref": ref}
-        resp = get_request(url, headers=self.headers, params=query, output="json")
+        resp = get_request(
+            url, headers=self.inputs.headers, params=query, output="json"
+        )
 
         download_url = resp["download_url"]
         sha = resp["sha"]
 
-        resp = get_request(download_url, headers=self.headers, output="text")
+        resp = get_request(download_url, headers=self.inputs.headers, output="text")
         return yaml.yaml_string_to_object(resp), sha
 
     def _get_local_image_tags(self):

@@ -25,6 +25,7 @@ class UpdateImageTags:
         labels=[],
         reviewers=[],
         team_reviewers=[],
+        push_to_users_fork=None,
         dry_run=False,
     ):
         self.repository = repository
@@ -35,6 +36,7 @@ class UpdateImageTags:
         self.labels = labels
         self.reviewers = reviewers
         self.team_reviewers = team_reviewers
+        self.push_to_users_fork = push_to_users_fork
         self.dry_run = dry_run
 
         self.headers = {
@@ -79,10 +81,28 @@ class UpdateImageTags:
         github = GitHubAPI(self)
         github.find_existing_pull_request()
 
-        if github.pr_exists:
-            image_parser = ImageTags(self, self.head_branch)
-        else:
-            image_parser = ImageTags(self, self.base_branch)
+        if self.push_to_users_fork is not None:
+            github.check_fork_exists()
+
+            if github.fork_exists:
+                github.merge_upstream()
+            else:
+                github.create_fork()
+
+        if github.pr_exists and github.fork_exists:
+            image_parser = ImageTags(self, github.fork_api_url, self.head_branch)
+
+        elif github.pr_exists and not github.fork_exists:
+            image_parser = ImageTags(self, github.api_url, self.head_branch)
+
+        elif not github.pr_exists and github.fork_exists:
+            image_parser = ImageTags(self, github.fork_api_url, self.head_branch)
+
+            resp = github.get_ref(self.base_branch)
+            github.create_ref(self.head_branch, resp["object"]["sha"])
+
+        elif not github.pr_exists and not github.fork_exists:
+            image_parser = ImageTags(self, github.api_url, self.head_branch)
 
             resp = github.get_ref(self.base_branch)
             github.create_ref(self.head_branch, resp["object"]["sha"])
@@ -158,6 +178,11 @@ def main():
         if "INPUT_TEAM_REVIEWERS" in os.environ
         else []
     )
+    push_to_users_fork = (
+        os.environ["INPUT_PUSH_TO_USERS_FORK"]
+        if "PUSH_TO_USERS_FORK" in os.environ
+        else None
+    )
     dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
 
     # Reference dict for required inputs
@@ -204,6 +229,7 @@ def main():
         labels=labels,
         reviewers=reviewers,
         team_reviewers=team_reviewers,
+        push_to_users_fork=push_to_users_fork,
         dry_run=dry_run,
     )
     update_image_tags.update()

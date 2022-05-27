@@ -11,7 +11,9 @@ If more recent image tags are available, the action will open a Pull Request to 
 - [🤔 Assumptions `bump-jhub-image-action` Makes](#-assumptions-bump-jhub-image-action-makes)
 - [:inbox_tray: Inputs](#inbox_tray-inputs)
 - [:lock: Permissions](#lock-permissions)
+  - [:wrench: Configuring `GITHUB_TOKEN`](#wrench-configuring-github_token)
 - [:recycle: Example Usage](#recycle-example-usage)
+  - [:wrench: Configuring the Action to push to a fork](#wrench-configuring-the-action-to-push-to-a-fork)
 - [:sparkles: Contributing](#sparkles-contributing)
 
 ---
@@ -51,11 +53,17 @@ Here is a list detailing the assumptions that the Action makes.
 | `labels` | A comma-separated list of labels to apply to the opened Pull Request. Labels must already exist in the repository. | :x: | `[]` |
 | `reviewers` | A comma-separated list of GitHub users (without the leading `@`) to request reviews from. | :x: | `[]` |
 | `team_reviewers` | A comma-separated list of GitHub teams, in the form `ORG_NAME/TEAM_NAME`, to request reviews from. | :x: | `[]` |
+| `push_to_users_fork` | A GitHub account username (without the leading `@`) to fork the repository to and open a Pull Request from. If provided, then `github_token` must also be provided, and it should be a PAT owned by the account named here. | :x: | `None` |
 | `dry_run` | Perform a dry-run of the action. A Pull Request will not be opened, but a log message will indicate if any image tags can be bumped. | :x: | `False` |
 
 ## :lock: Permissions
 
 This Action will need permission to read the contents of a file stored in your repository, create a new branch, commit to a branch, and open a Pull Request.
+The permission is granted by a token passed using the `github_token` input parameter.
+You can choose to provide a specific token if you wish, otherwise the Action will default to using the inbuilt `GITHUB_TOKEN` in the GitHub Actions Runner.
+
+### :wrench: Configuring `GITHUB_TOKEN`
+
 The [default permissive settings of `GITHUB_TOKEN`](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) should provide the relevant permissions.
 
 If instead your repository is using the default restricted settings of `GITHUB_TOKEN`, you could grant just enough permissions to the Action using a [`permissions`](https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#jobsjob_idpermissions) config, such as the one below:
@@ -87,6 +95,35 @@ jobs:
       with:
         config_path: path/to/config.yaml
         values_paths: .singleuser.image .singleuser.profileList[0].kubespawner_override.image
+```
+
+### :wrench: Configuring the Action to push to a fork
+
+Some people prefer not to have tokens with write permissions acting upon the parent repository.
+Using the token to fork a repository and open Pull Requests from the fork is considered a more secure option, since the token does not require write access to the parent repo (especially if it is public).
+
+This Action can be configured to push to a fork by using the `push_to_users_fork` input and providing a valid GitHub account name (without the leading `@`).
+
+:warning: Note that when using this feature, you must also provide a token to `github_token`, and this should be a Personal Access Token (PAT) that belongs to the account named in `push_to_users_fork` :warning:
+
+```yaml
+name: Check and Bump image tags in a JupyterHub config
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * 1-5"
+
+jobs:
+  bump-image-tags:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: sgibson91/bump-jhub-image-action@main
+      with:
+        config_path: path/to/config.yaml
+        values_paths: .singleuser.image
+        push_to_users_fork: octocat
+        github_token: <PROVIDE A TOKEN OWNED BY OCTOCAT HERE>
 ```
 
 ## :sparkles: Contributing
