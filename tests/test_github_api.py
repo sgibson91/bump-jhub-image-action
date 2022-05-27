@@ -47,7 +47,7 @@ class TestGitHubAPI(unittest.TestCase):
             mock.assert_called_with(
                 "/".join([pr_url, "requested_reviewers"]),
                 headers=main.headers,
-                json={"reviewers": main.reviewers, "team_reviewers": []},
+                json={"reviewers": main.reviewers},
             )
 
     def test_create_pr_no_labels_no_reviewers(self):
@@ -227,7 +227,7 @@ class TestGitHubAPI(unittest.TestCase):
             call(
                 "/".join([github.api_url, "pulls", "1", "requested_reviewers"]),
                 headers=main.headers,
-                json={"reviewers": main.reviewers, "team_reviewers": []},
+                json={"reviewers": main.reviewers},
             ),
         ]
 
@@ -307,7 +307,7 @@ class TestGitHubAPI(unittest.TestCase):
             call(
                 "/".join([github.api_url, "pulls", "1", "requested_reviewers"]),
                 headers=main.headers,
-                json={"reviewers": main.reviewers, "team_reviewers": []},
+                json={"reviewers": main.reviewers},
             ),
         ]
 

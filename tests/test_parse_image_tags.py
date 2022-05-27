@@ -13,7 +13,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
             "singleuser": {
                 "image": {
@@ -41,7 +41,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.profileList[0].kubespawner_override.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
             "singleuser": {
                 "profileList": [
@@ -72,7 +72,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
         image = "image_owner/image_name"
 
@@ -120,7 +120,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
         image = "image_owner/image_name"
 
@@ -168,7 +168,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
             "image_name": {
                 "current": "image_name",
@@ -189,7 +189,7 @@ class TestImageTags(unittest.TestCase):
             "config/config.yaml",
             [".singleuser.image"],
         )
-        image_parser = ImageTags(main, "main")
+        image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
             "image_name": {
                 "current": "image_name",
