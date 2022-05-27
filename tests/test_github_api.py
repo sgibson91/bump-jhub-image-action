@@ -529,11 +529,19 @@ class TestGitHubAPI(unittest.TestCase):
             self.assertDictEqual(resp, {"object": {"sha": "sha"}})
 
     def test_check_fork_exists_true(self):
-        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
         github = GitHubAPI(main)
         main.push_to_users_fork = "user1/octocat"
 
-        mock_get = patch("tag_bot.github_api.get_request", return_value=[{"full_name": "user1/octocat"}])
+        mock_get = patch(
+            "tag_bot.github_api.get_request",
+            return_value=[{"full_name": "user1/octocat"}],
+        )
 
         with mock_get as mock:
             github.check_fork_exists()
@@ -546,11 +554,19 @@ class TestGitHubAPI(unittest.TestCase):
             )
 
     def test_check_fork_exists_false(self):
-        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
         github = GitHubAPI(main)
         main.push_to_users_fork = "user1/octocat"
 
-        mock_get = patch("tag_bot.github_api.get_request", return_value=[{"full_name": "user2/octocat"}])
+        mock_get = patch(
+            "tag_bot.github_api.get_request",
+            return_value=[{"full_name": "user2/octocat"}],
+        )
 
         with mock_get as mock:
             github.check_fork_exists()
@@ -563,7 +579,13 @@ class TestGitHubAPI(unittest.TestCase):
             )
 
     def test_create_fork(self):
-        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"], push_to_users_fork="user1")
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+            push_to_users_fork="user1",
+        )
         github = GitHubAPI(main)
 
         mock_post = patch("tag_bot.github_api.post_request")
@@ -577,9 +599,16 @@ class TestGitHubAPI(unittest.TestCase):
             )
 
     def test_merge_upstream(self):
-        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
         github = GitHubAPI(main)
-        github.fork_api_url = "/".join(["https://api.github.com", "repos", "user", "octocat"])
+        github.fork_api_url = "/".join(
+            ["https://api.github.com", "repos", "user", "octocat"]
+        )
 
         mock_post = patch("tag_bot.github_api.post_request")
 
@@ -593,7 +622,12 @@ class TestGitHubAPI(unittest.TestCase):
             )
 
     def test_update_existing_pr(self):
-        main = UpdateImageTags("octocat/octocat", "ThIs_Is_A_t0k3n", "config/config.yaml", [".singleuser.image"])
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [".singleuser.image"],
+        )
         github = GitHubAPI(main)
         github.pr_exists = True
         main.image_tags = {"image": {"current": "old_tag", "latest": "new_tag"}}
@@ -614,7 +648,9 @@ class TestGitHubAPI(unittest.TestCase):
             "state": "open",
         }
 
-        mock_patch = patch("tag_bot.github_api.patch_request", return_value={"number": 1})
+        mock_patch = patch(
+            "tag_bot.github_api.patch_request", return_value={"number": 1}
+        )
 
         with mock_patch as mock:
             github.create_update_pull_request()
