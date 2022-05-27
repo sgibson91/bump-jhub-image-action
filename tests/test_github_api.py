@@ -374,7 +374,7 @@ class TestGitHubAPI(unittest.TestCase):
             self.assertFalse(github.pr_exists)
             self.assertTrue(main.head_branch.startswith("bump-image-tags-"))
 
-    def test_find_existing_pr_one_match(self):
+    def test_find_existing_pr_match(self):
         main = UpdateImageTags(
             "octocat/octocat",
             "token ThIs_Is_A_ToKeN",
@@ -388,7 +388,8 @@ class TestGitHubAPI(unittest.TestCase):
                 {
                     "head": {
                         "label": "bump-image-tags",
-                    }
+                    },
+                    "number": 1,
                 }
             ],
         )
@@ -405,43 +406,6 @@ class TestGitHubAPI(unittest.TestCase):
             )
             self.assertTrue(github.pr_exists)
             self.assertEqual(main.head_branch, "bump-image-tags")
-
-    def test_find_existing_pr_multiple_matches(self):
-        main = UpdateImageTags(
-            "octocat/octocat",
-            "token ThIs_Is_A_ToKeN",
-            "config/config.yaml",
-            [".singleuser.image"],
-        )
-        github = GitHubAPI(main)
-        mock_get = patch(
-            "tag_bot.github_api.get_request",
-            return_value=[
-                {
-                    "head": {
-                        "label": "bump-image-tags1",
-                    }
-                },
-                {
-                    "head": {
-                        "label": "bump-image-tags2",
-                    }
-                },
-            ],
-        )
-
-        with mock_get as mock:
-            github.find_existing_pull_request()
-
-            self.assertEqual(mock.call_count, 1)
-            mock.assert_called_with(
-                "/".join([github.api_url, "pulls"]),
-                headers=main.headers,
-                params={"state": "open", "sort": "created", "direction": "desc"},
-                output="json",
-            )
-            self.assertTrue(github.pr_exists)
-            self.assertEqual(main.head_branch, "bump-image-tags1")
 
     def test_create_commit(self):
         main = UpdateImageTags(
