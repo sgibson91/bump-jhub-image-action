@@ -221,11 +221,10 @@ class TestImageTags(unittest.TestCase):
         expected_config = {"hello": "world"}
         expected_sha = "123456789"
 
-        with mock_get as mock:
-            config, sha = image_parser._get_config(main.base_branch)
+        config, sha = image_parser._get_config(main.base_branch)
 
-            self.assertDictEqual(config, expected_config)
-            self.assertEqual(sha, expected_sha)
+        self.assertDictEqual(config, expected_config)
+        self.assertEqual(sha, expected_sha)
 
 
 if __name__ == "__main__":
