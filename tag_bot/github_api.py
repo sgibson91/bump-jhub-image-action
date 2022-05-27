@@ -144,7 +144,14 @@ class GitHubAPI:
 
         head_label_exp = jmespath.compile("[*].head.label")
         matches = head_label_exp.search(resp)
-        indx, match = next(((indx, match) for (indx, match) in enumerate(matches) if self.inputs.head_branch in match), (None, None))
+        indx, match = next(
+            (
+                (indx, match)
+                for (indx, match) in enumerate(matches)
+                if self.inputs.head_branch in match
+            ),
+            (None, None),
+        )
 
         if (indx is None) and (match is None):
             logger.info(
