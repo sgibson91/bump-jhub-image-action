@@ -151,7 +151,7 @@ class ImageTags:
         tag published in a container registry, and compare which images are out of
         date
         """
-        self.inputs.config, self.inputs.sha = self._get_config()
+        self.inputs.config, self.inputs.sha = self._get_config(self.branch)
         self._get_local_image_tags()
         self._get_remote_tags()
         self.inputs.images_to_update = self._compare_image_tags()
