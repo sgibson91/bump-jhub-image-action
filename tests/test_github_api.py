@@ -594,6 +594,7 @@ class TestGitHubAPI(unittest.TestCase):
         )
         github = GitHubAPI(main)
         github.pr_exists = True
+        github.pr_number = 1
         main.image_tags = {"image": {"current": "old_tag", "latest": "new_tag"}}
         main.images_to_update = ["image"]
 
@@ -620,7 +621,7 @@ class TestGitHubAPI(unittest.TestCase):
             github.create_update_pull_request()
 
             mock.assert_called_with(
-                "/".join([github.api_url, "pulls"]),
+                "/".join([github.api_url, "pulls", str(github.pr_number)]),
                 headers=main.headers,
                 json=expected_pr,
                 return_json=True,

@@ -154,7 +154,7 @@ class GitHubAPI:
         if self.pr_exists:
             logger.info("Updating Pull Request...")
 
-            url = "/".join([url, self.pr_number])
+            url = "/".join([url, str(self.pr_number)])
             pr["state"] = "open"
             resp = patch_request(
                 url, headers=self.inputs.headers, json=pr, return_json=True
