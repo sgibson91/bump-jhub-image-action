@@ -96,13 +96,13 @@ class UpdateImageTags:
             image_parser = ImageTags(self, github.api_url, self.head_branch)
 
         elif not github.pr_exists and github.fork_exists:
-            image_parser = ImageTags(self, github.fork_api_url, self.head_branch)
+            image_parser = ImageTags(self, github.fork_api_url, self.base_branch)
 
             resp = github.get_ref(self.base_branch)
             github.create_ref(self.head_branch, resp["object"]["sha"])
 
         elif not github.pr_exists and not github.fork_exists:
-            image_parser = ImageTags(self, github.api_url, self.head_branch)
+            image_parser = ImageTags(self, github.api_url, self.base_branch)
 
             resp = github.get_ref(self.base_branch)
             github.create_ref(self.head_branch, resp["object"]["sha"])
