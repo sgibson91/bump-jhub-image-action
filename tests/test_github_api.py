@@ -342,6 +342,56 @@ class TestGitHubAPI(unittest.TestCase):
             }
             mock.assert_has_calls(calls)
 
+    def test_create_pr_fork_exists(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "token ThIs_Is_A_ToKeN",
+            "config/config.yaml",
+            [".singleuser.image"],
+            push_to_users_fork="user"
+        )
+        github = GitHubAPI(main)
+        github.pr_exists = False
+        github.fork_exists = True
+
+        main.image_tags = {
+            "image_owner/image1": {
+                "current": "old_tag",
+                "latest": "new_tag",
+            },
+            "image_owner/image2": {
+                "current": "old_tag",
+                "latest": "new_tag",
+            },
+        }
+        main.images_to_update = ["image_owner/image1", "image_owner/image2"]
+
+        expected_pr = {
+            "title": "Bumping Docker image tags in JupyterHub config",
+            "body": (
+                "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
+                + "\n".join(
+                    [
+                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        for image in main.images_to_update
+                    ]
+                )
+            ),
+            "base": main.base_branch,
+            "head": ":".join([main.push_to_users_fork, main.head_branch]),
+        }
+
+        with patch("tag_bot.github_api.post_request") as mock:
+            github.create_update_pull_request()
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join([github.api_url, "pulls"]),
+                headers=main.headers,
+                json=expected_pr,
+                return_json=True,
+            )
+
     def test_find_existing_pr_no_matches(self):
         main = UpdateImageTags(
             "octocat/octocat",
@@ -444,6 +494,46 @@ class TestGitHubAPI(unittest.TestCase):
                 headers=main.headers,
             )
 
+    def test_create_commit_fork_exists(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "token ThIs_Is_A_ToKeN",
+            "config/config.yaml",
+            [".singleuser.image"],
+            push_to_users_fork="user",
+        )
+        github = GitHubAPI(main)
+        github.fork_exists = True
+        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+
+        main.sha = "test_sha"
+        commit_msg = "This is a commit message"
+        contents = {"key1": "This is a test"}
+
+        contents = yaml.object_to_yaml_str(contents).encode("utf-8")
+        contents = base64.b64encode(contents)
+        contents = contents.decode("utf-8")
+
+        body = {
+            "message": commit_msg,
+            "content": contents,
+            "sha": main.sha,
+            "branch": main.head_branch,
+        }
+
+        with patch("tag_bot.github_api.put") as mock:
+            github.create_commit(
+                commit_msg,
+                contents,
+            )
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join([github.fork_api_url, "contents", main.config_path]),
+                json=body,
+                headers=main.headers,
+            )
+
     def test_create_ref(self):
         main = UpdateImageTags(
             "octocat/octocat",
@@ -463,6 +553,32 @@ class TestGitHubAPI(unittest.TestCase):
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
                 "/".join([github.api_url, "git", "refs"]),
+                headers=main.headers,
+                json=test_body,
+            )
+
+    def test_create_ref_fork_exists(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "token ThIs_Is_A_ToKeN",
+            "config/config.yaml",
+            [".singleuser.image"],
+            push_to_users_fork="user",
+        )
+        github = GitHubAPI(main)
+        github.fork_exists = True
+        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+        test_ref = "test_ref"
+        test_sha = "test_sha"
+
+        test_body = {"ref": f"refs/heads/{test_ref}", "sha": test_sha}
+
+        with patch("tag_bot.github_api.post_request") as mock:
+            github.create_ref(test_ref, test_sha)
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join([github.fork_api_url, "git", "refs"]),
                 headers=main.headers,
                 json=test_body,
             )
@@ -491,6 +607,35 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertDictEqual(resp, {"object": {"sha": "sha"}})
+
+    def test_get_ref_fork_exists(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "token ThIs_Is_A_ToKeN",
+            "config/config.yaml",
+            [".singleuser.image"],
+            push_to_users_fork="user",
+        )
+        github = GitHubAPI(main)
+        github.fork_exists = True
+        github.fork_api_url = "/".join(["https://api.github.com", "repos", main.push_to_users_fork, "octocat"])
+        test_ref = "test_ref"
+
+        mock_get = patch(
+            "tag_bot.github_api.get_request", return_value={"object": {"sha": "sha"}}
+        )
+
+        with mock_get as mock:
+            resp = github.get_ref(test_ref)
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join([github.fork_api_url, "git", "ref", "heads", test_ref]),
+                headers=main.headers,
+                output="json",
+            )
+            self.assertDictEqual(resp, {"object": {"sha": "sha"}})
+
 
     def test_check_fork_exists_true(self):
         main = UpdateImageTags(
