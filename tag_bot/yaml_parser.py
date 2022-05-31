@@ -5,7 +5,7 @@ import ruamel.yaml
 
 class YamlParser:
     def __init__(self):
-        self.yaml = ruamel.yaml.YAML(typ="safe", pure=True)
+        self.yaml = ruamel.yaml.YAML()
 
     def object_to_yaml_str(self, obj, options={}):
         string_stream = StringIO()
