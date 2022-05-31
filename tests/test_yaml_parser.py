@@ -55,12 +55,17 @@ class TestYamlParser(unittest.TestCase):
         with open("tests/assets/test_complex_output.yaml", "w") as fp:
             yaml.yaml.dump(test_yaml_back_to_obj, fp)
 
-        expected_yaml_string = '# This is a block comment\nhello: "world"  # This is an inline comment\nthis:\n  is: "a"\n  test:\n    - "hello"\n    - "world"\n'
+        expected_yaml_string = '# This is a block comment\nhello: "world"  # This is an inline comment\nthis:\n  is: "a"\n  test:\n    - "hello"\n    - "world"\n# Now lets test arrays\n# see if they behave\na:\n  - b: "c"\n    d: "e"\n  - f: "g"\n    h: "i"\n'
         expected_yaml_obj = OrderedDict()
         expected_yaml_obj["hello"] = "world"
         expected_yaml_obj["this"] = OrderedDict()
         expected_yaml_obj["this"]["is"] = "a"
         expected_yaml_obj["this"]["test"] = ["hello", "world"]
+        expected_yaml_obj["a"] = [OrderedDict(), OrderedDict()]
+        expected_yaml_obj["a"][0]["b"] = "c"
+        expected_yaml_obj["a"][0]["d"] = "e"
+        expected_yaml_obj["a"][1]["f"] = "g"
+        expected_yaml_obj["a"][1]["h"] = "i"
 
         self.assertEqual(test_yaml_str, expected_yaml_string)
         self.assertDictEqual(test_yaml_back_to_obj, expected_yaml_obj)
