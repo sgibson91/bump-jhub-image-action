@@ -32,15 +32,15 @@ class UpdateImageTags:
         self.config_path = config_path
         self.values_paths = values_paths
         self.base_branch = base_branch
-        self.head_branch = "/".join(
-            [head_branch, config_path.replace("/", "-").replace(".", "")]
-        )
         self.labels = labels
         self.reviewers = reviewers
         self.team_reviewers = team_reviewers
         self.push_to_users_fork = push_to_users_fork
         self.dry_run = dry_run
 
+        self.head_branch = "/".join(
+            [head_branch, config_path.replace("/", "-").replace(".", "")]
+        )
         self.headers = {
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"token {github_token}",
@@ -168,7 +168,7 @@ def main():
         os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else None
     )
     head_branch = (
-        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else None
+        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else "bump-image-tags"
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
@@ -191,7 +191,6 @@ def main():
         "GITHUB_TOKEN": github_token,
         "REPOSITORY": repository,
         "BASE_BRANCH": base_branch,
-        "HEAD_BRANCH": head_branch,
     }
 
     # Check all the required inputs are properly set

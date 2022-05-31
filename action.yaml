@@ -42,6 +42,7 @@ inputs:
       be opened from. Defaults to `bump_image_tags-WXYZ` where `WXYZ` will be a
       randomly generated ascii string (to avoid clashes).
     required: false
+    default: "bump-image-tags"
   labels:
     description: |
       A comma-separated list of labels to apply to the opened Pull Request.
