@@ -2,7 +2,7 @@
 FROM python:3.10.2-slim
 
 # Install gcc
-RUN apt-get update && apt-get install --yes gcc
+RUN apt-get update && apt-get install --yes gcc jq
 
 # Create and set the 'app' working directory
 RUN mkdir /app
