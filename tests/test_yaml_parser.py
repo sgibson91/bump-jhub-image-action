@@ -54,9 +54,7 @@ class TestYamlParser(unittest.TestCase):
         with open("tests/assets/test_complex_output.yaml", "w") as fp:
             yaml.yaml.dump(test_yaml_back_to_obj, fp)
 
-        expected_yaml_string = (
-            '# This is a block comment\nhello: "world"  # This is an inline comment\nthis:\n  is: "a"\n  test:\n    - "hello"\n    - "world"\n'
-        )
+        expected_yaml_string = '# This is a block comment\nhello: "world"  # This is an inline comment\nthis:\n  is: "a"\n  test:\n    - "hello"\n    - "world"\n'
         expected_yaml_obj = OrderedDict()
         expected_yaml_obj["hello"] = "world"
         expected_yaml_obj["this"] = OrderedDict()
@@ -67,7 +65,9 @@ class TestYamlParser(unittest.TestCase):
         self.assertDictEqual(test_yaml_back_to_obj, expected_yaml_obj)
         self.assertTrue(
             filecmp.cmp(
-                "tests/assets/test_complex.yaml", "tests/assets/test_complex_output.yaml", shallow=False
+                "tests/assets/test_complex.yaml",
+                "tests/assets/test_complex_output.yaml",
+                shallow=False,
             )
         )
 
