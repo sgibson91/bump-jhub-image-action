@@ -17,10 +17,10 @@ class ImageTags:
     published version on a container repository and update if needed.
     """
 
-    def __init__(self, inputs, repository, branch):
+    def __init__(self, inputs, github_api_url, branch):
         self.inputs = inputs
         self.branch = branch
-        self.github_api_url = "/".join(["https://api.github.com", "repos", repository])
+        self.github_api_url = github_api_url
         self.image_tags = {}
 
     def _get_config(self, ref):
