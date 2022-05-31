@@ -165,12 +165,10 @@ def main():
         os.environ["INPUT_REPOSITORY"] if "INPUT_REPOSITORY" in os.environ else None
     )
     base_branch = (
-        os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else "main"
+        os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else None
     )
     head_branch = (
-        os.environ["INPUT_HEAD_BRANCH"]
-        if "INPUT_HEAD_BRANCH" in os.environ
-        else "bump-image-tags"
+        os.environ["INPUT_HEAD_BRANCH"] if "INPUT_HEAD_BRANCH" in os.environ else None
     )
     labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
     reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
@@ -192,6 +190,8 @@ def main():
         "VALUES_PATHS": values_paths,
         "GITHUB_TOKEN": github_token,
         "REPOSITORY": repository,
+        "BASE_BRANCH": base_branch,
+        "HEAD_BRANCH": head_branch,
     }
 
     # Check all the required inputs are properly set
