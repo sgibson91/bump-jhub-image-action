@@ -422,7 +422,15 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertFalse(github.pr_exists)
-            self.assertTrue("/".join(["bump-image-tags", main.config_path.replace("/", "-").replace(".", "")]) in main.head_branch)
+            self.assertTrue(
+                "/".join(
+                    [
+                        "bump-image-tags",
+                        main.config_path.replace("/", "-").replace(".", ""),
+                    ]
+                )
+                in main.head_branch
+            )
 
     def test_find_existing_pr_match(self):
         main = UpdateImageTags(
@@ -455,7 +463,15 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertTrue(github.pr_exists)
-            self.assertTrue("/".join(["bump-image-tags", main.config_path.replace("/", "-").replace(".", "")]) in main.head_branch)
+            self.assertTrue(
+                "/".join(
+                    [
+                        "bump-image-tags",
+                        main.config_path.replace("/", "-").replace(".", ""),
+                    ]
+                )
+                in main.head_branch
+            )
 
     def test_create_commit(self):
         main = UpdateImageTags(
