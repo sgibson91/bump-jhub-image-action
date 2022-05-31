@@ -1,3 +1,4 @@
+import base64
 import filecmp
 import unittest
 from collections import OrderedDict
@@ -67,6 +68,32 @@ class TestYamlParser(unittest.TestCase):
             filecmp.cmp(
                 "tests/assets/test_complex.yaml",
                 "tests/assets/test_complex_output.yaml",
+                shallow=False,
+            )
+        )
+
+    def test_round_trip_encoded(self):
+        yaml = YamlParser()
+
+        with open("tests/assets/test.yaml") as stream:
+            config = yaml.yaml.load(stream)
+
+        # Encode the config
+        encoded_config = yaml.object_to_yaml_str(config).encode("utf-8")
+        encoded_config = base64.b64encode(encoded_config).decode("utf-8")
+
+        # Reverse the encoding process
+        decoded_config = base64.b64decode(encoded_config.encode("utf-8"))
+        decoded_config = yaml.yaml_string_to_object(decoded_config.decode("utf-8"))
+
+        with open("tests/assets/test_encoded_output.yaml", "w") as fp:
+            yaml.yaml.dump(decoded_config, fp)
+
+        self.assertDictEqual(config, decoded_config)
+        self.assertTrue(
+            filecmp.cmp(
+                "tests/assets/test.yaml",
+                "tests/assets/test_encoded_output.yaml",
                 shallow=False,
             )
         )
