@@ -487,8 +487,7 @@ class TestGitHubAPI(unittest.TestCase):
         contents = {"key1": "This is a test"}
 
         contents = yaml.object_to_yaml_str(contents).encode("utf-8")
-        contents = base64.b64encode(contents)
-        contents = contents.decode("utf-8")
+        contents = base64.b64encode(contents).decode("utf-8")
 
         body = {
             "message": commit_msg,
@@ -529,8 +528,7 @@ class TestGitHubAPI(unittest.TestCase):
         contents = {"key1": "This is a test"}
 
         contents = yaml.object_to_yaml_str(contents).encode("utf-8")
-        contents = base64.b64encode(contents)
-        contents = contents.decode("utf-8")
+        contents = base64.b64encode(contents).decode("utf-8")
 
         body = {
             "message": commit_msg,

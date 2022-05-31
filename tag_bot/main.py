@@ -72,9 +72,8 @@ class UpdateImageTags:
                 )
 
         logger.info("Encoding config in base64...")
-        encoded_config = yaml.object_to_yaml_str(self.config).encode("utf-8")
-        base64_bytes = base64.b64encode(encoded_config)
-        config = base64_bytes.decode("utf-8")
+        config = yaml.object_to_yaml_str(self.config).encode("utf-8")
+        config = base64.b64encode(config).decode("utf-8")
 
         return config
 
