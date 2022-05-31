@@ -5,3 +5,10 @@ this:
   test:
     - "hello"
     - "world"
+# Now lets test arrays
+# see if they behave
+a:
+  - b: "c"
+    d: "e"
+  - f: "g"
+    h: "i"
