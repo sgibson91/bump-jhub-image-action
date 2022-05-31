@@ -1,0 +1,7 @@
+# This is a block comment
+hello: "world"  # This is an inline comment
+this:
+  is: "a"
+  test:
+    - "hello"
+    - "world"
