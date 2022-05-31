@@ -98,7 +98,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )
@@ -147,7 +147,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )
@@ -220,7 +220,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )
@@ -294,7 +294,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )
@@ -372,7 +372,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )
@@ -770,7 +770,7 @@ class TestGitHubAPI(unittest.TestCase):
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{main.image_tags[image]['current']}` -> `{main.image_tags[image]['latest']}`"
                         for image in main.images_to_update
                     ]
                 )

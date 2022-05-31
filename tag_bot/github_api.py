@@ -143,7 +143,7 @@ class GitHubAPI:
                 "This Pull Request is bumping the Docker tags for the following images to the listed versions.\n\n"
                 + "\n".join(
                     [
-                        f"`{image}`: `{self.inputs.image_tags[image]['current']}` -> `{self.inputs.image_tags[image]['latest']}`"
+                        f"- `{image}`: `{self.inputs.image_tags[image]['current']}` -> `{self.inputs.image_tags[image]['latest']}`"
                         for image in self.inputs.images_to_update
                     ]
                 )
