@@ -5,7 +5,6 @@ tests
 
 # Files to be ignored
 .coveragerc
-.pre-co,,it-config.yaml
+.pre-commit-config.yaml
 codecov.yml
 dev-requirements.txt
-mypy.ini
