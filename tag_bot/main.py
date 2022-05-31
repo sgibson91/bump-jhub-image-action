@@ -32,7 +32,9 @@ class UpdateImageTags:
         self.config_path = config_path
         self.values_paths = values_paths
         self.base_branch = base_branch
-        self.head_branch = head_branch
+        self.head_branch = "/".join(
+            [head_branch, config_path.replace("/", "-").replace(".", "")]
+        )
         self.labels = labels
         self.reviewers = reviewers
         self.team_reviewers = team_reviewers
