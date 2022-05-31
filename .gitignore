@@ -1,5 +1,5 @@
 # Ignore test outputs
-tests/assests/**output.yaml
+tests/assets/**output.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
