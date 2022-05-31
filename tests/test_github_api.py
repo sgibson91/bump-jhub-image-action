@@ -104,7 +104,7 @@ class TestGitHubAPI(unittest.TestCase):
                 )
             ),
             "base": "main",
-            "head": "bump-image-tags",
+            "head": "bump-image-tags/config-configyaml",
         }
 
         with patch("tag_bot.github_api.post_request") as mock:
@@ -153,7 +153,7 @@ class TestGitHubAPI(unittest.TestCase):
                 )
             ),
             "base": "main",
-            "head": "bump-image-tags",
+            "head": "bump-image-tags/config-configyaml",
         }
 
         mock_post = patch(
@@ -226,7 +226,7 @@ class TestGitHubAPI(unittest.TestCase):
                 )
             ),
             "base": "main",
-            "head": "bump-image-tags",
+            "head": "bump-image-tags/config-configyaml",
         }
 
         mock_post = patch(
@@ -300,7 +300,7 @@ class TestGitHubAPI(unittest.TestCase):
                 )
             ),
             "base": "main",
-            "head": "bump-image-tags",
+            "head": "bump-image-tags/config-configyaml",
         }
 
         mock_post = patch(
@@ -422,7 +422,7 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertFalse(github.pr_exists)
-            self.assertTrue(main.head_branch.startswith("bump-image-tags-"))
+            self.assertTrue("/".join(["bump-image-tags", main.config_path.replace("/", "-").replace(".", "")]) in main.head_branch)
 
     def test_find_existing_pr_match(self):
         main = UpdateImageTags(
@@ -437,7 +437,7 @@ class TestGitHubAPI(unittest.TestCase):
             return_value=[
                 {
                     "head": {
-                        "label": "bump-image-tags",
+                        "label": "bump-image-tags/config-configyaml",
                     },
                     "number": 1,
                 }
@@ -455,7 +455,7 @@ class TestGitHubAPI(unittest.TestCase):
                 output="json",
             )
             self.assertTrue(github.pr_exists)
-            self.assertEqual(main.head_branch, "bump-image-tags")
+            self.assertTrue("/".join(["bump-image-tags", main.config_path.replace("/", "-").replace(".", "")]) in main.head_branch)
 
     def test_create_commit(self):
         main = UpdateImageTags(
