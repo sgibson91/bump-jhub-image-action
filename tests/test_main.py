@@ -35,8 +35,7 @@ class TestUpdateImageTags(unittest.TestCase):
             }
         }
         expected_output = yaml.object_to_yaml_str(expected_output).encode("utf-8")
-        expected_output = base64.b64encode(expected_output)
-        expected_output = expected_output.decode("utf-8")
+        expected_output = base64.b64encode(expected_output).decode("utf-8")
 
         result = update_images.update_config()
 
@@ -81,8 +80,7 @@ class TestUpdateImageTags(unittest.TestCase):
             }
         }
         expected_output = yaml.object_to_yaml_str(expected_output).encode("utf-8")
-        expected_output = base64.b64encode(expected_output)
-        expected_output = expected_output.decode("utf-8")
+        expected_output = base64.b64encode(expected_output).decode("utf-8")
 
         result = update_images.update_config()
 
@@ -140,8 +138,7 @@ class TestUpdateImageTags(unittest.TestCase):
             }
         }
         expected_output = yaml.object_to_yaml_str(expected_output).encode("utf-8")
-        expected_output = base64.b64encode(expected_output)
-        expected_output = expected_output.decode("utf-8")
+        expected_output = base64.b64encode(expected_output).decode("utf-8")
 
         result = update_images.update_config()
 
