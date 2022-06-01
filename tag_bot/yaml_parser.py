@@ -5,7 +5,7 @@ import ruamel.yaml
 
 class YamlParser:
     def __init__(self):
-        self.yaml = ruamel.yaml.YAML()
+        self.yaml = ruamel.yaml.YAML(typ="rt")
         self.yaml.indent(mapping=2, sequence=4, offset=2)
         self.yaml.allow_duplicate_keys = True
         self.yaml.explicit_start = False

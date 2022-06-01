@@ -5,7 +5,7 @@ from loguru import logger
 
 from .github_api import GitHubAPI
 from .parse_image_tags import ImageTags
-from .utils import read_config_with_jq, update_config_with_jq
+from .utils import read_config_with_yq, update_config_with_yq
 from .yaml_parser import YamlParser
 
 yaml = YamlParser()
@@ -55,17 +55,17 @@ class UpdateImageTags:
         """
         logger.info("Updating JupyterHub config...")
         for image in self.images_to_update:
-            logger.info("Updating tag for image: {}", self.image_tags[image])
-            value = read_config_with_jq(self.config, self.image_tags[image]["path"])
+            logger.info("Updating tag for image: {}", image)
+            value = read_config_with_yq(self.config, self.image_tags[image]["path"])
 
             if ":" in value:
-                self.config = update_config_with_jq(
+                self.config = update_config_with_yq(
                     self.config,
                     self.image_tags[image]["path"],
                     ":".join([image, self.image_tags[image]["latest"]]),
                 )
             else:
-                self.config = update_config_with_jq(
+                self.config = update_config_with_yq(
                     self.config,
                     self.image_tags[image]["path"],
                     self.image_tags[image]["latest"],
