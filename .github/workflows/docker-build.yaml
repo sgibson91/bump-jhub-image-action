@@ -11,12 +11,13 @@ on:
 jobs:
   build-docker-image:
     runs-on: ubuntu-latest
+    environment: docker
     steps:
       - name: Parse image tag
         id: parse_image_tag
         shell: python
         run: |
-          tag = "${{ github.head_ref }}".replace("/", "-")
+          tag = "${{ github.ref_name }}".replace("/", "-")
           print(f"::set-output name=image_tag::{tag}")
 
       - name: Echo tag
