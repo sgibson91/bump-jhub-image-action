@@ -79,8 +79,10 @@ class ImageTags:
         url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
         resp = get_request(url, output="json")
 
+        # Sort tags by datetime last updated
         tags = sorted(resp["results"], key=lambda k: k["last_updated"])
 
+        # Find the most recent tag
         if tags[-1]["name"] == "latest":
             latest_tag = tags[-2]["name"]
         else:
@@ -98,6 +100,7 @@ class ImageTags:
         resp = get_request(url, output="json")
         tags = [resp["tags"][key] for key in resp["tags"].keys()]
 
+        # Convert the last modified datetime into a valid object
         for tag in tags:
             tag["last_modified"] = datetime.strptime(
                 tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
