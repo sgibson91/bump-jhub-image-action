@@ -35,7 +35,7 @@ inputs:
       The name of the base branch Pull Requests will be merged into. Defaults to
       `main`.
     required: false
-    default: ${{ github.ref_name }}
+    default: "main"
   head_branch:
     description: |
       The name of the branch changes will be pushed to and the Pull Request will
