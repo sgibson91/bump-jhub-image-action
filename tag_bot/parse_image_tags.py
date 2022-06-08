@@ -102,8 +102,9 @@ class ImageTags:
 
         # Convert the last modified datetime into a valid object
         for tag in tags:
-            tag["last_modified"] = datetime.strptime(
-                tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
+            tag["last_modified"] = datetime.strftime(
+                datetime.strptime(tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"),
+                "%Y-%m-%dT%H:%M:%S.%fZ",
             )
 
         tags = sorted(tags, key=lambda k: k["last_modified"])
