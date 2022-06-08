@@ -48,11 +48,11 @@ Here is a list detailing the assumptions that the Action makes.
 | `values_paths` | A _space-delimited_ list of valid [JMESPath expressions](https://jmespath.org/) identifying the location of images in the config to check for updates. An example is: `.singleuser.profileList[0].kubespawner_override.image`. If the image name and tag are in separate fields, you can provide the path to the parent key, e.g., `.singleuser.image` will know how to parse `.singleuser.image.name` and `.singleuser.image.tag`. | :white_check_mark: | - |
 | `github_token` | A GitHub token to make requests to the API with. Requires write permissions to: create new branches, make commits, and open Pull Requests. | :x: | `${{github.token}}` |
 | `repository` | A GitHub repository containing the config for a JupyterHub deployment. | :x: | `${{github.repository}}` |
-| `base_branch` | The name of the base branch Pull Requests will be merged into. | :x: | `${{ github.ref_name }}` |
+| `base_branch` | The name of the base branch Pull Requests will be merged into. | :x: | `${{github.ref_name}}` |
 | `head_branch` | The name of the branch changes will be pushed to and the Pull Request will be opened from. | :x: | `bump-image-tags/{{ config path }}/WXYZ` where `WXYZ` will be a randomly generated ascii string (to avoid clashes) |
 | `labels` | A comma-separated list of labels to apply to the opened Pull Request. Labels must already exist in the repository. | :x: | `[]` |
 | `reviewers` | A comma-separated list of GitHub users (without the leading `@`) to request reviews from. | :x: | `[]` |
-| `team_reviewers` | A comma-separated list of GitHub teams, in the form `ORG_NAME/TEAM_NAME`, to request reviews from. | :x: | `[]` |
+| `team_reviewers` | A comma-separated list of GitHub teams to request reviews from. | :x: | `[]` |
 | `push_to_users_fork` | A GitHub account username (without the leading `@`) to fork the repository to and open a Pull Request from. If provided, then `github_token` must also be provided, and it should be a PAT owned by the account named here. | :x: | `None` |
 | `dry_run` | Perform a dry-run of the action. A Pull Request will not be opened, but a log message will indicate if any image tags can be bumped. | :x: | `False` |
 

@@ -55,8 +55,7 @@ inputs:
     required: false
   team_reviewers:
     description: |
-      A comma-separated list of GitHub teams, in the form ORG_NAME/TEAM_NAME, to
-      request reviews from.
+      A comma-separated list of GitHub teams to request reviews from.
     required: false
   push_to_users_fork:
     description: |
