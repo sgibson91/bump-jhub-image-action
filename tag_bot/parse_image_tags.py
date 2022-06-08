@@ -79,12 +79,12 @@ class ImageTags:
         url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
         resp = get_request(url, output="json")
 
-        tags_sorted = sorted(resp["results"], key=lambda k: k["last_updated"])
+        tags = sorted(resp["results"], key=lambda k: k["last_updated"])
 
-        if tags_sorted[-1]["name"] == "latest":
-            latest_tag = tags_sorted[-2]["name"]
+        if tags[-1]["name"] == "latest":
+            latest_tag = tags[-2]["name"]
         else:
-            latest_tag = tags_sorted[-1]["name"]
+            latest_tag = tags[-1]["name"]
 
         self.image_tags[image_name]["latest"] = latest_tag
 
@@ -103,12 +103,12 @@ class ImageTags:
                 tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
             )
 
-        tags_sorted = sorted(tags, key=lambda k: k["last_modified"])
+        tags = sorted(tags, key=lambda k: k["last_modified"])
 
-        if tags_sorted[-1]["name"] == "latest":
-            latest_tag = tags_sorted[-2]["name"]
+        if tags[-1]["name"] == "latest":
+            latest_tag = tags[-2]["name"]
         else:
-            latest_tag = tags_sorted[-1]["name"]
+            latest_tag = tags[-1]["name"]
 
         self.image_tags[image_name]["latest"] = latest_tag
 
