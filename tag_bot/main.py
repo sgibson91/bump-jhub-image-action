@@ -164,7 +164,7 @@ def assert_images_info_input(images_info):
     for obj in images_info:
         assert isinstance(obj, dict)
         assert "values_path" in obj.keys()
-        assert isinstance(obj["values_paths"], str)
+        assert isinstance(obj["values_path"], str)
 
 
 def main():
