@@ -86,9 +86,16 @@ class ImageTags:
         """
         url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
         resp = get_request(url, output="json")
+        tags = resp["results"]
+
+        # Convert the last updated metadata into a valid datetime object
+        for tag in tags:
+            tag["last_updated"] = datetime.strptime(
+                tag["last_updated"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
 
         # Sort tags by datetime last updated
-        tags = sorted(resp["results"], key=lambda k: k["last_updated"])
+        tags = sorted(tags, key=lambda k: k["last_updated"])
 
         if regexpr is not None:
             # Filter the names of the tags based on a regular expression
@@ -115,11 +122,10 @@ class ImageTags:
         resp = get_request(url, output="json")
         tags = [resp["tags"][key] for key in resp["tags"].keys()]
 
-        # Convert the last modified datetime into a valid object
+        # Convert the last modified metadata into a valid datetime object
         for tag in tags:
-            tag["last_modified"] = datetime.strftime(
-                datetime.strptime(tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"),
-                "%Y-%m-%dT%H:%M:%S.%fZ",
+            tag["last_modified"] = datetime.strptime(
+                tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
             )
 
         tags = sorted(tags, key=lambda k: k["last_modified"])
