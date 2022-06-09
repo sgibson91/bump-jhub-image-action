@@ -120,7 +120,12 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [{"values_path": ".singleuser.image", "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}"}],
+            [
+                {
+                    "values_path": ".singleuser.image",
+                    "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}",
+                }
+            ],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
@@ -154,7 +159,9 @@ class TestImageTags(unittest.TestCase):
         )
 
         with mock_get as mock:
-            image_parser._get_most_recent_image_tag_dockerhub(image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}")
+            image_parser._get_most_recent_image_tag_dockerhub(
+                image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}"
+            )
 
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
@@ -216,7 +223,12 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [{"values_path": ".singleuser.image", "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}"}],
+            [
+                {
+                    "values_path": ".singleuser.image",
+                    "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}",
+                }
+            ],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
@@ -250,7 +262,9 @@ class TestImageTags(unittest.TestCase):
         )
 
         with mock_get as mock:
-            image_parser._get_most_recent_image_tag_quayio(image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}")
+            image_parser._get_most_recent_image_tag_quayio(
+                image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}"
+            )
 
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
