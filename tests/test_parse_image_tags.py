@@ -11,7 +11,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
@@ -27,6 +27,7 @@ class TestImageTags(unittest.TestCase):
             "image_owner/image_name": {
                 "current": "image_tag",
                 "path": ".singleuser.image.tag",
+                "regexpr": None,
             }
         }
 
@@ -39,7 +40,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.profileList[0].kubespawner_override.image"],
+            [{"values_path": ".singleuser.profileList[0].kubespawner_override.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
@@ -58,6 +59,7 @@ class TestImageTags(unittest.TestCase):
             "image_owner/image_name": {
                 "current": "image_tag",
                 "path": ".singleuser.profileList[0].kubespawner_override.image",
+                "regexpr": None,
             },
         }
 
