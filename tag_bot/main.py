@@ -223,11 +223,11 @@ def main():
     assert_images_info_input(images_info)
 
     # If labels/reviewers have been provided, transform from string into a list
-    if len(labels) > 0:
+    if labels:
         labels = split_str_to_list(labels, split_char=",")
-    if len(reviewers) > 0:
+    if reviewers:
         reviewers = split_str_to_list(reviewers, split_char=",")
-    if len(team_reviewers) > 0:
+    if team_reviewers:
         team_reviewers = split_str_to_list(team_reviewers, split_char=",")
 
     # Check the dry_run variable is properly set
