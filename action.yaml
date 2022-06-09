@@ -11,10 +11,14 @@ inputs:
       Path to the JupyterHub configuration file relative to the root of the
       repository.
     required: true
-  values_paths:
+  images_info:
     description: |
-      A list of space-delimited JMESPath expressions that describe the location of
-      images to check in the JupyterHub configuration file.
+      A list of dictionaries describing each image to be bumped by the action. Each
+      dictionary should contain a 'values_path' key containing a valid JMESPath
+      expression locating the image in the JupyterHub configuration file. Optionally,
+      a 'regexpr' key can be provided to describe the format of the tag to use from the
+      repository. This can be useful if the image publishes a range of different styles
+      of tags.
     required: true
   github_token:
     description: |

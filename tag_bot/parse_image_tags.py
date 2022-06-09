@@ -1,3 +1,4 @@
+import re
 import warnings
 from datetime import datetime
 from itertools import compress
@@ -48,39 +49,51 @@ class ImageTags:
     def _get_local_image_tags(self):
         """Read the tags currently stored in a JupyterHub YAML config file"""
         logger.info("Fetching current image tags from config...")
-        for values_path in self.inputs.values_paths:
-            value = read_config_with_yq(self.inputs.config, values_path)
+        for image_info in self.inputs.images_info:
+            value = read_config_with_yq(self.inputs.config, image_info["values_path"])
 
             if (
                 isinstance(value, dict)
                 and ("name" in value.keys())
                 and ("tag" in value.keys())
             ):
-                path = values_path + ".tag"
+                path = image_info["values_path"] + ".tag"
                 self.image_tags[value["name"]] = {
                     "current": value["tag"],
                     "path": path,
+                    "regexpr": image_info.get("regexpr", None),
                 }
             elif isinstance(value, str):
                 name, tag = value.split(":")
-                self.image_tags[name] = {"current": tag, "path": values_path}
+                self.image_tags[name] = {
+                    "current": tag,
+                    "path": image_info["values_path"],
+                    "regexpr": image_info.get("regexpr", None),
+                }
             else:
                 warnings.warn(
-                    f"Unknown image definition in path. Skipping for now. {values_path}"
+                    f"Unknown image definition in path. Skipping for now. {image_info['values_path']}"
                 )
                 continue
 
-    def _get_most_recent_image_tag_dockerhub(self, image_name):
+    def _get_most_recent_image_tag_dockerhub(self, image_name, regexpr=None):
         """For an image hosted on DockerHub, look up the most recent tag
 
         Args:
             image_name (str): The name of the image to look up tags for
+            regexpr (str): A regular expression describing the format of tag to return.
+                Defaults to None.
         """
         url = "/".join(["https://hub.docker.com/v2/repositories", image_name, "tags"])
         resp = get_request(url, output="json")
 
         # Sort tags by datetime last updated
         tags = sorted(resp["results"], key=lambda k: k["last_updated"])
+
+        if regexpr is not None:
+            # Filter the names of the tags based on a regular expression
+            regexpr = re.compile(regexpr)
+            tags = [tag for tag in tags if regexpr.match(tag["name"]) is not None]
 
         # Find the most recent tag
         if tags[-1]["name"] == "latest":
@@ -90,11 +103,13 @@ class ImageTags:
 
         self.image_tags[image_name]["latest"] = latest_tag
 
-    def _get_most_recent_image_tag_quayio(self, image_name):
+    def _get_most_recent_image_tag_quayio(self, image_name, regexpr=None):
         """For an image hosted on quay.io, look up the most recent tag
 
         Args:
             image_name (str): The name of the image to look up tags for
+            regexpr (str): A regular expression describing the format of tag to return.
+                Defaults to None.
         """
         url = "/".join(["https://quay.io/api/v1/repository", image_name])
         resp = get_request(url, output="json")
@@ -108,6 +123,11 @@ class ImageTags:
             )
 
         tags = sorted(tags, key=lambda k: k["last_modified"])
+
+        if regexpr is not None:
+            # Filter the names of the tags based on a regular expression
+            regexpr = re.compile(regexpr)
+            tags = [tag for tag in tags if regexpr.match(tag["name"]) is not None]
 
         if tags[-1]["name"] == "latest":
             latest_tag = tags[-2]["name"]
@@ -124,10 +144,14 @@ class ImageTags:
         logger.info("Fetching most recently published image tags...")
         for image in self.image_tags.keys():
             if len(image.split("/")) == 2:
-                self._get_most_recent_image_tag_dockerhub(image)
+                self._get_most_recent_image_tag_dockerhub(
+                    image, regexpr=self.image_tags[image]["regexpr"]
+                )
             elif len(image.split("/")) > 2:
                 if image.split("/")[0] == "quay.io":
-                    self._get_most_recent_image_tag_quayio(image)
+                    self._get_most_recent_image_tag_quayio(
+                        image, regexpr=self.image_tags[image]["regexpr"]
+                    )
                 else:
                     warnings.warn(
                         f"NotImplemented: Cannot currently retrieve image from {image.split('/')[0]}"

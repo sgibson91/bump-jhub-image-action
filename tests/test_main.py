@@ -1,7 +1,9 @@
 import base64
 import unittest
 
-from tag_bot.main import UpdateImageTags, split_str_to_list
+import pytest
+
+from tag_bot.main import UpdateImageTags, assert_images_info_input, split_str_to_list
 from tag_bot.yaml_parser import YamlParser
 
 yaml = YamlParser()
@@ -171,6 +173,39 @@ def test_split_str_to_list_complex():
     assert result1 == expected_output
     assert result2 == expected_output
     assert result1 == result2
+
+
+def test_assert_images_info_input_pass():
+    images_info = [{"values_path": ".singleuser.image"}]
+    assert_images_info_input(images_info)
+
+
+def test_assert_images_info_input_fail_1():
+    images_info = {"values_path": ".singleuser.image"}
+
+    with pytest.raises(AssertionError):
+        assert_images_info_input(images_info)
+
+
+def test_assert_images_info_input_fail_2():
+    images_info = ["values_paths", ".singleuser.image"]
+
+    with pytest.raises(AssertionError):
+        assert_images_info_input(images_info)
+
+
+def test_assert_images_info_input_fail_3():
+    images_info = [{"values_paths": ".singleuser.image"}]
+
+    with pytest.raises(AssertionError):
+        assert_images_info_input(images_info)
+
+
+def test_assert_images_info_input_fail_4():
+    images_info = [{"values_path": 42}]
+
+    with pytest.raises(AssertionError):
+        assert_images_info_input(images_info)
 
 
 if __name__ == "__main__":

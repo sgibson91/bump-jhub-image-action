@@ -11,7 +11,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
@@ -27,6 +27,7 @@ class TestImageTags(unittest.TestCase):
             "image_owner/image_name": {
                 "current": "image_tag",
                 "path": ".singleuser.image.tag",
+                "regexpr": None,
             }
         }
 
@@ -39,7 +40,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.profileList[0].kubespawner_override.image"],
+            [{"values_path": ".singleuser.profileList[0].kubespawner_override.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.inputs.config = {
@@ -58,6 +59,7 @@ class TestImageTags(unittest.TestCase):
             "image_owner/image_name": {
                 "current": "image_tag",
                 "path": ".singleuser.profileList[0].kubespawner_override.image",
+                "regexpr": None,
             },
         }
 
@@ -70,7 +72,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
@@ -113,12 +115,67 @@ class TestImageTags(unittest.TestCase):
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
 
+    def test_get_most_recent_image_tags_dockerhub_with_regexpr(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [
+                {
+                    "values_path": ".singleuser.image",
+                    "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}",
+                }
+            ],
+        )
+        image_parser = ImageTags(main, "octocat/octocat", "main")
+        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+        image = "image_owner/image_name"
+
+        expected_image_tags = {
+            "image_owner/image_name": {
+                "current": "image_tag",
+                "latest": "2022.06.09",
+            }
+        }
+
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value={
+                "results": [
+                    {
+                        "last_updated": "2021-09-27T16:00:00.000000Z",
+                        "name": "latest",
+                    },
+                    {
+                        "last_updated": "2021-09-27T15:59:00.000000Z",
+                        "name": "2022.06.09",
+                    },
+                    {
+                        "last_updated": "2021-08-27T16:00:00.000000Z",
+                        "name": "some_other_tag",
+                    },
+                ]
+            },
+        )
+
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_dockerhub(
+                image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}"
+            )
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join(["https://hub.docker.com/v2/repositories", image, "tags"]),
+                output="json",
+            )
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
     def test_get_most_recent_image_tags_quayio(self):
         main = UpdateImageTags(
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
@@ -161,12 +218,67 @@ class TestImageTags(unittest.TestCase):
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
 
+    def test_get_most_recent_image_tags_quayio_with_regexpr(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [
+                {
+                    "values_path": ".singleuser.image",
+                    "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}",
+                }
+            ],
+        )
+        image_parser = ImageTags(main, "octocat/octocat", "main")
+        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
+        image = "image_owner/image_name"
+
+        expected_image_tags = {
+            "image_owner/image_name": {
+                "current": "image_tag",
+                "latest": "2022.06.09",
+            }
+        }
+
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value={
+                "tags": {
+                    "latest": {
+                        "last_modified": "Mon, 27 Sep 2021 16:00:00 -0000",
+                        "name": "latest",
+                    },
+                    "new_image_tag": {
+                        "last_modified": "Mon, 27 Sep 2021 15:59:00 -0000",
+                        "name": "2022.06.09",
+                    },
+                    "some_other_tag": {
+                        "last_modified": "Fri, 27 Aug 2021 16:00:00 -0000",
+                        "name": "some_other_tag",
+                    },
+                }
+            },
+        )
+
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_quayio(
+                image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}"
+            )
+
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                "/".join(["https://quay.io/api/v1/repository", image]),
+                output="json",
+            )
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
     def test_compare_image_tags_match(self):
         main = UpdateImageTags(
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
@@ -187,7 +299,7 @@ class TestImageTags(unittest.TestCase):
             "octocat/octocat",
             "ThIs_Is_A_t0k3n",
             "config/config.yaml",
-            [".singleuser.image"],
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
         image_parser.image_tags = {
@@ -206,7 +318,10 @@ class TestImageTags(unittest.TestCase):
     @patch("tag_bot.parse_image_tags.get_request")
     def test_get_config(self, mock_get):
         main = UpdateImageTags(
-            "octocat/octocat", "t0k3n", "config/config.yaml", [".singleuser.image"]
+            "octocat/octocat",
+            "t0k3n",
+            "config/config.yaml",
+            [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, main.repository, main.base_branch)
 

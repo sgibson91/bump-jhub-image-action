@@ -1,4 +1,5 @@
 import base64
+import json
 import os
 
 from loguru import logger
@@ -19,7 +20,7 @@ class UpdateImageTags:
         repository,
         github_token,
         config_path,
-        values_paths,
+        images_info,
         base_branch="main",
         head_branch="bump-image-tags",
         labels=[],
@@ -30,7 +31,7 @@ class UpdateImageTags:
     ):
         self.repository = repository
         self.config_path = config_path
-        self.values_paths = values_paths
+        self.images_info = images_info
         self.base_branch = base_branch
         self.labels = labels
         self.reviewers = reviewers
@@ -150,13 +151,31 @@ def split_str_to_list(input_str, split_char=" "):
     return split_str
 
 
+def assert_images_info_input(images_info):
+    """Assert the user input provided to the images_info variable is as of the expected
+    structure. I.e., a list of dictionaries, where each dictionary must have a
+    'values_path' key whose value is a string type.
+
+    Args:
+        images_info (list[dict]): The input list of dictionaries to check
+    """
+    assert isinstance(images_info, list)
+
+    for obj in images_info:
+        assert isinstance(obj, dict)
+        assert "values_path" in obj.keys()
+        assert isinstance(obj["values_path"], str)
+
+
 def main():
     # Retrieve environment variables
     config_path = (
         os.environ["INPUT_CONFIG_PATH"] if "INPUT_CONFIG_PATH" in os.environ else None
     )
-    values_paths = (
-        os.environ["INPUT_VALUES_PATHS"] if "INPUT_VALUES_PATHS" in os.environ else None
+    images_info = (
+        json.loads(os.environ["INPUT_IMAGES_INFO"])
+        if "INPUT_IMAGES_INFO" in os.environ
+        else None
     )
     github_token = (
         os.environ["INPUT_GITHUB_TOKEN"] if "INPUT_GITHUB_TOKEN" in os.environ else None
@@ -189,7 +208,7 @@ def main():
     # Reference dict for required inputs
     required_vars = {
         "CONFIG_PATH": config_path,
-        "VALUES_PATHS": values_paths,
+        "IMAGES_INFO": images_info,
         "GITHUB_TOKEN": github_token,
         "REPOSITORY": repository,
         "BASE_BRANCH": base_branch,
@@ -200,15 +219,15 @@ def main():
         if v is None:
             raise ValueError(f"{k} must be set!")
 
-    # Split the parsed values paths into a list
-    values_paths = split_str_to_list(values_paths)
+    # Assert images_info is set correctly
+    assert_images_info_input(images_info)
 
     # If labels/reviewers have been provided, transform from string into a list
-    if len(labels) > 0:
+    if labels:
         labels = split_str_to_list(labels, split_char=",")
-    if len(reviewers) > 0:
+    if reviewers:
         reviewers = split_str_to_list(reviewers, split_char=",")
-    if len(team_reviewers) > 0:
+    if team_reviewers:
         team_reviewers = split_str_to_list(team_reviewers, split_char=",")
 
     # Check the dry_run variable is properly set
@@ -225,7 +244,7 @@ def main():
         repository,
         github_token,
         config_path,
-        values_paths,
+        images_info,
         base_branch=base_branch,
         head_branch=head_branch,
         labels=labels,
