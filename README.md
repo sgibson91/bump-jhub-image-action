@@ -94,7 +94,30 @@ jobs:
     - uses: sgibson91/bump-jhub-image-action@main
       with:
         config_path: path/to/config.yaml
-        values_paths: .singleuser.image .singleuser.profileList[0].kubespawner_override.image
+        images_info: '[{"values_path": ".singleuser.image"}, {"values_path": ".singleuser.profileList[0].kubespawner_override.image"}]'
+```
+
+You can also optionally provide a regular expression describing the format of the image tag you'd like to action to bump to.
+This is particularly useful if an image is published with a range of tags, e.g., date, commit, etc.
+
+```yaml
+name: Check and Bump image tags in a JupyterHub config
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * 1-5"
+
+jobs:
+  bump-image-tags:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: sgibson91/bump-jhub-image-action@main
+      with:
+        config_path: path/to/config.yaml
+        # The following regexpr will select image tags for .singleuser.image that are in
+        # the form of a YYYY.MM.DD date, e.g., 2022.09.06
+        images_info: '[{"values_path": ".singleuser.image", "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}"}]'
 ```
 
 ### :wrench: Configuring the Action to push to a fork
@@ -121,7 +144,7 @@ jobs:
     - uses: sgibson91/bump-jhub-image-action@main
       with:
         config_path: path/to/config.yaml
-        values_paths: .singleuser.image
+        images_info: [{"values_path": ".singleuser.image"}]
         push_to_users_fork: octocat
         github_token: <PROVIDE A TOKEN OWNED BY OCTOCAT HERE>
 ```
