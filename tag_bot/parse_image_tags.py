@@ -155,12 +155,13 @@ class ImageTags:
                 )
             elif len(image.split("/")) > 2:
                 if image.split("/")[0] == "quay.io":
+                    image = "/".join(image.split("/")[1:])
                     self._get_most_recent_image_tag_quayio(
                         image, regexpr=self.image_tags[image]["regexpr"]
                     )
                 else:
                     warnings.warn(
-                        f"NotImplemented: Cannot currently retrieve image from {image.split('/')[0]}"
+                        f"NotImplemented: Cannot currently retrieve images from {image.split('/')[0]}"
                     )
                     continue
             else:
