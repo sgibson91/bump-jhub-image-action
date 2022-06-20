@@ -110,14 +110,19 @@ class ImageTags:
 
         self.image_tags[image_name]["latest"] = latest_tag
 
-    def _get_most_recent_image_tag_quayio(self, image_name, regexpr=None):
+    def _get_most_recent_image_tag_quayio(self, full_image_name, regexpr=None):
         """For an image hosted on quay.io, look up the most recent tag
 
         Args:
-            image_name (str): The name of the image to look up tags for
+            full_image_name (str): The name of the image to look up tags for. Includes
+                the 'quay.io/' prefix.
             regexpr (str): A regular expression describing the format of tag to return.
                 Defaults to None.
         """
+        # Strip 'quay.io/' from the beginning of the image name
+        image_name = "/".join(full_image_name.split("/")[1:])
+
+        # Construct and make API call to quay.io
         url = "/".join(["https://quay.io/api/v1/repository", image_name])
         resp = get_request(url, output="json")
         tags = [resp["tags"][key] for key in resp["tags"].keys()]
@@ -140,7 +145,7 @@ class ImageTags:
         else:
             latest_tag = tags[-1]["name"]
 
-        self.image_tags[image_name]["latest"] = latest_tag
+        self.image_tags[full_image_name]["latest"] = latest_tag
 
     def _get_remote_tags(self):
         """
@@ -155,7 +160,6 @@ class ImageTags:
                 )
             elif len(image.split("/")) > 2:
                 if image.split("/")[0] == "quay.io":
-                    image = "/".join(image.split("/")[1:])
                     self._get_most_recent_image_tag_quayio(
                         image, regexpr=self.image_tags[image]["regexpr"]
                     )

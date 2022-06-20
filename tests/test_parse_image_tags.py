@@ -178,11 +178,13 @@ class TestImageTags(unittest.TestCase):
             [{"values_path": ".singleuser.image"}],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
-        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
-        image = "image_owner/image_name"
+        image_parser.image_tags = {
+            "quay.io/image_owner/image_name": {"current": "image_tag"}
+        }
+        image = "quay.io/image_owner/image_name"
 
         expected_image_tags = {
-            "image_owner/image_name": {
+            "quay.io/image_owner/image_name": {
                 "current": "image_tag",
                 "latest": "new_image_tag",
             }
@@ -213,7 +215,12 @@ class TestImageTags(unittest.TestCase):
 
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
-                "/".join(["https://quay.io/api/v1/repository", image]),
+                "/".join(
+                    [
+                        "https://quay.io/api/v1/repository",
+                        "/".join(image.split("/")[1:]),
+                    ]
+                ),
                 output="json",
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
@@ -231,11 +238,13 @@ class TestImageTags(unittest.TestCase):
             ],
         )
         image_parser = ImageTags(main, "octocat/octocat", "main")
-        image_parser.image_tags = {"image_owner/image_name": {"current": "image_tag"}}
-        image = "image_owner/image_name"
+        image_parser.image_tags = {
+            "quay.io/image_owner/image_name": {"current": "image_tag"}
+        }
+        image = "quay.io/image_owner/image_name"
 
         expected_image_tags = {
-            "image_owner/image_name": {
+            "quay.io/image_owner/image_name": {
                 "current": "image_tag",
                 "latest": "2022.06.09",
             }
@@ -268,7 +277,12 @@ class TestImageTags(unittest.TestCase):
 
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
-                "/".join(["https://quay.io/api/v1/repository", image]),
+                "/".join(
+                    [
+                        "https://quay.io/api/v1/repository",
+                        "/".join(image.split("/")[1:]),
+                    ]
+                ),
                 output="json",
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
