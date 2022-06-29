@@ -86,15 +86,9 @@ class UpdateImageTags:
         if self.push_to_users_fork is not None:
             github.check_fork_exists()
 
-        if github.pr_exists:
-            branch = self.head_branch
-        else:
-            branch = self.base_branch
+        branch = self.head_branch if github.pr_exists else self.base_branch
 
-        if github.fork_exists:
-            url = github.fork_api_url
-        else:
-            url = github.api_url
+        url = github.fork_api_url if github.fork_exists else github.api_url
 
         image_parser = ImageTags(self, url, branch)
         image_parser.get_image_tags()
