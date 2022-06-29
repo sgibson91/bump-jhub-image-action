@@ -86,29 +86,17 @@ class UpdateImageTags:
         if self.push_to_users_fork is not None:
             github.check_fork_exists()
 
-            if github.fork_exists:
-                github.merge_upstream()
-            else:
-                github.create_fork()
+        if github.pr_exists:
+            branch = self.head_branch
+        else:
+            branch = self.base_branch
 
-        if github.pr_exists and github.fork_exists:
-            image_parser = ImageTags(self, github.fork_api_url, self.head_branch)
+        if github.fork_exists:
+            url = github.fork_api_url
+        else:
+            url = github.api_url
 
-        elif github.pr_exists and not github.fork_exists:
-            image_parser = ImageTags(self, github.api_url, self.head_branch)
-
-        elif not github.pr_exists and github.fork_exists:
-            image_parser = ImageTags(self, github.fork_api_url, self.base_branch)
-
-            resp = github.get_ref(self.base_branch)
-            github.create_ref(self.head_branch, resp["object"]["sha"])
-
-        elif not github.pr_exists and not github.fork_exists:
-            image_parser = ImageTags(self, github.api_url, self.base_branch)
-
-            resp = github.get_ref(self.base_branch)
-            github.create_ref(self.head_branch, resp["object"]["sha"])
-
+        image_parser = ImageTags(self, url, branch)
         image_parser.get_image_tags()
 
         if len(self.images_to_update) > 0 and not self.dry_run:
@@ -116,6 +104,15 @@ class UpdateImageTags:
                 "Newer tags are available for the following images: {}",
                 self.images_to_update,
             )
+
+            if github.fork_exists:
+                github.merge_upstream()
+            else:
+                github.create_fork()
+
+            if not github.pr_exists:
+                resp = github.get_ref(self.base_branch)
+                github.create_ref(self.head_branch, resp["object"]["sha"])
 
             updated_config = self.update_config()
             commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
