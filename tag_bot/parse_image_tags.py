@@ -1,5 +1,6 @@
 import re
 import warnings
+from datetime import datetime
 from itertools import compress
 
 from dateutil.parser import isoparse
@@ -127,7 +128,9 @@ class ImageTags:
 
         # Convert the last modified metadata into a valid datetime object
         for tag in tags:
-            tag["last_modified"] = isoparse(tag["last_modified"])
+            tag["last_modified"] = datetime.strptime(
+                tag["last_modified"], "%a, %d %b %Y %H:%M:%S %z"
+            )
 
         tags = sorted(tags, key=lambda k: k["last_modified"])
 
