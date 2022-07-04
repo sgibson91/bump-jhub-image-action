@@ -83,13 +83,13 @@ class UpdateImageTags:
         github = GitHubAPI(self)
         github.find_existing_pull_request()
 
-        if self.push_to_users_fork is not None:
-            github.check_fork_exists()
+        #         if self.push_to_users_fork is not None:
+        #             github.check_fork_exists()
 
-        url = github.fork_api_url if github.fork_exists else github.api_url
+        #         url = github.fork_api_url if github.fork_exists else github.api_url
         branch = self.head_branch if github.pr_exists else self.base_branch
 
-        image_parser = ImageTags(self, url, branch)
+        image_parser = ImageTags(self, github.api_url, branch)
         image_parser.get_image_tags()
 
         if len(self.images_to_update) > 0 and not self.dry_run:
@@ -98,10 +98,10 @@ class UpdateImageTags:
                 self.images_to_update,
             )
 
-            if github.fork_exists:
-                github.merge_upstream()
-            else:
-                github.create_fork()
+            #             if github.fork_exists:
+            #                 github.merge_upstream()
+            #             else:
+            #                 github.create_fork()
 
             if not github.pr_exists:
                 resp = github.get_ref(self.base_branch)
