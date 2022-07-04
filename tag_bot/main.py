@@ -98,10 +98,11 @@ class UpdateImageTags:
                 self.images_to_update,
             )
 
-            if github.fork_exists:
-                github.merge_upstream()
-            else:
-                github.create_fork()
+            if self.push_to_users_fork is not None:
+                if github.fork_exists:
+                    github.merge_upstream()
+                else:
+                    github.create_fork()
 
             if not github.pr_exists:
                 resp = github.get_ref(self.base_branch)
