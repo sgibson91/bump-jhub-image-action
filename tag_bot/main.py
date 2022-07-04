@@ -160,41 +160,17 @@ def assert_images_info_input(images_info):
 
 def main():
     # Retrieve environment variables
-    config_path = (
-        os.environ["INPUT_CONFIG_PATH"] if "INPUT_CONFIG_PATH" in os.environ else None
-    )
-    images_info = (
-        json.loads(os.environ["INPUT_IMAGES_INFO"])
-        if "INPUT_IMAGES_INFO" in os.environ
-        else None
-    )
-    github_token = (
-        os.environ["INPUT_GITHUB_TOKEN"] if "INPUT_GITHUB_TOKEN" in os.environ else None
-    )
-    repository = (
-        os.environ["INPUT_REPOSITORY"] if "INPUT_REPOSITORY" in os.environ else None
-    )
-    base_branch = (
-        os.environ["INPUT_BASE_BRANCH"] if "INPUT_BASE_BRANCH" in os.environ else None
-    )
-    head_branch = (
-        os.environ["INPUT_HEAD_BRANCH"]
-        if "INPUT_HEAD_BRANCH" in os.environ
-        else "bump-image-tags"
-    )
-    labels = os.environ["INPUT_LABELS"] if "INPUT_LABELS" in os.environ else []
-    reviewers = os.environ["INPUT_REVIEWERS"] if "INPUT_REVIEWERS" in os.environ else []
-    team_reviewers = (
-        os.environ["INPUT_TEAM_REVIEWERS"]
-        if "INPUT_TEAM_REVIEWERS" in os.environ
-        else []
-    )
-    push_to_users_fork = (
-        os.environ["INPUT_PUSH_TO_USERS_FORK"]
-        if "PUSH_TO_USERS_FORK" in os.environ
-        else None
-    )
-    dry_run = os.environ["INPUT_DRY_RUN"] if "INPUT_DRY_RUN" in os.environ else False
+    config_path = os.environ.get("INPUT_CONFIG_PATH", None)
+    images_info = json.loads(os.environ.get("INPUT_IMAGES_INFO", "null"))
+    github_token = os.environ.get("INPUT_GITHUB_TOKEN", None)
+    repository = os.environ.get("INPUT_REPOSITORY", None)
+    base_branch = os.environ.get("INPUT_BASE_BRANCH", None)
+    head_branch = os.environ.get("INPUT_HEAD_BRANCH", "bump-image-tags")
+    labels = os.environ.get("INPUT_LABELS", [])
+    reviewers = os.environ.get("INPUT_REVIEWERS", [])
+    team_reviewers = os.environ.get("INPUT_TEAM_REVIEWERS", [])
+    push_to_users_fork = os.environ.get("INPUT_PUSH_TO_USERS_FORK", None)
+    dry_run = os.environ.get("INPUT_DRY_RUN", False)
 
     # Reference dict for required inputs
     required_vars = {
