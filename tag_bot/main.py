@@ -89,7 +89,7 @@ class UpdateImageTags:
         if (
             self.push_to_users_fork is not None
             and github.fork_exists
-            and hasattr(github.fork_api_url)
+            and hasattr(github, "fork_api_url")
         ):
             url = github.fork_api_url
         else:
