@@ -219,21 +219,6 @@ def main():
     else:
         raise ValueError("DRY_RUN variable can only take values 'true' or 'false'")
 
-    for var in [
-        config_path,
-        images_info,
-        repository,
-        base_branch,
-        head_branch,
-        labels,
-        reviewers,
-        team_reviewers,
-        push_to_users_fork,
-        dry_run,
-    ]:
-        vnames = [name for name in globals() if globals()[name] is var]
-        print(vnames, ":", var)
-
     update_image_tags = UpdateImageTags(
         repository,
         github_token,
