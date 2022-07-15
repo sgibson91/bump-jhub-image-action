@@ -205,6 +205,10 @@ def main():
     if team_reviewers:
         team_reviewers = split_str_to_list(team_reviewers, split_char=",")
 
+    # Check the push_to_users_fork variable is properly set
+    if len(push_to_users_fork) == 0:
+        push_to_users_fork = None
+
     # Check the dry_run variable is properly set
     if isinstance(dry_run, str) and (dry_run == "true"):
         dry_run = True
