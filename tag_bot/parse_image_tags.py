@@ -155,7 +155,13 @@ class ImageTags:
                 Defaults to None.
         """
         _, org, reg_name = image_name.split("/")
-        url = "/".join([f"https://api.github.com/orgs/{org}/packages/container", reg_name, "versions"])
+        url = "/".join(
+            [
+                f"https://api.github.com/orgs/{org}/packages/container",
+                reg_name,
+                "versions",
+            ]
+        )
         tags = get_request(url, output="json")
 
         # Convert the last updated metadata into a valid datetime object

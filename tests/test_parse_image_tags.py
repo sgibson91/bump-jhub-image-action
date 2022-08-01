@@ -321,8 +321,8 @@ class TestImageTags(unittest.TestCase):
                 {
                     "updated_at": "2019-10-29T12:42:12Z",
                     "name": "some_other_tag",
-                }
-            ]
+                },
+            ],
         )
 
         with mock_get as mock:
@@ -375,8 +375,8 @@ class TestImageTags(unittest.TestCase):
                 {
                     "updated_at": "2019-10-29T12:42:12Z",
                     "name": "some_other_tag",
-                }
-            ]
+                },
+            ],
         )
 
         with mock_get as mock:
