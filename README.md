@@ -73,6 +73,7 @@ If instead your repository is using the default restricted settings of `GITHUB_T
 permissions:
   contents: write
   pull-requests: write
+  packages: read  # Required for bumping GHCR packages
 ```
 
 ## :recycle: Example Usage
