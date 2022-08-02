@@ -39,6 +39,7 @@ Here is a list detailing the assumptions that the Action makes.
 3. The Docker images are publicly available on one of the following container registries (other container registries may be supported in the future):
    - [Docker Hub](https://hub.docker.com)
    - [quay.io](https://quay.io)
+   - [GiHub Container Registry](https://ghcr.io) (*currently only for org-owned packages*)
 
 ## :inbox_tray: Inputs
 
@@ -72,6 +73,7 @@ If instead your repository is using the default restricted settings of `GITHUB_T
 permissions:
   contents: write
   pull-requests: write
+  packages: read  # Required for bumping GHCR packages
 ```
 
 ## :recycle: Example Usage

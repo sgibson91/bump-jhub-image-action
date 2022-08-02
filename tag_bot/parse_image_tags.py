@@ -146,6 +146,44 @@ class ImageTags:
 
         self.image_tags[full_image_name]["latest"] = latest_tag
 
+    def _get_most_recent_image_tag_ghcr(self, image_name, regexpr=None):
+        """For an image hosted on GitHub CR, look up the most recent tag
+
+        Args:
+            image_name (str): The name of the image to look up tags for
+            regexpr (str): A regular expression describing the format of tag to return.
+                Defaults to None.
+        """
+        _, org, reg_name = image_name.split("/")
+        url = "/".join(
+            [
+                f"https://api.github.com/orgs/{org}/packages/container",
+                reg_name,
+                "versions",
+            ]
+        )
+        tags = get_request(url, output="json")
+
+        # Convert the last updated metadata into a valid datetime object
+        for tag in tags:
+            tag["updated_at"] = isoparse(tag["updated_at"])
+
+        # Sort tags by datetime last updated
+        tags = sorted(tags, key=lambda k: k["updated_at"])
+
+        if regexpr is not None:
+            # Filter the names of the tags based on a regular expression
+            regexpr = re.compile(regexpr)
+            tags = [tag for tag in tags if regexpr.match(tag["name"]) is not None]
+
+        # Find the most recent tag
+        if tags[-1]["name"] == "latest":
+            latest_tag = tags[-2]["name"]
+        else:
+            latest_tag = tags[-1]["name"]
+
+        self.image_tags[image_name]["latest"] = latest_tag
+
     def _get_remote_tags(self):
         """
         Decipher which container registry an image is stored in and find its most
@@ -160,6 +198,10 @@ class ImageTags:
             elif len(image.split("/")) > 2:
                 if image.split("/")[0] == "quay.io":
                     self._get_most_recent_image_tag_quayio(
+                        image, regexpr=self.image_tags[image]["regexpr"]
+                    )
+                elif image.split("/")[0] == "ghcr.io":
+                    self._get_most_recent_image_tag_ghcr(
                         image, regexpr=self.image_tags[image]["regexpr"]
                     )
                 else:

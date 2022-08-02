@@ -287,6 +287,111 @@ class TestImageTags(unittest.TestCase):
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
 
+    def test_get_most_recent_image_tags_ghcr(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [{"values_path": ".singleuser.image"}],
+        )
+        image_parser = ImageTags(main, "octocat/octocat", "main")
+        image_parser.image_tags = {
+            "ghcr.io/image_owner/image_name": {"current": "image_tag"}
+        }
+        image = "ghcr.io/image_owner/image_name"
+
+        expected_image_tags = {
+            "ghcr.io/image_owner/image_name": {
+                "current": "image_tag",
+                "latest": "new_image_tag",
+            }
+        }
+
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value=[
+                {
+                    "updated_at": "2022-10-29T15:42:12Z",
+                    "name": "latest",
+                },
+                {
+                    "updated_at": "2022-10-29T15:42:12Z",
+                    "name": "new_image_tag",
+                },
+                {
+                    "updated_at": "2019-10-29T12:42:12Z",
+                    "name": "some_other_tag",
+                },
+            ],
+        )
+
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_ghcr(image)
+            _, org, img_name = image.split("/")
+            self.assertEqual(mock.call_count, 1)
+            mock.assert_called_with(
+                f"https://api.github.com/orgs/{org}/packages/container/{img_name}/versions",
+                output="json",
+            )
+
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
+    def test_get_most_recent_image_tags_ghcr_with_regexpr(self):
+        main = UpdateImageTags(
+            "octocat/octocat",
+            "ThIs_Is_A_t0k3n",
+            "config/config.yaml",
+            [
+                {
+                    "values_path": ".singleuser.image",
+                    "regexpr": "[0-9]{4}.[0-9]{2}.[0-9]{2}",
+                }
+            ],
+        )
+        image_parser = ImageTags(main, "octocat/octocat", "main")
+        image_parser.image_tags = {
+            "ghcr.io/image_owner/image_name": {"current": "image_tag"}
+        }
+        image = "ghcr.io/image_owner/image_name"
+
+        expected_image_tags = {
+            "ghcr.io/image_owner/image_name": {
+                "current": "image_tag",
+                "latest": "2022.06.09",
+            }
+        }
+
+        mock_get = patch(
+            "tag_bot.parse_image_tags.get_request",
+            return_value=[
+                {
+                    "updated_at": "2022-10-29T15:42:12Z",
+                    "name": "latest",
+                },
+                {
+                    "updated_at": "2022-10-29T15:42:12Z",
+                    "name": "2022.06.09",
+                },
+                {
+                    "updated_at": "2019-10-29T12:42:12Z",
+                    "name": "some_other_tag",
+                },
+            ],
+        )
+
+        with mock_get as mock:
+            image_parser._get_most_recent_image_tag_ghcr(
+                image, regexpr="[0-9]{4}.[0-9]{2}.[0-9]{2}"
+            )
+            self.assertEqual(mock.call_count, 1)
+
+            _, org, img_name = image.split("/")
+            mock.assert_called_with(
+                f"https://api.github.com/orgs/{org}/packages/container/{img_name}/versions",
+                output="json",
+            )
+            self.assertDictEqual(image_parser.image_tags, expected_image_tags)
+
     def test_compare_image_tags_match(self):
         main = UpdateImageTags(
             "octocat/octocat",
