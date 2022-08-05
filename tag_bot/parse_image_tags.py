@@ -177,7 +177,11 @@ class ImageTags:
         if regexpr is not None:
             # Filter the names of the tags based on a regular expression
             regexpr = re.compile(regexpr)
-            tags = [tag for tag in tags if regexpr.match(tag["metadata"]["container"]["tags"][0]) is not None]
+            tags = [
+                tag
+                for tag in tags
+                if regexpr.match(tag["metadata"]["container"]["tags"][0]) is not None
+            ]
 
         # Find the most recent tag
         latest_tag = None
