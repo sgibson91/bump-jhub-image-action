@@ -162,7 +162,7 @@ class ImageTags:
                 "versions",
             ]
         )
-        tags = get_request(url, output="json")
+        tags = get_request(url, headers=self.inputs.headers, output="json")
 
         # Convert the last updated metadata into a valid datetime object
         for tag in tags:
