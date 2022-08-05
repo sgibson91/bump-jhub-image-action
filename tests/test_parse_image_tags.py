@@ -312,15 +312,27 @@ class TestImageTags(unittest.TestCase):
             return_value=[
                 {
                     "updated_at": "2022-10-29T15:42:12Z",
-                    "name": "latest",
+                    "name": "sha256:bd084421f3b0b77b57d81e616f7bba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["latest"]},
+                    },
                 },
                 {
                     "updated_at": "2022-10-29T15:42:12Z",
-                    "name": "new_image_tag",
+                    "name": "sha256:bd084421f3b0b77b57dsdfgdffgdfba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["new_image_tag"]},
+                    },
                 },
                 {
                     "updated_at": "2019-10-29T12:42:12Z",
-                    "name": "some_other_tag",
+                    "name": "sha256:fdgbfghfghfgfgfb57dsdfgdffgdfba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["some_other_tag"]},
+                    },
                 },
             ],
         )
@@ -370,15 +382,27 @@ class TestImageTags(unittest.TestCase):
             return_value=[
                 {
                     "updated_at": "2022-10-29T15:42:12Z",
-                    "name": "latest",
+                    "name": "sha256:bd084421f3b0b77b57d81e616f7bba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["latest"]},
+                    },
                 },
                 {
                     "updated_at": "2022-10-29T15:42:12Z",
-                    "name": "2022.06.09",
+                    "name": "sha256:bd084421f3b0b77b57dsdfgdffgdfba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["2022.06.09"]},
+                    },
                 },
                 {
                     "updated_at": "2019-10-29T12:42:12Z",
-                    "name": "some_other_tag",
+                    "name": "sha256:fdgbfghfghfgfgfb57dsdfgdffgdfba155d988d609575d4e97bd32eebbbfbb7c3",
+                    "metadata": {
+                        "package_type": "container",
+                        "container": {"tags": ["2019-10-29T12:42:12Z"]},
+                    },
                 },
             ],
         )
