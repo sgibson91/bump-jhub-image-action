@@ -331,7 +331,10 @@ class TestImageTags(unittest.TestCase):
             self.assertEqual(mock.call_count, 1)
             mock.assert_called_with(
                 f"https://api.github.com/orgs/{org}/packages/container/{img_name}/versions",
-                headers={'Accept': 'application/vnd.github.v3+json', 'Authorization': 'token ThIs_Is_A_t0k3n'},
+                headers={
+                    "Accept": "application/vnd.github.v3+json",
+                    "Authorization": "token ThIs_Is_A_t0k3n",
+                },
                 output="json",
             )
 
@@ -389,7 +392,10 @@ class TestImageTags(unittest.TestCase):
             _, org, img_name = image.split("/")
             mock.assert_called_with(
                 f"https://api.github.com/orgs/{org}/packages/container/{img_name}/versions",
-                headers={'Accept': 'application/vnd.github.v3+json', 'Authorization': 'token ThIs_Is_A_t0k3n'},
+                headers={
+                    "Accept": "application/vnd.github.v3+json",
+                    "Authorization": "token ThIs_Is_A_t0k3n",
+                },
                 output="json",
             )
             self.assertDictEqual(image_parser.image_tags, expected_image_tags)
