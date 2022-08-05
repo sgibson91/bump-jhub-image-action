@@ -171,16 +171,21 @@ class ImageTags:
         # Sort tags by datetime last updated
         tags = sorted(tags, key=lambda k: k["updated_at"])
 
+        # Make sure we're looking only at versions that have pushed tags
+        tags = [tag for tag in tags if tag["metadata"]["container"]["tags"] is not None]
+
         if regexpr is not None:
             # Filter the names of the tags based on a regular expression
             regexpr = re.compile(regexpr)
-            tags = [tag for tag in tags if regexpr.match(tag["name"]) is not None]
+            tags = [tag for tag in tags if regexpr.match(tag["metadata"]["container"]["tags"][0]) is not None]
 
         # Find the most recent tag
-        if tags[-1]["name"] == "latest":
-            latest_tag = tags[-2]["name"]
-        else:
-            latest_tag = tags[-1]["name"]
+        latest_tag = None
+        if tags:
+            if tags[-1]["metadata"]["container"]["tags"][0] == "latest":
+                latest_tag = tags[-2]["metadata"]["container"]["tags"][0]
+            else:
+                latest_tag = tags[-1]["metadata"]["container"]["tags"][0]
 
         self.image_tags[image_name]["latest"] = latest_tag
 
