@@ -3,6 +3,10 @@ from io import StringIO
 import ruamel.yaml
 
 
+def represent_none(self, data):
+    return self.represent_scalar("tag:yaml.org,2002:null", "null")
+
+
 class YamlParser:
     def __init__(self):
         self.yaml = ruamel.yaml.YAML(typ="rt")
@@ -10,6 +14,7 @@ class YamlParser:
         self.yaml.allow_duplicate_keys = True
         self.yaml.explicit_start = False
         self.yaml.preserve_quotes = True
+        self.yaml.representer.add_representer(type(None), represent_none)
 
     def object_to_yaml_str(self, obj, options={}):
         string_stream = StringIO()
