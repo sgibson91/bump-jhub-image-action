@@ -1,5 +1,5 @@
 # Use a Python slim image
-FROM python:3.11.1-slim
+FROM python:3.12.0-slim
 
 # Install gcc and wget
 RUN apt-get update && apt-get install --yes gcc wget
