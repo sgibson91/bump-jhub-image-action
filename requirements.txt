@@ -4,4 +4,4 @@ loguru==0.7.0
 python-dateutil==2.9.0
 requests==2.31.0
 ruamel.yaml==0.18.3
-twisted==23.10.0
+twisted==24.3.0
