@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: image_build
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v5
+
       - name: Parse image tag
         id: parse_image_tag
         shell: python
