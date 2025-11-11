@@ -37,3 +37,9 @@ jobs:
         with:
           push: ${{ github.event_name != 'pull_request' }}
           tags: quay.io/${{ github.repository }}:${{ steps.parse_image_tag.outputs.image_tag }}
+
+      - name: Trigger auto-merge if applicable
+        if: github.event_name == 'pull_request'
+        uses: ./.github/workflows/bot-automerge.yaml
+        with:
+          PR_URL: ${{ github.event.pull_request.html_url }}
