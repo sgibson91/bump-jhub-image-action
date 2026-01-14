@@ -1,0 +1,26 @@
+name: Auto-merge bot PRs
+
+on:
+  workflow_call:
+    inputs:
+      PR_URL:
+        required: true
+        description: The HTML URL of the PR to merge
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  automerge-bot-prs:
+    runs-on: ubuntu-latest
+    if: (
+      github.event.pull_request.user.login == 'dependabot[bot]' || 
+      github.event.pull_request.user.login == 'pre-commit-ci[bot]') &&
+      github.repository == 'sgibson91/bump-jhub-image-action'
+    steps:
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{ inputs.PR_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
