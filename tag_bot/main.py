@@ -117,7 +117,7 @@ class UpdateImageTags:
                 github.create_ref(self.head_branch, resp["object"]["sha"])
 
             updated_config = self.update_config()
-            commit_msg = f"Bump images {[image for image in self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
+            commit_msg = f"Bump images {[*self.images_to_update]} to tags {[self.image_tags[image]['latest'] for image in self.images_to_update]}, respectively"
             github.create_commit(commit_msg, updated_config)
             github.create_update_pull_request()
 
